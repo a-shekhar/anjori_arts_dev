@@ -6,7 +6,7 @@ const Footer = () => {
     <footer className="bg-[#0b1120] text-white py-6 px-4 md:px-8 text-sm">
       <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-6">
         {/* Contact - Left on all */}
-        <div className="self-start order-1 md:order-2">
+        <div className="self-start order-2 md:order-1">
           <h3 className="font-semibold mb-2">Contact Us</h3>
           <p>
             Email:{" "}
