@@ -14,7 +14,6 @@ function App() {
 
       <Routes>
         {/* Add your other routes here... */}
-
         {/* Catch-all for 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>

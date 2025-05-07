@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Menu, X, Lock } from "lucide-react";
 import ImageZoomModal from "./ImageZoomModal";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -22,7 +23,7 @@ const Navbar = () => {
             alt="Anjori Arts Logo"
             className="w-10 h-10 object-contain rounded hover:scale-105 transition-transform duration-300"
           />
-          <span className="text-xl font-semibold text-gray-900">Anjori Arts</span>
+          <Link to="/" className="text-xl font-semibold text-gray-900">Anjori Arts</Link>
         </div>
 
         {/* Desktop Nav */}

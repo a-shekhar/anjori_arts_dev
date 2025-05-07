@@ -5,8 +5,8 @@ const Footer = () => {
   return (
     <footer className="bg-[#0b1120] text-white py-6 px-4 md:px-8 text-sm">
       <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-6">
-        {/* Left: Contact */}
-        <div className="self-start">
+        {/* Contact - Left on all */}
+        <div className="self-start order-1 md:order-1">
           <h3 className="font-semibold mb-2">Contact Us</h3>
           <p>
             Email:{" "}
@@ -28,11 +28,27 @@ const Footer = () => {
           </p>
         </div>
 
-        {/* Center: Version + Terms */}
-        <div className="self-start text-center">
+        {/* Stats - Middle on mobile, right on desktop */}
+        <div className="self-start md:text-right space-y-2 order-2 md:order-3">
+          <p className="flex items-center justify-start md:justify-end gap-2 text-purple-300">
+            <Footprints size={16} className="animate-pulse" />
+            Visitors: 1024
+          </p>
+          <p className="flex items-center justify-start md:justify-end gap-2 text-purple-300">
+            <Users size={16} className="animate-bounce" />
+            Active Users: 1
+          </p>
+          <p className="flex items-center justify-start md:justify-end gap-2 text-yellow-400">
+            <Package size={16} className="animate-pulse" />
+            Orders Delivered: 0
+          </p>
+        </div>
+
+        {/* Version & Legal - Bottom on mobile, center on desktop */}
+        <div className="self-start text-center order-3 md:order-2">
           <p className="mb-1">© 2025 Anjori Arts. All rights reserved.</p>
           <p className="mb-2">
-            App <span className="font-semibold">Version: 1.5</span>
+            App <span className="font-semibold">Version: 0.1</span>
           </p>
           <div className="space-x-4">
             <a
@@ -48,22 +64,6 @@ const Footer = () => {
               Privacy Policy
             </a>
           </div>
-        </div>
-
-        {/* Right: Stats with Animations */}
-        <div className="self-start md:text-right space-y-2">
-          <p className="flex items-center justify-start md:justify-end gap-2 text-purple-300">
-            <Footprints size={16} className="animate-pulse" />
-            Visitors: 1024
-          </p>
-          <p className="flex items-center justify-start md:justify-end gap-2 text-purple-300">
-            <Users size={16} className="animate-bounce" />
-            Active Users: 1
-          </p>
-          <p className="flex items-center justify-start md:justify-end gap-2 text-yellow-400">
-            <Package size={16} className="text-yellow-400 animate-pulse" />
-            Orders Delivered: 0
-          </p>
         </div>
       </div>
     </footer>
