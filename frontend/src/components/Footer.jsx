@@ -6,7 +6,7 @@ const Footer = () => {
     <footer className="bg-[#0b1120] text-white py-6 px-4 md:px-8 text-sm">
       <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-6">
         {/* Contact - Left on all */}
-        <div className="self-start order-1 md:order-1">
+        <div className="self-start order-1 md:order-2">
           <h3 className="font-semibold mb-2">Contact Us</h3>
           <p>
             Email:{" "}
@@ -29,7 +29,7 @@ const Footer = () => {
         </div>
 
         {/* Stats - Middle on mobile, right on desktop */}
-        <div className="self-start md:text-right space-y-2 order-2 md:order-3">
+        <div className="self-start md:text-right space-y-2 order-1 md:order-3">
           <p className="flex items-center justify-start md:justify-end gap-2 text-purple-300">
             <Footprints size={16} className="animate-pulse" />
             Visitors: 1024
