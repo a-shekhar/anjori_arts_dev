@@ -1,20 +1,27 @@
-import Navbar from './components/Navbar';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { showMessage } from './utils/toast';
 
 export default function App() {
   return (
-    <>
-      {/* Navbar */}
-      <Navbar />
+    <div className="p-6 text-center space-y-4">
+      <h1 className="text-3xl font-bold text-green-600">Global Toast Test</h1>
 
-      {/* Test block to confirm Tailwind is working */}
-      <div className="pt-24 p-4 text-center">
-        <h1 className="text-3xl font-bold text-gray-800">Welcome to Anjori Arts</h1>
-        <p className="mt-4 text-green-600">Tailwind CSS appears to be working if this text is green.</p>
+      <button
+        onClick={() => showMessage('success', 'User profile updated!')}
+        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        Show Success
+      </button>
 
-        <div className="mt-6 bg-blue-100 text-blue-800 p-4 rounded-lg shadow">
-          This is a Tailwind-styled card.
-        </div>
-      </div>
-    </>
+      <button
+        onClick={() => showMessage('error', '')}
+        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+      >
+        Show Default Error
+      </button>
+
+      <ToastContainer />
+    </div>
   );
 }
