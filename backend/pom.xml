@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.anjoriarts</groupId>
 	<artifactId>Artworks</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1</version>
 	<name>Artworks</name>
 	<description>Just a website selling artworks.</description>
 	<url/>
@@ -50,6 +50,19 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+
+		<!-- Dependency for adding spring security -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- Dependency for creating key value pair -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
 
 		<!-- Dependency for Junit -->
 		<dependency>

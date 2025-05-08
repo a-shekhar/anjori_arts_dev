@@ -6,6 +6,7 @@ import { showMessage } from './utils/toast';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import NotFound from "./components/NotFound";
 import Footer from "./components/Footer"
+import Home from "./pages/Home"
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
 
       <Routes>
         {/* Add your other routes here... */}
+        <Route path="/" element={<Home/> } />
         {/* Catch-all for 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
