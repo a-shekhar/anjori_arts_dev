@@ -25,4 +25,3 @@ EXPOSE 8080
 
 # Run the app using injected or fallback port
 CMD ["sh", "-c", "java -Dserver.port=${PORT:-8080} -jar app.jar"]
-d
