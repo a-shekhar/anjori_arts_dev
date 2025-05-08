@@ -28,16 +28,13 @@ public class AppStatsController {
 
         @GetMapping("/track-visitor")
         public ResponseEntity<String> track(HttpServletRequest request) {
-            logger.info("track-visitor method entered....");
             String ip = IpUtil.getClientIp(request);
             appStatsService.trackVisitor(ip);
-            logger.info("track-visitor method exist");
             return ResponseEntity.ok("Visitor tracked");
         }
 
         @GetMapping("/unique-visitors")
         public ResponseEntity<Long> getUniqueVisitors() {
-            logger.info("count" + appStatsService.getUniqueVisitorCount());
             return ResponseEntity.ok(appStatsService.getUniqueVisitorCount());
         }
 

@@ -1,11 +1,15 @@
 package com.anjoriarts.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AppStatsService {
+
+    Logger logger  = LoggerFactory.getLogger(getClass().getName());
 
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -14,14 +18,10 @@ public class AppStatsService {
 
     public AppStatsService(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
-        System.out.println("env is " + env);
     }
 
     public void trackVisitor(String ip) {
         String key = env + ":unique-visitors";
-        System.out.println(key);
-        System.out.println(ip);
-        System.out.println(redisTemplate.opsForSet().members(key));
         redisTemplate.opsForSet().add(key, ip); // Add only if not already present
     }
 
