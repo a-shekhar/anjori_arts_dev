@@ -7,6 +7,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import NotFound from "./components/NotFound";
 import Footer from "./components/Footer"
 import Home from "./pages/Home"
+import Admin from "./layout/Admin"
+import AddArtwork from "./pages/admin/AddArtwork"
 
 function App() {
   return (
@@ -14,11 +16,19 @@ function App() {
       <Navbar />
 
       <Routes>
-        {/* Add your other routes here... */}
-        <Route path="/" element={<Home/> } />
-        {/* Catch-all for 404 */}
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+
+        {/* Admin Routes with Layout */}
+        <Route path="/admin" element={<Admin />}>
+          <Route path="artworks/add" element={<AddArtwork />} />
+          <Route path="artworks/manage" element={<NotFound />} /> {/* Placeholder for now */}
+        </Route>
+
+        {/* Catch-all */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+
       <Footer />
     </Router>
   );
