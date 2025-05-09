@@ -22,7 +22,7 @@ const Footer = () => {
         <div className="self-start text-center md:text-right space-y-2 order-1 md:order-3">
           <p className="flex items-center justify-center md:justify-end gap-2 text-purple-300">
             <Footprints size={16} className="animate-pulse" />
-            Visitors:  {visitorCount !== null ? visitorCount : 0}
+            Unique Visitors:  {visitorCount !== null ? visitorCount : 0}
           </p>
           <p className="flex items-center justify-center md:justify-end gap-2 text-purple-300">
             <Users size={16} className="animate-bounce" />
@@ -61,7 +61,7 @@ const Footer = () => {
         <div className="self-start text-center order-3 md:order-2">
           <p className="mb-1">© 2025 Anjori Arts. All rights reserved.</p>
           <p className="mb-2">
-            App <span className="font-semibold">Version: 0.1</span>
+            App <span className="font-semibold">Version: 0.2</span>
           </p>
           <div className="space-x-4">
             <a

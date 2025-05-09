@@ -27,6 +27,8 @@ public class AppStatsService {
 
     public long getUniqueVisitorCount() {
         String key = env + ":unique-visitors";
-        return redisTemplate.opsForSet().size(key);
+        long visitorCount = redisTemplate.opsForSet().size(key);
+        logger.info("Visitor count for {} is {}", key,visitorCount );
+        return visitorCount;
     }
 }
