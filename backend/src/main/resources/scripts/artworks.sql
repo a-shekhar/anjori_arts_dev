@@ -1,3 +1,4 @@
+create schema arts;
 CREATE TABLE arts.artworks (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -9,6 +10,7 @@ CREATE TABLE arts.artworks (
     available BOOLEAN DEFAULT true,
     featured BOOLEAN DEFAULT false,
     tags TEXT, -- comma-separated tags (e.g., "nature,green,oil")
+    image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
