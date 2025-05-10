@@ -27,7 +27,8 @@ public class ArtworkDTO {
     private List<MultipartFile> imageFiles;
 
     public ArtworkDTO(String title, String size, String medium, String surface,
-                      Double price, String tags, boolean available, boolean featured) {
+                      Double price, String tags, boolean available, boolean featured,
+                      List<MultipartFile> imageFiles) {
         this.title = title;
         this.size = size;
         this.medium = medium;
@@ -36,5 +37,6 @@ public class ArtworkDTO {
         this.tags = tags;
         this.available = available;
         this.featured = featured;
+        this.imageFiles = imageFiles;
     }
 }

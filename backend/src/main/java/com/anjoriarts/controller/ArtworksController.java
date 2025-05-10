@@ -52,15 +52,17 @@ public class ArtworksController {
                                         @RequestParam("tags") String tags,
                                         @RequestParam("available") boolean available,
                                         @RequestParam("featured") boolean featured,
-                                        @RequestParam("images") List<MultipartFile> images
+                                        @RequestParam("images") List<MultipartFile> imageFiles
                                         ){
-        String errorMessage = validateData(title, size, medium, surface, price, images);
+        String errorMessage = validateData(title, size, medium, surface, price, imageFiles);
 
         if(errorMessage.isEmpty()) {
             ArtworkDTO dto = new ArtworkDTO(title, size, medium, surface,
-                    Double.valueOf(price), tags, available, featured);
-            //for( List<MultipartFile>)
+                    Double.valueOf(price), tags, available, featured, imageFiles);
             dto = artworksService.saveArtwork(dto);
+            if(dto.getId() == null){
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(CommonResponse.failure("Upload failed. Please try again.", null));
+            }
             return ResponseEntity.ok(CommonResponse.success("Artwork added successfully!", null));
         }else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(CommonResponse.failure(errorMessage, null));

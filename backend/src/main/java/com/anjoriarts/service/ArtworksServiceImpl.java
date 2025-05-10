@@ -5,6 +5,7 @@ import com.anjoriarts.entity.ArtworkEntity;
 import com.anjoriarts.repository.ArtworksRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,9 +15,15 @@ public class ArtworksServiceImpl implements ArtworksService{
 
     private final ArtworksRepository artworksRepository;
 
-    public ArtworksServiceImpl(ArtworksRepository artworksRepository){
+    private final CloudinaryServiceImpl cloudinaryService;
+
+    public ArtworksServiceImpl(ArtworksRepository artworksRepository, CloudinaryServiceImpl cloudinaryService){
         this.artworksRepository = artworksRepository;
+        this.cloudinaryService = cloudinaryService;
     }
+
+    @Value("${spring.application.env}")
+    private String env;
 
     public ArtworkDTO saveArtwork(ArtworkDTO dto){
         try {
@@ -30,7 +37,19 @@ public class ArtworksServiceImpl implements ArtworksService{
             artwork.setSlug(this.generateSlug(dto.getTitle()));
             artwork.setAvailable(dto.isAvailable());
             artwork.setFeatured(dto.isFeatured());
-            artworksRepository.save(artwork);
+
+            // upload image to cloudinary
+            String folderPath = String.format("Anjori/arts/%s/artworks/%s", env, artwork.getSlug());
+
+            if(dto.getImageFiles() != null && !dto.getImageFiles().isEmpty())     {
+                String imageUrl = cloudinaryService.upload(dto.getImageFiles().getFirst(),
+                        folderPath); // Currently will support only one upload
+                artwork.setImageUrl(imageUrl);
+                logger.info("Generated image url is: " + imageUrl);
+            }
+
+            ArtworkEntity savedArtwork = artworksRepository.save(artwork);
+            dto.setId(savedArtwork.getId());
             logger.info("Artwork saved successfully...");
         }catch (Exception e){
             logger.error("Failed saving Artwork");
