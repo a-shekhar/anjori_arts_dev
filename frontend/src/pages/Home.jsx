@@ -56,7 +56,7 @@ const Homepage = () => {
 
           <div className="absolute inset-0 flex items-center justify-center text-center z-10 px-4">
             <div className="space-y-4 md:space-y-5 max-w-xl">
-              <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-bold text-white">
+              <h1 className="font-['Playfair_Display'] text-3xl sm:text-4xl md:text-5xl font-bold text-white">
                 Welcome to Anjori Arts
               </h1>
 
@@ -64,7 +64,7 @@ const Homepage = () => {
                 “Art enables us to find ourselves and lose ourselves at the same time.” — Thomas Merton
               </p>
 
-              <p className="text-sm sm:text-base md:text-lg text-gray-200">
+              <p className="font-['quicksand'] text-sm sm:text-base md:text-lg text-gray-200">
                 Bring Your Imagination to Canvas
               </p>
 

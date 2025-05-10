@@ -8,8 +8,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        playfair: ['"Playfair Display"', 'serif'],
-        quicksand: ['Quicksand', 'sans-serif'],
+        playfair: ['"Playfair Display"'],
+        quicksand: ['Quicksand'],
       },
     },
   }
