@@ -9,6 +9,7 @@ import Footer from "./components/Footer"
 import Home from "./pages/Home"
 import Admin from "./layout/Admin"
 import AddArtwork from "./pages/admin/AddArtwork"
+import AdminHome from "./pages/admin/AdminHome"
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
 
         {/* Admin Routes with Layout */}
         <Route path="/admin" element={<Admin />}>
+          <Route index element={<AdminHome />} />                // shows on /admin
           <Route path="artworks/add" element={<AddArtwork />} />
           <Route path="artworks/manage" element={<NotFound />} /> {/* Placeholder for now */}
         </Route>
