@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { X } from "lucide-react";
 
-// Sidebar styles
+// Sidebar link styles
 const linkStyle = ({ isActive }) =>
   `block px-4 py-2 rounded ${
     isActive ? "bg-purple-600 text-white" : "text-gray-700 hover:bg-purple-100"
@@ -16,7 +16,7 @@ const subLinkStyle = ({ isActive }) =>
 export default function AdminSidebar({ isOpen, onClose }) {
   const location = useLocation();
 
-  // Auto-close on route change (mobile only)
+  // Auto-close on route change (mobile)
   useEffect(() => {
     if (isOpen) {
       onClose();
@@ -25,7 +25,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
 
   return (
     <div
-      className={`fixed md:static z-40 top-0 left-0 h-full w-64 bg-white border-r p-4 shadow-md md:shadow-none transform transition-transform duration-300 ease-in-out
+      className={`fixed md:static z-40 top-0 left-0 h-full w-64 max-w-[80%] bg-white border-r p-4 shadow-md md:shadow-none transform transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
     >
       {/* Mobile Header */}
@@ -36,9 +36,10 @@ export default function AdminSidebar({ isOpen, onClose }) {
         </button>
       </div>
 
-      {/* Desktop Sidebar Title */}
+      {/* Desktop Header */}
       <h2 className="text-2xl font-semibold mb-6 hidden md:block">Admin Panel</h2>
 
+      {/* Navigation */}
       <nav className="space-y-2">
         <NavLink to="/admin/dashboard" className={linkStyle}>Dashboard</NavLink>
         <NavLink to="/admin/users" className={linkStyle}>Users</NavLink>
