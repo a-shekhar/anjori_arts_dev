@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import ParticlesBackground from "../components/ParticlesBackground";
 import axios from "axios";
 import { showMessage } from '../utils/toast';
-import HeroLoader from "../components/HeroLoader"; // 👈 Add this line
+import HeroLoader from "../components/HeroLoader";
+import { API_BASE_URL } from "../utils/api";
 
 const Homepage = () => {
   const [artworks, setArtworks] = useState([]);
@@ -22,7 +23,7 @@ const Homepage = () => {
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/home/featured-artworks`);
+        const response = await axios.get(`${API_BASE_URL}/api/home/featured-artworks`);
         const artworkArray = response.data?.data ?? response.data;
 
         if (!Array.isArray(artworkArray)) {
@@ -92,7 +93,7 @@ const Homepage = () => {
               {artworks.map((art) => (
                 <div key={art.id} className="bg-white rounded-xl shadow p-4">
                   <img
-                    src={art.url}
+                    src={art.imageUrl}
                     alt={art.title}
                     className="w-full h-72 object-cover rounded-md mb-4"
                   />

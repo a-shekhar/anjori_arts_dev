@@ -21,7 +21,7 @@ public class ArtworkDTO {
     private String slug;
     private boolean available;
     private boolean featured;
-
+    private String imageUrl;
 
     // Uploaded images (optional, used for POST/upload only)
     private List<MultipartFile> imageFiles;

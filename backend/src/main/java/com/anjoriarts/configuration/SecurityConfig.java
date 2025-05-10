@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -26,10 +27,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
-                .cors(cors -> {}) // <-- THIS is required!
-                .authorizeHttpRequests(
-                        auth -> auth.anyRequest().permitAll()).build();
+                .cors(cors -> {})
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/admin/**").hasRole("ADMIN")  // must be first
+                        .anyRequest().permitAll()                      // must be inside lambda
+                )
+                .formLogin(Customizer.withDefaults())
+                .build();
     }
+
 
     //  Proper CORS configuration for session-based auth
     @Bean

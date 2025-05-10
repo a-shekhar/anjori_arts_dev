@@ -3,6 +3,8 @@ package com.anjoriarts.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -36,4 +38,7 @@ public class ArtworkEntity {
 //    private ArtworkImagesEntity artworkImages;
     @Column(name = "image_url")
     private String imageUrl;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }

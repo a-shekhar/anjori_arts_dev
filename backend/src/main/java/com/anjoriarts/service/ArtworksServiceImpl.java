@@ -6,7 +6,12 @@ import com.anjoriarts.repository.ArtworksRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ArtworksServiceImpl implements ArtworksService{
@@ -37,6 +42,7 @@ public class ArtworksServiceImpl implements ArtworksService{
             artwork.setSlug(this.generateSlug(dto.getTitle()));
             artwork.setAvailable(dto.isAvailable());
             artwork.setFeatured(dto.isFeatured());
+            artwork.setCreatedAt(LocalDateTime.now());
 
             // upload image to cloudinary
             String folderPath = String.format("Anjori/arts/%s/artworks/%s", env, artwork.getSlug());
@@ -70,4 +76,33 @@ public class ArtworksServiceImpl implements ArtworksService{
         }
         return slug;
     }
+
+    @Override
+    public List<ArtworkDTO> getFeaturedArtworks() {
+        logger.info("Fetching the first 12 featured artworks...");
+        PageRequest pageRequest = PageRequest.of(0, 12); // page 0, size 12
+
+        List<ArtworkEntity> featuredArtworks = artworksRepository.findByFeaturedTrueOrderByCreatedAtDesc(pageRequest);
+        List<ArtworkDTO> dtoList =  featuredArtworks.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        logger.info("Fetched the first 12 featured artworks...");
+        return dtoList;
+    }
+
+    @Override
+    public ArtworkDTO convertToDTO(ArtworkEntity entity) {
+        ArtworkDTO dto = new ArtworkDTO();
+        dto.setId(entity.getId());
+        dto.setTitle(entity.getTitle());
+        dto.setSize(entity.getSize());
+        dto.setPrice(entity.getPrice());
+        dto.setMedium(entity.getMedium());
+        dto.setSurface(entity.getSurface());
+        dto.setTags(entity.getTags());
+        dto.setSlug(entity.getSlug());
+        dto.setImageUrl(entity.getImageUrl());
+        return dto;
+    }
+
 }
