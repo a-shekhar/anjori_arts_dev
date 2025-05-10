@@ -14,13 +14,24 @@ public class ArtworkDTO {
     private Long id;
     private String title;
     private String size;
-    private String paintType;
+    private String medium;
     private String surface;
     private Double price;
-    private String url;
     private String slug;
     private boolean available;
     private boolean featured;
-    private List<MultipartFile> images;
 
+    // Uploaded images (optional, used for POST/upload only)
+    private List<MultipartFile> imageFiles;
+
+    public ArtworkDTO(String title, String size, String medium, String surface,
+                      Double price, boolean available, boolean featured) {
+        this.title = title;
+        this.size = size;
+        this.medium = medium;
+        this.surface = surface;
+        this.price = price;
+        this.available = available;
+        this.featured = featured;
+    }
 }

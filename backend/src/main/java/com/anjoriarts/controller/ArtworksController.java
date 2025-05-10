@@ -2,6 +2,7 @@ package com.anjoriarts.controller;
 
 import com.anjoriarts.common.CommonResponse;
 import com.anjoriarts.dto.ArtworkDTO;
+import com.anjoriarts.service.ArtworksService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,11 @@ import java.util.List;
 public class ArtworksController {
 
     Logger  logger = LoggerFactory.getLogger(getClass().getName());
+    private final ArtworksService artworksService;
+
+    public ArtworksController(ArtworksService artworksService){
+        this.artworksService = artworksService;
+    }
 
     @GetMapping("/home/featured-artworks")
     public ResponseEntity<?> getFeaturedArtworks(){
@@ -40,16 +46,20 @@ public class ArtworksController {
     @PostMapping("/artworks/add")
     public ResponseEntity<?> addArtWork(@RequestParam("title") String title,
                                         @RequestParam("size") String size,
-                                        @RequestParam("paintType") String paintType,
+                                        @RequestParam("medium") String medium,
                                         @RequestParam("surface") String surface,
                                         @RequestParam("price") String price,
                                         @RequestParam("available") boolean available,
                                         @RequestParam("featured") boolean featured,
                                         @RequestParam("images") List<MultipartFile> images
                                         ){
-        String errorMessage = validateData(title, size, paintType, surface, price, images);
+        String errorMessage = validateData(title, size, medium, surface, price, images);
 
         if(errorMessage.isEmpty()) {
+            ArtworkDTO dto = new ArtworkDTO(title, size, medium, surface,
+                    Double.valueOf(price), available, featured);
+            //for( List<MultipartFile>)
+            dto = artworksService.saveArtwork(dto);
             return ResponseEntity.ok(CommonResponse.success("Artwork added successfully!", null));
         }else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(CommonResponse.failure(errorMessage, null));
@@ -84,6 +94,7 @@ public class ArtworksController {
             }
         }catch (NumberFormatException num){
             errorMsg = "Price should be numeric value value.";
+            logger.error(errorMsg);
             return  errorMsg;
         }
         return errorMsg;

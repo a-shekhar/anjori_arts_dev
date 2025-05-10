@@ -9,7 +9,7 @@ export default function AddArtwork() {
     title: "",
     size: "",
     price: "",
-    paintType: "",
+    medium: "",
     surface: "",
     available: true,
     featured: false,
@@ -59,7 +59,7 @@ export default function AddArtwork() {
     form.append("title", formData.title);
     form.append("size", formData.size);
     form.append("price", formData.price);
-    form.append("paintType", formData.paintType);
+    form.append("medium", formData.medium);
     form.append("surface", formData.surface);
     form.append("available", formData.available);
     form.append("featured", formData.featured);
@@ -85,7 +85,7 @@ export default function AddArtwork() {
           title: "",
           size: "",
           price: "",
-          paintType: "",
+          medium: "",
           surface: "",
           available: true,
           featured: false,
@@ -113,7 +113,7 @@ export default function AddArtwork() {
           { name: "title", label: "Title", type: "text", placeholder: "Enter title" },
           { name: "size", label: "Size", type: "text", placeholder: "e.g. 24x36" },
           { name: "price", label: "Price (₹)", type: "number", placeholder: "Enter price" },
-          { name: "paintType", label: "Medium", type: "text", placeholder: "e.g. Oil, Acrylic" },
+          { name: "medium", label: "Medium", type: "text", placeholder: "e.g. Oil, Acrylic" },
           { name: "surface", label: "Surface", type: "text", placeholder: "e.g. Canvas, Wood" },
         ].map(({ name, label, type, placeholder }) => (
           <div key={name} className="flex items-center justify-between gap-4">
