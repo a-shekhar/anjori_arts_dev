@@ -1,6 +1,9 @@
 package com.anjoriarts.dto;
 
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,5 +19,8 @@ public class ArtworkDTO {
     private Double price;
     private String url;
     private String slug;
+    private boolean available;
+    private boolean featured;
+    private List<MultipartFile> images;
 
 }

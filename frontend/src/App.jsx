@@ -33,7 +33,7 @@ function App() {
 
       <Footer />
        {/* Toast */}
-       <ToastContainer />
+       <ToastContainer position="top-right" autoClose={3000} />
     </Router>
   );
 }
