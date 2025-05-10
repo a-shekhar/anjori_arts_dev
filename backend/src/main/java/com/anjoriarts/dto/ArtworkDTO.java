@@ -17,20 +17,23 @@ public class ArtworkDTO {
     private String medium;
     private String surface;
     private Double price;
+    private String tags;
     private String slug;
     private boolean available;
     private boolean featured;
+
 
     // Uploaded images (optional, used for POST/upload only)
     private List<MultipartFile> imageFiles;
 
     public ArtworkDTO(String title, String size, String medium, String surface,
-                      Double price, boolean available, boolean featured) {
+                      Double price, String tags, boolean available, boolean featured) {
         this.title = title;
         this.size = size;
         this.medium = medium;
         this.surface = surface;
         this.price = price;
+        this.tags = tags;
         this.available = available;
         this.featured = featured;
     }

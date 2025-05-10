@@ -26,6 +26,7 @@ public class ArtworksServiceImpl implements ArtworksService{
             artwork.setMedium(dto.getMedium());
             artwork.setSurface(dto.getSurface());
             artwork.setPrice(dto.getPrice());
+            artwork.setTags(dto.getTags());
             artwork.setSlug(this.generateSlug(dto.getTitle()));
             artwork.setAvailable(dto.isAvailable());
             artwork.setFeatured(dto.isFeatured());

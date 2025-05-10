@@ -49,6 +49,7 @@ public class ArtworksController {
                                         @RequestParam("medium") String medium,
                                         @RequestParam("surface") String surface,
                                         @RequestParam("price") String price,
+                                        @RequestParam("tags") String tags,
                                         @RequestParam("available") boolean available,
                                         @RequestParam("featured") boolean featured,
                                         @RequestParam("images") List<MultipartFile> images
@@ -57,7 +58,7 @@ public class ArtworksController {
 
         if(errorMessage.isEmpty()) {
             ArtworkDTO dto = new ArtworkDTO(title, size, medium, surface,
-                    Double.valueOf(price), available, featured);
+                    Double.valueOf(price), tags, available, featured);
             //for( List<MultipartFile>)
             dto = artworksService.saveArtwork(dto);
             return ResponseEntity.ok(CommonResponse.success("Artwork added successfully!", null));

@@ -30,6 +30,8 @@ public class ArtworkEntity {
     private boolean available;
     @Column(name = "featured")
     private boolean featured;
+    @Column(name = "tags")
+    private String tags;
 //    @OneToMany(mappedBy = "artwork", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private ArtworkImagesEntity artworkImages;
     @Column(name = "image_url")
