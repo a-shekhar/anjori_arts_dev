@@ -55,13 +55,21 @@ const Footer = () => {
               +91 98765 43210
             </a>
           </p>
+
+          <p>
+               Want to know us? : {" "}
+               <a href="/about-us" className="text-blue-400 hover:underline">
+                    About Us
+                  </a>
+          </p>
+
         </div>
 
         {/* Legal + Version - Bottom on mobile, center on desktop */}
         <div className="self-start text-center order-3 md:order-2">
           <p className="mb-1">© 2025 Anjori Arts. All rights reserved.</p>
           <p className="mb-2">
-            App <span className="font-semibold">Version: 0.2</span>
+           🛠️ App <span className="font-semibold">Version: 0.3</span>
           </p>
           <div className="space-x-4">
             <a

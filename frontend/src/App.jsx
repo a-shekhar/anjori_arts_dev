@@ -10,6 +10,7 @@ import Home from "./pages/Home"
 import Admin from "./layout/Admin"
 import AddArtwork from "./pages/admin/AddArtwork"
 import AdminHome from "./pages/admin/AdminHome"
+import ShopPage from "./pages/Shop"
 
 function App() {
   return (
@@ -19,7 +20,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
-
+        <Route path="/shop" element={<ShopPage />} />
         {/* Admin Routes with Layout */}
         <Route path="/admin" element={<Admin />}>
           <Route index element={<AdminHome />} />                // shows on /admin
