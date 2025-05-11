@@ -26,3 +26,8 @@
 .animate-brush {
   animation: brush 1s ease-out forwards;
 }
+
+/* Custom input base style */
+.input {
+  @apply w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black;
+}

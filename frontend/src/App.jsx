@@ -11,6 +11,8 @@ import Admin from "./layout/Admin"
 import AddArtwork from "./pages/admin/AddArtwork"
 import AdminHome from "./pages/admin/AdminHome"
 import ShopPage from "./pages/Shop"
+import CustomOrderPage from "./pages/CustomOrder"
+import AboutPage from "./pages/About"
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<ShopPage />} />
+        <Route path="/custom-order" element={<CustomOrderPage />} />
+         <Route path="/about-us" element={<AboutPage />} />
         {/* Admin Routes with Layout */}
         <Route path="/admin" element={<Admin />}>
           <Route index element={<AdminHome />} />                // shows on /admin
