@@ -12,7 +12,7 @@ import java.util.List;
 public interface ArtworksService {
     ArtworkDTO saveArtwork(ArtworkDTO dto);
 
-    List<ArtworkDTO> getFeaturedArtworks();
+    Page<ArtworkResponseDTO> getFeaturedArtworks(Pageable pageable);
 
     ArtworkDTO convertToDTO(ArtworkEntity artworkEntity);
 

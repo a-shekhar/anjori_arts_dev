@@ -8,14 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ArtworksServiceImpl implements ArtworksService{
@@ -82,16 +80,9 @@ public class ArtworksServiceImpl implements ArtworksService{
     }
 
     @Override
-    public List<ArtworkDTO> getFeaturedArtworks() {
-        logger.info("Fetching the first 12 featured artworks...");
-        PageRequest pageRequest = PageRequest.of(0, 12); // page 0, size 12
-
-        List<ArtworkEntity> featuredArtworks = artworksRepository.findByFeaturedTrueOrderByCreatedAtDesc(pageRequest);
-        List<ArtworkDTO> dtoList =  featuredArtworks.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-        logger.info("Fetched the first 12 featured artworks...");
-        return dtoList;
+    public Page<ArtworkResponseDTO> getFeaturedArtworks(Pageable pageable) {
+        Page<ArtworkEntity> entities = artworksRepository.findByFeaturedTrueOrderByCreatedAtDesc(pageable);
+        return entities.map(this::convertToResponseDto);
     }
 
     @Override

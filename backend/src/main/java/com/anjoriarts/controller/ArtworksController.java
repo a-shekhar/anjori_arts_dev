@@ -29,17 +29,32 @@ public class ArtworksController {
         this.artworksService = artworksService;
     }
 
-    @GetMapping("/home/featured-artworks")
-    public ResponseEntity<?> getFeaturedArtworks(){
+    @GetMapping(value = "/artworks/featured", produces = "application/json")
+    public ResponseEntity<ArtworkPageResponse> getPaginatedFeaturedArtworks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
         try {
-            logger.info("Fetching all the featured artworks ===>");
-            List<ArtworkDTO> featuredArtworks = artworksService.getFeaturedArtworks();
-            return ResponseEntity.ok(CommonResponse.success("Fetched featured artworks successfully.", featuredArtworks));
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(CommonResponse.failure("Error while fetching feature artworks", null));
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            Page<ArtworkResponseDTO> resultPage = artworksService.getFeaturedArtworks(pageable);
+
+            ArtworkPageResponse response = new ArtworkPageResponse(
+                    resultPage.getContent(),
+                    resultPage.getTotalPages(),
+                    resultPage.getTotalElements(),
+                    resultPage.getNumber(),
+                    resultPage.getSize(),
+                    resultPage.isFirst(),
+                    resultPage.isLast()
+            );
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error while fetching paginated featured artworks", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
     // ✅ Updated this method only
     @GetMapping(value = "/artworks", produces = "application/json")
@@ -48,6 +63,7 @@ public class ArtworksController {
             @RequestParam(defaultValue = "20") int size
     ) {
         try {
+            logger.info("Fetching all the artworks...");
             Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
             Page<ArtworkResponseDTO> resultPage = artworksService.getAllArtworks(pageable);
 
@@ -61,8 +77,8 @@ public class ArtworksController {
                     resultPage.isLast()
             );
 
+            logger.info("Fetched all the artworks...");
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             logger.error("Error while fetching paginated artworks", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -80,6 +96,7 @@ public class ArtworksController {
                                         @RequestParam("featured") boolean featured,
                                         @RequestParam("images") List<MultipartFile> imageFiles
     ){
+        logger.info("Adding the given artwork...");
         String errorMessage = validateData(title, size, medium, surface, price, imageFiles);
 
         if(errorMessage.isEmpty()) {
@@ -89,6 +106,7 @@ public class ArtworksController {
             if(dto.getId() == null){
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(CommonResponse.failure("Upload failed. Please try again.", null));
             }
+            logger.info("Added the given artwork...");
             return ResponseEntity.ok(CommonResponse.success("Artwork added successfully!", null));
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(CommonResponse.failure(errorMessage, null));
