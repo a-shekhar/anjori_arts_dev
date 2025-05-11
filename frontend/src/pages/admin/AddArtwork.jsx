@@ -15,7 +15,10 @@ export default function AddArtwork() {
     available: true,
     featured: false,
     images: [], // { file, preview }
-  });
+    description: "",
+    availability: "",
+    artistNote: "",
+    });
 
   const [loading, setLoading] = useState(false);
 
@@ -65,7 +68,9 @@ export default function AddArtwork() {
     form.append("tags", formData.tags)
     form.append("available", formData.available);
     form.append("featured", formData.featured);
-
+    form.append("description", formData.description);
+        form.append("availability", formData.availability);
+        form.append("artistNote", formData.artistNote);
     formData.images.forEach(({ file }) => {
       form.append("images", file);
     });
@@ -93,6 +98,9 @@ export default function AddArtwork() {
           available: true,
           featured: false,
           images: [],
+          description: "",
+          availability: "",
+          artistNote: "",
         });
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
@@ -195,6 +203,48 @@ export default function AddArtwork() {
             />
             <span>Featured Artwork</span>
           </label>
+        </div>
+
+        {/* Artist Note, Description, Availability - Insert here */}
+        <div className="flex flex-col">
+          <label htmlFor="description" className="font-medium mb-1">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            rows="4"
+            placeholder="Short description about the artwork"
+            className="w-full border rounded px-3 py-2 text-sm"
+            value={formData.description || ""}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label htmlFor="availability" className="font-medium mb-1">Availability</label>
+          <select
+            id="availability"
+            name="availability"
+            className="w-full border rounded px-3 py-2 text-sm"
+            value={formData.availability || "Available"}
+            onChange={handleChange}
+          >
+            <option value="Available">Available</option>
+            <option value="Sold">Sold</option>
+            <option value="Coming Soon">Coming Soon</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col">
+          <label htmlFor="artistNote" className="font-medium mb-1">Artist Note</label>
+          <textarea
+            id="artistNote"
+            name="artistNote"
+            rows="3"
+            placeholder="Add a personal note about the piece"
+            className="w-full border rounded px-3 py-2 text-sm"
+            value={formData.artistNote || ""}
+            onChange={handleChange}
+          />
         </div>
 
         {/* Submit Button */}
