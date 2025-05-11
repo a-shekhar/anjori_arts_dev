@@ -1,45 +1,44 @@
 package com.anjoriarts.dto;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
-public class ArtworkResponseDTO {
+public class ArtworkRequestDTO {
     private Long id;
     private String title;
     private String medium;
     private String surface;
     private String size;
     private Double price;
-    private String imageUrl;
-    private List<String> tags;
+    private String tags;
+    private  boolean featured;
     private String description;
     private String availability;
     private String createdAt;
     private String artistNote;
-    private String slug;
+    private List<MultipartFile> imageFiles;
 
-
-    public ArtworkResponseDTO(Long id, String title, String medium, String surface, String size,
-                              Double price, String imageUrl, List<String> tags, String description,
-                              String availability, String createdAt, String artistNote) {
-        this.id = id;
+    public ArtworkRequestDTO(String title, String size, String medium, String surface,
+                             Double price, String tags, boolean featured, List<MultipartFile> imageFiles, String description, String availability, String artistNote) {
         this.title = title;
+        this.size = size;
         this.medium = medium;
         this.surface = surface;
-        this.size = size;
         this.price = price;
-        this.imageUrl = imageUrl;
         this.tags = tags;
+        this.imageFiles = imageFiles;
+        this.featured = featured;
         this.description = description;
         this.availability = availability;
-        this.createdAt = createdAt;
         this.artistNote = artistNote;
     }
-
 }

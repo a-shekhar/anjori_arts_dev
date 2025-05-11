@@ -36,7 +36,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       >
         <div className="p-6 space-y-6">
           <div className="flex items-center gap-2 mb-4">
-            <img src="/logo.png" alt="Logo" className="h-8 w-8 rounded-full" />
+            <img src="/favicon.ico" alt="Logo" className="h-8 w-8 rounded-full" />
             <h1 className="text-lg font-bold">Anjori Arts</h1>
           </div>
 

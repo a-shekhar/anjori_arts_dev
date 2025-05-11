@@ -1,6 +1,6 @@
 package com.anjoriarts.service;
 
-import com.anjoriarts.dto.ArtworkDTO;
+import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;
 import com.anjoriarts.entity.ArtworkEntity;
 import com.anjoriarts.repository.ArtworksRepository;
@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,7 +32,7 @@ public class ArtworksServiceImpl implements ArtworksService{
     @Value("${spring.application.env}")
     private String env;
 
-    public ArtworkDTO saveArtwork(ArtworkDTO dto){
+    public ArtworkRequestDTO saveArtwork(ArtworkRequestDTO dto){
         try {
             ArtworkEntity artwork = new ArtworkEntity();
             artwork.setTitle(dto.getTitle());
@@ -40,12 +40,11 @@ public class ArtworksServiceImpl implements ArtworksService{
             artwork.setMedium(dto.getMedium());
             artwork.setSurface(dto.getSurface());
             artwork.setPrice(dto.getPrice());
-            artwork.setTags(dto.getTags());
             artwork.setSlug(this.generateSlug(dto.getTitle()));
-            artwork.setAvailable(dto.isAvailable());
             artwork.setFeatured(dto.isFeatured());
-            artwork.setCreatedAt(LocalDateTime.now());
-
+            artwork.setTags(dto.getTags());
+            ZonedDateTime istNow = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+            artwork.setCreatedAt(istNow);
             // upload image to cloudinary
             String folderPath = String.format("Anjori/arts/%s/artworks/%s", env, artwork.getSlug());
 
@@ -55,6 +54,9 @@ public class ArtworksServiceImpl implements ArtworksService{
                 artwork.setImageUrl(imageUrl);
                 logger.info("Generated image url is: " + imageUrl);
             }
+            artwork.setDescription(dto.getDescription());
+            artwork.setAvailability(dto.getAvailability());
+            artwork.setArtistNote(dto.getArtistNote());
 
             ArtworkEntity savedArtwork = artworksRepository.save(artwork);
             dto.setId(savedArtwork.getId());
@@ -85,20 +87,6 @@ public class ArtworksServiceImpl implements ArtworksService{
         return entities.map(this::convertToResponseDto);
     }
 
-    @Override
-    public ArtworkDTO convertToDTO(ArtworkEntity entity) {
-        ArtworkDTO dto = new ArtworkDTO();
-        dto.setId(entity.getId());
-        dto.setTitle(entity.getTitle());
-        dto.setSize(entity.getSize());
-        dto.setPrice(entity.getPrice());
-        dto.setMedium(entity.getMedium());
-        dto.setSurface(entity.getSurface());
-        dto.setTags(entity.getTags());
-        dto.setSlug(entity.getSlug());
-        dto.setImageUrl(entity.getImageUrl());
-        return dto;
-    }
 
     @Override
     public Page<ArtworkResponseDTO> getAllArtworks(Pageable pageable) {
@@ -120,10 +108,10 @@ public class ArtworksServiceImpl implements ArtworksService{
                 entity.getPrice(),
                 entity.getImageUrl(),
                 allTags,
-                "Aditya is testing",
-                "Sold to nahi hai",
+                entity.getDescription(),
+                entity.getAvailability(),
                 entity.getCreatedAt().toString(),
-                "Sab changa si"
+                entity.getArtistNote()
         );
     }
 

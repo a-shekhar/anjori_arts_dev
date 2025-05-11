@@ -2,8 +2,7 @@ package com.anjoriarts.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,17 +27,25 @@ public class ArtworkEntity {
     private Double price;
     @Column(name = "slug")
     private String slug;
-    @Column(name = "available")
-    private boolean available;
+
     @Column(name = "featured")
     private boolean featured;
     @Column(name = "tags")
     private String tags;
 //    @OneToMany(mappedBy = "artwork", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private ArtworkImagesEntity artworkImages;
+    @Column(name = "availability")
+    private String availability;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "artist_note")
+    private String artistNote;
+
     @Column(name = "image_url")
     private String imageUrl;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 }

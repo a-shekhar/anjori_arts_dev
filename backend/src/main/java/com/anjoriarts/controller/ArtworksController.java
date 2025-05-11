@@ -1,9 +1,9 @@
 package com.anjoriarts.controller;
 
 import com.anjoriarts.common.CommonResponse;
-import com.anjoriarts.dto.ArtworkDTO;
+import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;
-import com.anjoriarts.dto.ArtworkPageResponse; // ✅ Updated import
+import com.anjoriarts.dto.ArtworkPageResponse;
 import com.anjoriarts.service.ArtworksService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,16 +92,19 @@ public class ArtworksController {
                                         @RequestParam("surface") String surface,
                                         @RequestParam("price") String price,
                                         @RequestParam("tags") String tags,
-                                        @RequestParam("available") boolean available,
                                         @RequestParam("featured") boolean featured,
-                                        @RequestParam("images") List<MultipartFile> imageFiles
+                                        @RequestParam("images") List<MultipartFile> imageFiles,
+                                        @RequestParam("description") String description,
+                                        @RequestParam("availability") String availability,
+                                        @RequestParam("artistNote") String artistNote
     ){
         logger.info("Adding the given artwork...");
         String errorMessage = validateData(title, size, medium, surface, price, imageFiles);
 
         if(errorMessage.isEmpty()) {
-            ArtworkDTO dto = new ArtworkDTO(title, size, medium, surface,
-                    Double.valueOf(price), tags, available, featured, imageFiles);
+            ArtworkRequestDTO dto = new ArtworkRequestDTO(title, size, medium, surface,
+                    Double.valueOf(price), tags, featured, imageFiles, description,
+                    availability, artistNote);
             dto = artworksService.saveArtwork(dto);
             if(dto.getId() == null){
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(CommonResponse.failure("Upload failed. Please try again.", null));

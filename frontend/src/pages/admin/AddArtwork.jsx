@@ -12,11 +12,10 @@ export default function AddArtwork() {
     medium: "",
     surface: "",
     tags: "",
-    available: true,
     featured: false,
     images: [], // { file, preview }
     description: "",
-    availability: "",
+    availability: "Available",
     artistNote: "",
     });
 
@@ -66,11 +65,11 @@ export default function AddArtwork() {
     form.append("medium", formData.medium);
     form.append("surface", formData.surface);
     form.append("tags", formData.tags)
-    form.append("available", formData.available);
     form.append("featured", formData.featured);
     form.append("description", formData.description);
-        form.append("availability", formData.availability);
-        form.append("artistNote", formData.artistNote);
+    form.append("availability", formData.availability);
+    form.append("artistNote", formData.artistNote);
+
     formData.images.forEach(({ file }) => {
       form.append("images", file);
     });
@@ -95,11 +94,10 @@ export default function AddArtwork() {
           medium: "",
           surface: "",
           tags: "",
-          available: true,
           featured: false,
           images: [],
           description: "",
-          availability: "",
+          availability: "Available",
           artistNote: "",
         });
         if (fileInputRef.current) {
@@ -185,15 +183,6 @@ export default function AddArtwork() {
 
         {/* Checkboxes */}
         <div className="flex gap-6 flex-wrap">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="available"
-              checked={formData.available}
-              onChange={handleChange}
-            />
-            <span>Available</span>
-          </label>
           <label className="flex items-center gap-2">
             <input
               type="checkbox"

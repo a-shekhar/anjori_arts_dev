@@ -14,6 +14,9 @@ CREATE TABLE arts.artworks (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE arts.artworks DROP COLUMN available;
+ALTER TABLE arts.artworks ADD COLUMN description TEXT, ADD COLUMN artist_note TEXT, ADD COLUMN Availability varchar(20);
+
 CREATE TABLE arts.artwork_images (
     id SERIAL PRIMARY KEY,
     artwork_id INTEGER NOT NULL REFERENCES arts.artworks(id) ON DELETE CASCADE,
@@ -22,3 +25,5 @@ CREATE TABLE arts.artwork_images (
     display_order INTEGER DEFAULT 0,
     is_main BOOLEAN DEFAULT false
 );
+
+
