@@ -99,7 +99,7 @@ const Homepage = () => {
                   />
                   <h3 className="text-lg font-semibold">{art.title}</h3>
                   <p className="text-sm text-gray-500">
-                    {art.size} • {art.paintType} on {art.surface}
+                    {art.size} • {art.medium} on {art.surface}
                   </p>
                   <p className="text-blue-600 font-semibold mt-1">{art.price}</p>
                   <button className="mt-4 w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-md transition">
