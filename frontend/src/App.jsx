@@ -13,6 +13,8 @@ import AdminHome from "./pages/admin/AdminHome"
 import ShopPage from "./pages/Shop"
 import CustomOrderPage from "./pages/CustomOrder"
 import AboutPage from "./pages/About"
+import LoginPage from "./pages/Login"
+import SignupPage from "./pages/Signup"
 
 function App() {
   return (
@@ -24,7 +26,9 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/custom-order" element={<CustomOrderPage />} />
-         <Route path="/about-us" element={<AboutPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/about-us" element={<AboutPage />} />
         {/* Admin Routes with Layout */}
         <Route path="/admin" element={<Admin />}>
           <Route index element={<AdminHome />} />                // shows on /admin
