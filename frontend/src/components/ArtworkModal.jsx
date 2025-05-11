@@ -1,5 +1,6 @@
-
 import React, { useEffect } from "react";
+import ImageZoomModal from "../components/ImageZoomModal"; // Adjust path as needed
+
 
 const ArtworkModal = ({ artwork, onClose }) => {
   if (!artwork) return null;
@@ -38,9 +39,15 @@ const ArtworkModal = ({ artwork, onClose }) => {
         </button>
 
         {/* Image */}
+        {/* Zoomable Image using custom modal */}
         <div className="flex justify-center items-center bg-gray-100 rounded-lg p-4 mb-4">
-          <img src={imageUrl} alt={title} className="max-h-[400px] object-contain" />
+          <ImageZoomModal
+            src={imageUrl}
+            alt={title}
+            className="max-h-[300px] cursor-zoom-in object-contain"
+          />
         </div>
+
 
         {/* Details */}
         <h2 className="text-xl font-semibold mb-1">{title}</h2>

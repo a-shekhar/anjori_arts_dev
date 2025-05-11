@@ -68,7 +68,7 @@ const ImageZoomModal = ({
             <img
               src={src}
               alt={alt}
-              className="max-w-[90%] max-h-[80%] rounded-lg shadow-lg transition-transform duration-300"
+              className="max-w-[90vw] max-h-[80vh] w-auto h-auto rounded-lg shadow-lg transition-transform duration-300"
               onClick={(e) => e.stopPropagation()}
             />
           </Zoom>
