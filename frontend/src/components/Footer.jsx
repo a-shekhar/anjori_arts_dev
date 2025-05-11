@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Footprints, Users, Package } from "lucide-react";
+import { API_BASE_URL } from "../utils/api";
 
 const Footer = () => {
      const [visitorCount, setVisitorCount] = useState(0);
 
      useEffect(() => {
-         fetch(`${import.meta.env.VITE_API_URL}/analytics/unique-visitors`)
+         fetch(`${API_BASE_URL}/analytics/unique-visitors`)
            .then(res => res.json())
            .then(data => setVisitorCount(data))
            .catch(err => {

@@ -1,10 +1,30 @@
-// components/ArtworkModal.jsx
-import React from "react";
+
+import React, { useEffect } from "react";
 
 const ArtworkModal = ({ artwork, onClose }) => {
   if (!artwork) return null;
 
-  const { title, size, medium, surface, price, tags, imageUrl } = artwork;
+  // 🔒 Lock scroll when modal opens
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  const {
+    title,
+    size,
+    medium,
+    surface,
+    price,
+    tags,
+    imageUrl,
+    description,
+    availability,
+    createdOn,
+    artistNote,
+  } = artwork;
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex justify-center items-center px-4">
@@ -19,38 +39,48 @@ const ArtworkModal = ({ artwork, onClose }) => {
 
         {/* Image */}
         <div className="flex justify-center items-center bg-gray-100 rounded-lg p-4 mb-4">
-          <img
-            src={imageUrl}
-            alt={title}
-            className="max-h-[400px] object-contain"
-          />
+          <img src={imageUrl} alt={title} className="max-h-[400px] object-contain" />
         </div>
 
         {/* Details */}
         <h2 className="text-xl font-semibold mb-1">{title}</h2>
-        <p className="text-sm text-gray-600 mb-1">
-          {size} • {medium} on {surface}
-        </p>
+        <p className="text-sm text-gray-600 mb-1">{size} • {medium} on {surface}</p>
         <p className="text-blue-700 font-bold text-base mb-2">₹{price}</p>
 
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {tags?.map((tag, index) => (
-            <span
-              key={index}
-              className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
+        {/* Optional Fields */}
+        {description && <p className="text-sm text-gray-700 mb-2">{description}</p>}
+        {createdOn && <p className="text-xs text-gray-500 mb-1">🗓️ Created On: {createdOn}</p>}
+        {availability && (
+          <p className={`text-xs mb-2 font-medium ${
+            availability === "Available" ? "text-green-600" : "text-red-600"
+          }`}>
+            {availability}
+          </p>
+        )}
+        {tags?.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {tags.map((tag, i) => (
+              <span
+                key={i}
+                className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+        {artistNote && (
+          <div className="mt-3 p-3 bg-yellow-50 border-l-4 border-yellow-300 text-yellow-800 text-sm rounded">
+            🖌️ Artist Note: {artistNote}
+          </div>
+        )}
 
         {/* Request Now Button */}
         <button
           onClick={() => {
-            // Add request action here
+            // Request action here
           }}
-          className="w-full bg-violet-500 text-white text-sm py-2 rounded hover:bg-violet-600 transition"
+          className="mt-5 w-full bg-violet-500 text-white text-sm py-2 rounded hover:bg-violet-600 transition"
         >
           🎨 Request Now
         </button>

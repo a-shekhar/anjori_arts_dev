@@ -2,7 +2,7 @@
 import React from "react";
 
 const ArtworkCard = ({ artwork, onClick }) => {
-  const { title, size, medium, surface, price, tags, imageUrl } = artwork;
+  const { title, size, medium, surface, price, imageUrl } = artwork;
 
   return (
     <div
@@ -10,11 +10,7 @@ const ArtworkCard = ({ artwork, onClick }) => {
       onClick={onClick}
     >
       <div className="h-64 flex items-center justify-center bg-gray-50 rounded-t-xl">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="h-full object-contain p-2"
-        />
+        <img src={imageUrl} alt={title} className="h-full object-contain p-2" />
       </div>
 
       <div className="p-4 flex flex-col gap-2">
@@ -22,25 +18,24 @@ const ArtworkCard = ({ artwork, onClick }) => {
         <p className="text-sm text-gray-600">{size} • {medium} on {surface}</p>
         <p className="text-blue-700 font-bold text-base">₹{price}</p>
 
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1 mt-1">
-          {tags?.map((tag, index) => (
-            <span
-              key={index}
-              className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
+        {/* Show More Link */}
+        <p
+          className="text-sm text-blue-500 hover:underline cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+          }}
+        >
+          Show More
+        </p>
 
         {/* Request Now Button */}
         <button
           onClick={(e) => {
-            e.stopPropagation(); // Prevent card click
-            // You can handle request logic here later
+            e.stopPropagation();
+            // Request logic here later
           }}
-          className="mt-3 w-full bg-violet-500 text-white text-sm py-2 rounded hover:bg-violet-600 transition"
+          className="w-full bg-violet-500 text-white text-sm py-2 rounded hover:bg-violet-600 transition"
         >
           🎨 Request Now
         </button>

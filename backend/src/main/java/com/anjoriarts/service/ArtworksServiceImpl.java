@@ -1,15 +1,19 @@
 package com.anjoriarts.service;
 
 import com.anjoriarts.dto.ArtworkDTO;
+import com.anjoriarts.dto.ArtworkResponseDTO;
 import com.anjoriarts.entity.ArtworkEntity;
 import com.anjoriarts.repository.ArtworksRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -105,4 +109,33 @@ public class ArtworksServiceImpl implements ArtworksService{
         return dto;
     }
 
+    @Override
+    public Page<ArtworkResponseDTO> getAllArtworks(Pageable pageable) {
+        Page<ArtworkEntity> page = artworksRepository.findAll(pageable);
+
+        // Convert each entity to DTO using map
+        return page.map(this::convertToResponseDto);
+    }
+
+    private ArtworkResponseDTO convertToResponseDto(ArtworkEntity entity) {
+        String[] tags = entity.getTags().split(",");
+        List<String> allTags = Arrays.stream(tags).toList();
+        return new ArtworkResponseDTO(
+                entity.getId(),
+                entity.getTitle(),
+                entity.getMedium(),
+                entity.getSurface(),
+                entity.getSize(),
+                entity.getPrice(),
+                entity.getImageUrl(),
+                allTags,
+                "Aditya is testing",
+                "Sold to nahi hai",
+                entity.getCreatedAt().toString(),
+                "Sab changa si"
+        );
+    }
+
 }
+
+
