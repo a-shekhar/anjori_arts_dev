@@ -14,6 +14,7 @@ CREATE TABLE arts.artworks (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 11/05/2025
 ALTER TABLE arts.artworks DROP COLUMN available;
 ALTER TABLE arts.artworks ADD COLUMN description TEXT, ADD COLUMN artist_note TEXT, ADD COLUMN Availability varchar(20);
 

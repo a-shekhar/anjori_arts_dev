@@ -125,8 +125,8 @@ export default function AboutPage() {
         <p className="mb-4 text-gray-600">Follow Anjori Arts on social media for updates, new launches & art behind-the-scenes.</p>
         <div className="flex justify-center gap-6 mb-6">
           <a href="https://www.instagram.com/anjoriarts" className="hover:scale-110 transition-transform">📸 Instagram</a>
-          {/* <a href="#" className="hover:scale-110 transition-transform">📌 Pinterest</a>
- */}        </div>
+          <a href="https://pin.it/lwclKG9Dw" className="hover:scale-110 transition-transform">📌 Pinterest</a>
+       </div>
         <input
           type="email"
           placeholder="Your email for newsletter"
