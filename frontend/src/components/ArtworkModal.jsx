@@ -23,7 +23,7 @@ const ArtworkModal = ({ artwork, onClose }) => {
     imageUrl,
     description,
     availability,
-    createdOn,
+    createdAt,
     artistNote,
   } = artwork;
 
@@ -56,7 +56,7 @@ const ArtworkModal = ({ artwork, onClose }) => {
 
         {/* Optional Fields */}
         {description && <p className="text-sm text-gray-700 mb-2">{description}</p>}
-        {createdOn && <p className="text-xs text-gray-500 mb-1">🗓️ Created On: {createdOn}</p>}
+        {createdAt && <p className="text-xs text-gray-500 mb-1">🗓️ Created At: {createdAt}</p>}
         {availability && (
           <p className={`text-xs mb-2 font-medium ${
             availability === "Available" ? "text-green-600" : "text-red-600"

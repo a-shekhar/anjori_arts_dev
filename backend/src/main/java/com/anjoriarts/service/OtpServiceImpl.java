@@ -36,6 +36,22 @@ public class OtpServiceImpl implements OtpService{
         return generatedOtp;
     }
 
+    @Override
+    public boolean verifyOtp(String email, String otp) {
+        if(!otpStore.containsKey(email)){
+            return false;
+        }
+        ZonedDateTime timeNow = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
+        if(timeNow.isAfter(otpStore.get(email).expiresAt)){
+            return false;
+        }
+
+        if(!otp.equals(otpStore.get(email).otp)){
+            return false;
+        }
+        return true;
+    }
+
     // class for storing expiration time
     private static class OTPEntry{
         private String otp;

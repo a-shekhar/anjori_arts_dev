@@ -7,4 +7,5 @@ public class Consonants {
     public static final String ZONE_ID = "Asia/Kolkata";
     public static final int EXPIRATION_TIME_IN_MINUTES = 10;
     public static final int RESEND_TIME_IN_MINUTES = 1;
+    public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
 }

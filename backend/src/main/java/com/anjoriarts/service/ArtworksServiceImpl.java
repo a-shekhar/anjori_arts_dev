@@ -4,6 +4,7 @@ import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;
 import com.anjoriarts.entity.ArtworkEntity;
 import com.anjoriarts.repository.ArtworksRepository;
+import com.anjoriarts.util.CommonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +22,9 @@ public class ArtworksServiceImpl implements ArtworksService{
     Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     private final ArtworksRepository artworksRepository;
-
     private final CloudinaryServiceImpl cloudinaryService;
+
+
 
     public ArtworksServiceImpl(ArtworksRepository artworksRepository, CloudinaryServiceImpl cloudinaryService){
         this.artworksRepository = artworksRepository;
@@ -99,6 +101,7 @@ public class ArtworksServiceImpl implements ArtworksService{
     private ArtworkResponseDTO convertToResponseDto(ArtworkEntity entity) {
         String[] tags = entity.getTags().split(",");
         List<String> allTags = Arrays.stream(tags).toList();
+        System.out.println( CommonUtil.formatToLocal(entity.getCreatedAt().toString()));
         return new ArtworkResponseDTO(
                 entity.getId(),
                 entity.getTitle(),
@@ -110,7 +113,7 @@ public class ArtworksServiceImpl implements ArtworksService{
                 allTags,
                 entity.getDescription(),
                 entity.getAvailability(),
-                entity.getCreatedAt().toString(),
+                CommonUtil.formatToLocal(entity.getCreatedAt().toString()),
                 entity.getArtistNote()
         );
     }

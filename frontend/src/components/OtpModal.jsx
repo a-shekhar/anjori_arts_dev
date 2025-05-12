@@ -39,13 +39,23 @@ export default function OtpModal({ email, onClose, onVerified }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
       });
-      const result = await response.text();
-      if (response.ok) {
-        onVerified();
+
+      const defaultMessage = "Something went wrong. Please try again later.";
+      const result = await response.json();
+
+      const msg = typeof result.message === 'string' ? result.message : defaultMessage;
+      setMessage(msg)
+
+      if (response.ok && result.success) {
+        setTimeout(() => {
+          setLoading(false); // stop loading in case it's still active
+          onVerified(); // trigger redirect
+        }, 2000); // delay so user sees the message
       } else {
-        setMessage(result || 'Invalid OTP');
+        setMessage(msg || 'Invalid OTP');
       }
-    } catch {
+    } catch (err) {
+      console.error("OTP verification error:", err);
       setMessage('Internal Server Error');
     } finally {
       setLoading(false);
@@ -83,10 +93,12 @@ export default function OtpModal({ email, onClose, onVerified }) {
           className="w-full border border-gray-300 rounded-md px-4 py-2 mb-3 text-center tracking-widest"
         />
 
-        {message && (
+        {typeof message === 'string' && (
           <p
             className={`text-sm text-center mb-3 ${
-              message.toLowerCase().includes('resent') ? 'text-green-600' : 'text-red-500'
+              message.toLowerCase().includes('resent') || message.toLowerCase().includes('redirecting')
+                ? 'text-green-600'
+                : 'text-red-500'
             }`}
           >
             {message}

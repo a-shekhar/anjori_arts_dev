@@ -17,4 +17,5 @@ public class SignupDTO {
     private BigInteger phoneNo;
     private String userName;
     private String password;
+    private String otp;
 }
