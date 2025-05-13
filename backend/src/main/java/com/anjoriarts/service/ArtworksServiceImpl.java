@@ -3,8 +3,9 @@ package com.anjoriarts.service;
 import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;
 import com.anjoriarts.entity.ArtworkEntity;
-import com.anjoriarts.repository.ArtworksRepository;
+import com.anjoriarts.repository.ArtworkRepository;
 import com.anjoriarts.util.CommonUtil;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,19 +22,20 @@ public class ArtworksServiceImpl implements ArtworksService{
 
     Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-    private final ArtworksRepository artworksRepository;
+    private final ArtworkRepository artworkRepository;
     private final CloudinaryServiceImpl cloudinaryService;
 
 
-
-    public ArtworksServiceImpl(ArtworksRepository artworksRepository, CloudinaryServiceImpl cloudinaryService){
-        this.artworksRepository = artworksRepository;
+    public ArtworksServiceImpl(ArtworkRepository artworkRepository, CloudinaryServiceImpl cloudinaryService){
+        this.artworkRepository = artworkRepository;
         this.cloudinaryService = cloudinaryService;
     }
 
     @Value("${spring.application.env}")
     private String env;
 
+    @Override
+    @Transactional
     public ArtworkRequestDTO saveArtwork(ArtworkRequestDTO dto){
         try {
             ArtworkEntity artwork = new ArtworkEntity();
@@ -60,7 +62,7 @@ public class ArtworksServiceImpl implements ArtworksService{
             artwork.setAvailability(dto.getAvailability());
             artwork.setArtistNote(dto.getArtistNote());
 
-            ArtworkEntity savedArtwork = artworksRepository.save(artwork);
+            ArtworkEntity savedArtwork = artworkRepository.save(artwork);
             dto.setId(savedArtwork.getId());
             logger.info("Artwork saved successfully...");
         }catch (Exception e){
@@ -77,7 +79,7 @@ public class ArtworksServiceImpl implements ArtworksService{
 
         String slug = baseSlug;
         int count = 1;
-        while(artworksRepository.existsBySlug(slug)){
+        while(artworkRepository.existsBySlug(slug)){
             slug = baseSlug + "-" + (count++);
         }
         return slug;
@@ -85,14 +87,14 @@ public class ArtworksServiceImpl implements ArtworksService{
 
     @Override
     public Page<ArtworkResponseDTO> getFeaturedArtworks(Pageable pageable) {
-        Page<ArtworkEntity> entities = artworksRepository.findByFeaturedTrueOrderByCreatedAtDesc(pageable);
+        Page<ArtworkEntity> entities = artworkRepository.findByFeaturedTrueOrderByCreatedAtDesc(pageable);
         return entities.map(this::convertToResponseDto);
     }
 
 
     @Override
     public Page<ArtworkResponseDTO> getAllArtworks(Pageable pageable) {
-        Page<ArtworkEntity> page = artworksRepository.findAll(pageable);
+        Page<ArtworkEntity> page = artworkRepository.findAll(pageable);
 
         // Convert each entity to DTO using map
         return page.map(this::convertToResponseDto);
@@ -101,7 +103,6 @@ public class ArtworksServiceImpl implements ArtworksService{
     private ArtworkResponseDTO convertToResponseDto(ArtworkEntity entity) {
         String[] tags = entity.getTags().split(",");
         List<String> allTags = Arrays.stream(tags).toList();
-        System.out.println( CommonUtil.formatToLocal(entity.getCreatedAt().toString()));
         return new ArtworkResponseDTO(
                 entity.getId(),
                 entity.getTitle(),

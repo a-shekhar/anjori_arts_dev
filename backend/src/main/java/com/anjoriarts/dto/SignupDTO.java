@@ -10,12 +10,12 @@ import java.math.BigInteger;
 @Setter
 @ToString
 public class SignupDTO {
-    private String userId;
+    private Long userId;
     private String firstName;
     private String lastName;
     private String email;
     private BigInteger phoneNo;
-    private String userName;
+    private String username;
     private String password;
     private String otp;
 }

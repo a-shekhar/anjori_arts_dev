@@ -4,6 +4,7 @@ import { API_BASE_URL } from "../utils/api";
 
 const Footer = () => {
      const [visitorCount, setVisitorCount] = useState(0);
+     const [activeUsers, setActiveUsers] = useState(0);
 
      useEffect(() => {
          fetch(`${API_BASE_URL}/analytics/unique-visitors`)
@@ -14,6 +15,16 @@ const Footer = () => {
              setVisitorCount(0);
            });
        }, []);
+
+   useEffect(() => {
+            fetch(`${API_BASE_URL}/analytics/active-users`)
+              .then(res => res.json())
+              .then(data => setVisitorCount(data))
+              .catch(err => {
+                console.error("Failed to fetch visitor count:", err);
+                setVisitorCount(0);
+              });
+          }, []);
 
   return (
     <footer className="bg-[#0b1120] text-white py-6 px-4 md:px-8 text-sm">

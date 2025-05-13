@@ -2,6 +2,7 @@ package com.anjoriarts.controller;
 
 
 import com.anjoriarts.Application;
+import com.anjoriarts.common.CommonResponse;
 import com.anjoriarts.service.AppStatsService;
 import com.anjoriarts.util.IpUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,7 +29,7 @@ public class AppStatsController {
         }
 
         @GetMapping("/track-visitor")
-        public ResponseEntity<String> track(HttpServletRequest request) {
+        public ResponseEntity<String> trackVisitors(HttpServletRequest request) {
             String ip = IpUtil.getClientIp(request);
             appStatsService.trackVisitor(ip);
             return ResponseEntity.ok("Visitor tracked");
@@ -35,6 +37,12 @@ public class AppStatsController {
 
         @GetMapping("/unique-visitors")
         public ResponseEntity<Long> getUniqueVisitors() {
+            return ResponseEntity.ok(appStatsService.getUniqueVisitorCount());
+        }
+
+
+        @GetMapping("/active-users")
+        public ResponseEntity<Long> getActiveUsers() {
             return ResponseEntity.ok(appStatsService.getUniqueVisitorCount());
         }
 

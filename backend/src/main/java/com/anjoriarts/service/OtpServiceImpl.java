@@ -49,6 +49,7 @@ public class OtpServiceImpl implements OtpService{
         if(!otp.equals(otpStore.get(email).otp)){
             return false;
         }
+        otpStore.remove(email);
         return true;
     }
 

@@ -1,4 +1,3 @@
-// File: SignupPage.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../utils/api';
@@ -9,38 +8,71 @@ export default function SignupPage() {
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
+    phoneNo: '',
+    countryCode: '+91',
+    username: '',
     password: '',
     confirmPassword: '',
   });
+
+  const [errors, setErrors] = useState({});
   const [message, setMessage] = useState(null);
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.firstName || formData.firstName.length < 2)
+      newErrors.firstName = 'First name must be at least 2 characters';
+    if (!formData.lastName || formData.lastName.length < 2)
+      newErrors.lastName = 'Last name must be at least 2 characters';
+    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email))
+      newErrors.email = 'Invalid email address';
+    if (formData.phoneNo && !/^\d{10}$/.test(formData.phoneNo))
+      newErrors.phoneNo = 'Phone Number must be 10 digits';
+    if (!formData.password || formData.password.length < 6)
+      newErrors.password = 'Password must be at least 6 characters';
+    if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = 'Passwords do not match';
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
     setMessage(null);
-    if (formData.password !== formData.confirmPassword) {
-      setMessage('Passwords do not match');
+    setSubmitting(true);
+
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setSubmitting(false);
       return;
     }
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-      const result = await response.text();
-      if (response.ok) {
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
         setShowOtpModal(true);
       } else {
-        setMessage(result || 'Could not send OTP');
+        setMessage(result.message || 'Could not send OTP');
       }
     } catch (err) {
       setMessage('Internal Server Issue');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -61,15 +93,114 @@ export default function SignupPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input name="firstName" type="text" value={formData.firstName} onChange={handleChange} required placeholder="First Name" className="border border-gray-300 rounded-md px-4 py-2 w-full" />
-              <input name="lastName" type="text" value={formData.lastName} onChange={handleChange} required placeholder="Last Name" className="border border-gray-300 rounded-md px-4 py-2 w-full" />
+              <div>
+                <input
+                  name="firstName"
+                  type="text"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                  placeholder="First Name"
+                  className="border border-gray-300 rounded-md px-4 py-2 w-full"
+                />
+                {errors.firstName && <p className="text-sm text-red-500">{errors.firstName}</p>}
+              </div>
+              <div>
+                <input
+                  name="lastName"
+                  type="text"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  placeholder="Last Name"
+                  className="border border-gray-300 rounded-md px-4 py-2 w-full"
+                />
+                {errors.lastName && <p className="text-sm text-red-500">{errors.lastName}</p>}
+              </div>
             </div>
-            <input name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="Email" className="border border-gray-300 rounded-md px-4 py-2 w-full" />
-            <input name="phone" type="tel" value={formData.phone} onChange={handleChange} placeholder="Phone (optional)" className="border border-gray-300 rounded-md px-4 py-2 w-full" />
-            <input name="password" type="password" value={formData.password} onChange={handleChange} required placeholder="Password" className="border border-gray-300 rounded-md px-4 py-2 w-full" />
-            <input name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} required placeholder="Confirm Password" className="border border-gray-300 rounded-md px-4 py-2 w-full" />
+
+            <div>
+              <input
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="Email"
+                className="border border-gray-300 rounded-md px-4 py-2 w-full"
+              />
+              {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+            </div>
+
+            <div className="flex gap-2">
+              <select
+                name="countryCode"
+                value={formData.countryCode}
+                onChange={handleChange}
+                className="border border-gray-300 rounded-md px-2 py-2 w-24 text-sm"
+              >
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+61">🇦🇺 +61</option>
+                <option value="+1">🇨🇦 +1</option>
+              </select>
+              <input
+                name="phoneNo"
+                type="tel"
+                value={formData.phoneNo}
+                onChange={handleChange}
+                placeholder="Phone (optional)"
+                className="border border-gray-300 rounded-md px-4 py-2 flex-1"
+              />
+            </div>
+            {errors.phoneNo && <p className="text-sm text-red-500">{errors.phoneNo}</p>}
+
+            <div>
+              <input
+                name="username"
+                type="text"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder="User name (optional)"
+                className="border border-gray-300 rounded-md px-4 py-2 w-full"
+              />
+            </div>
+
+            <div>
+              <input
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                placeholder="Password"
+                className="border border-gray-300 rounded-md px-4 py-2 w-full"
+              />
+              {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+            </div>
+
+            <div>
+              <input
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                placeholder="Confirm Password"
+                className="border border-gray-300 rounded-md px-4 py-2 w-full"
+              />
+              {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword}</p>}
+            </div>
+
             {message && <p className="text-red-500 text-sm text-center">{message}</p>}
-            <button type="submit" className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-md transition duration-300">Sign Up & Receive OTP ✨</button>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-md transition duration-300"
+            >
+              {submitting ? "Sending OTP..." : "Sign Up & Receive OTP ✨"}
+            </button>
           </form>
 
           <div className="text-sm text-gray-500 text-center mt-4">
@@ -80,7 +211,7 @@ export default function SignupPage() {
 
       {showOtpModal && (
         <OtpModal
-          email={formData.email}
+          signupData={formData}
           onClose={() => setShowOtpModal(false)}
           onVerified={() => {
             setShowOtpModal(false);

@@ -1,14 +1,20 @@
-// File: OtpModal.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '../utils/api';
 
-export default function OtpModal({ email, onClose, onVerified }) {
+export default function OtpModal({ signupData, onClose, onVerified }) {
   const [otp, setOtp] = useState('');
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(60);
   const timerStarted = useRef(false);
+  const inputRef = useRef(null);
 
+  // Auto focus on OTP input when modal opens
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.focus();
+  }, []);
+
+  // Start resend timer
   useEffect(() => {
     if (!timerStarted.current) {
       timerStarted.current = true;
@@ -34,23 +40,28 @@ export default function OtpModal({ email, onClose, onVerified }) {
     setLoading(true);
     setMessage(null);
     try {
+      const fullPayload = {
+        ...signupData,
+        otp: otp,
+      };
+
       const response = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp }),
+        body: JSON.stringify(fullPayload),
       });
 
       const defaultMessage = "Something went wrong. Please try again later.";
       const result = await response.json();
 
       const msg = typeof result.message === 'string' ? result.message : defaultMessage;
-      setMessage(msg)
+      setMessage(msg);
 
       if (response.ok && result.success) {
         setTimeout(() => {
-          setLoading(false); // stop loading in case it's still active
-          onVerified(); // trigger redirect
-        }, 2000); // delay so user sees the message
+          setLoading(false);
+          onVerified();
+        }, 2000);
       } else {
         setMessage(msg || 'Invalid OTP');
       }
@@ -64,14 +75,23 @@ export default function OtpModal({ email, onClose, onVerified }) {
 
   const handleResend = async () => {
     try {
-      await fetch(`${API_BASE_URL}/api/auth/resend-otp`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/resend-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: signupData.email, firstName: signupData.firstName }),
       });
-      setMessage('OTP resent!');
-      setTimer(60);
-    } catch {
+
+      const result = await response.json();
+      const msg = result.message || 'Something went wrong';
+
+      if (response.ok && result.success) {
+        setMessage('OTP resent!');
+        setTimer(60);
+      } else {
+        setMessage(msg);
+      }
+    } catch (err) {
+      console.error('Resend error:', err);
       setMessage('Could not resend OTP');
     }
   };
@@ -81,13 +101,14 @@ export default function OtpModal({ email, onClose, onVerified }) {
       <div className="bg-white rounded-2xl shadow-lg px-6 py-8 w-full max-w-sm">
         <h2 className="text-xl font-semibold text-center text-purple-600 mb-2">Verify Your Email</h2>
         <p className="text-sm text-center text-gray-600 mb-5">
-          We’ve sent an OTP to <strong>{email}</strong>
+          We’ve sent an OTP to <strong>{signupData.email}</strong>
         </p>
 
         <input
+          ref={inputRef}
           type="text"
           value={otp}
-          onChange={(e) => setOtp(e.target.value)}
+          onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
           placeholder="Enter 6-digit OTP"
           maxLength={6}
           className="w-full border border-gray-300 rounded-md px-4 py-2 mb-3 text-center tracking-widest"
@@ -96,7 +117,7 @@ export default function OtpModal({ email, onClose, onVerified }) {
         {typeof message === 'string' && (
           <p
             className={`text-sm text-center mb-3 ${
-              message.toLowerCase().includes('resent') || message.toLowerCase().includes('redirecting')
+              message.toLowerCase().includes('sent') || message.toLowerCase().includes('redirecting')
                 ? 'text-green-600'
                 : 'text-red-500'
             }`}
