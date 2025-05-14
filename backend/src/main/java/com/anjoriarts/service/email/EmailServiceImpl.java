@@ -1,4 +1,4 @@
-package com.anjoriarts.service;
+package com.anjoriarts.service.email;
 
 import com.anjoriarts.common.Consonants;
 import jakarta.mail.internet.MimeMessage;
@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 @Service

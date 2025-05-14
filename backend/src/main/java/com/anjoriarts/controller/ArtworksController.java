@@ -4,7 +4,7 @@ import com.anjoriarts.common.CommonResponse;
 import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;
 import com.anjoriarts.dto.ArtworkPageResponse;
-import com.anjoriarts.service.ArtworksService;
+import com.anjoriarts.service.artworks.ArtworksService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;

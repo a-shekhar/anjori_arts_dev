@@ -81,7 +81,7 @@ const Footer = () => {
         <div className="self-start text-center order-3 md:order-2">
           <p className="mb-1">© 2025 Anjori Arts. All rights reserved.</p>
           <p className="mb-2">
-           🛠️ App <span className="font-semibold">Version: 0.4</span>
+           🛠️ App <span className="font-semibold">Version: 0.5</span>
           </p>
           <div className="space-x-4">
             <a

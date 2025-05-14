@@ -1,4 +1,4 @@
-package com.anjoriarts.service;
+package com.anjoriarts.service.email;
 
 import com.anjoriarts.common.Consonants;
 import org.springframework.stereotype.Service;

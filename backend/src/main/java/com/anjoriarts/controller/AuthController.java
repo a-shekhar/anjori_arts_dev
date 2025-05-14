@@ -1,10 +1,18 @@
 package com.anjoriarts.controller;
 
 import com.anjoriarts.common.CommonResponse;
+import com.anjoriarts.dto.LoginDTO;
 import com.anjoriarts.dto.SignupDTO;
+import com.anjoriarts.dto.UserDTO;
 import com.anjoriarts.service.*;
+import com.anjoriarts.service.auth.AuthService;
+import com.anjoriarts.service.email.EmailService;
+import com.anjoriarts.service.email.OtpService;
+import com.anjoriarts.service.email.OtpServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,5 +100,21 @@ public class AuthController {
             return err;
         }
         return err;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody LoginDTO dto, HttpServletRequest request){
+        try {
+            UserDTO userDTO = authService.authenticateAndLogin(dto, request);
+            if(userDTO == null){
+                return ResponseEntity.ok().body(CommonResponse.failure("Invalid credentials!!!", null));
+            }
+            return ResponseEntity.ok().body(CommonResponse.success("Login successful, Redirecting you to profile!!!", userDTO));
+        } catch (Exception e) {
+            logger.error("Login failed for {}  Error is", dto.getIdentifier(), e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(CommonResponse.failure("Login failed. Please try again..", null));
+
+        }
     }
 }

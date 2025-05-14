@@ -1,9 +1,10 @@
-package com.anjoriarts.service;
+package com.anjoriarts.service.artworks;
 
 import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;
 import com.anjoriarts.entity.ArtworkEntity;
 import com.anjoriarts.repository.ArtworkRepository;
+import com.anjoriarts.service.CloudinaryServiceImpl;
 import com.anjoriarts.util.CommonUtil;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.anjoriarts.service;
+package com.anjoriarts.service.email;
 
 public interface OtpService {
 

@@ -1,4 +1,4 @@
-package com.anjoriarts.service;
+package com.anjoriarts.service.artworks;
 
 import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;

@@ -8,4 +8,6 @@ public class Consonants {
     public static final int EXPIRATION_TIME_IN_MINUTES = 10;
     public static final int RESEND_TIME_IN_MINUTES = 1;
     public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
+    public static final String USER_ROLE = "ROLE_USER";
+    public static final String ADMIN_ROLE = "ROLE_ADMIN";
 }

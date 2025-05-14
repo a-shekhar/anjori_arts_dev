@@ -1,28 +1,38 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate  } from 'react-router-dom';
+import { API_BASE_URL } from '../utils/api';
 
 export default function LoginPage() {
-  const [emailOrPhone, setEmailOrPhone] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState(null);
+  const [messageType, setMessageType] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/login', {
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ username: emailOrPhone, password }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password }),
       });
 
-      if (response.ok) {
-        window.location.href = '/profile';
+      const result = await response.json();
+      if (response.ok && result.success) {
+          setMessage(result.message || 'Login successful ✨');
+          setMessageType('success');
+          setTimeout(() => {
+              navigate('/profile');
+            }, 2000); // 2 seconds delay
       } else {
-        const text = await response.text();
-        setMessage(text || 'Login failed. Please try again.');
+        setMessage(result.message || 'Login failed. Please try again.');
+        setMessageType('error');
       }
     } catch {
       setMessage('Internal Server Issue');
+       setMessageType('error');
     }
   };
 
@@ -49,11 +59,11 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-1 block">Email or Phone</label>
+              <label className="text-sm font-medium mb-1 block">Email</label>
               <input
                 type="text"
-                value={emailOrPhone}
-                onChange={(e) => setEmailOrPhone(e.target.value)}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 required
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-rose-300 focus:outline-none"
                 placeholder="you@example.com"
@@ -72,7 +82,15 @@ export default function LoginPage() {
               />
             </div>
 
-            {message && <p className="text-red-500 text-sm text-center">{message}</p>}
+            {message && (
+              <p
+                className={`text-sm text-center ${
+                  messageType === 'success' ? 'text-green-600' : 'text-red-500'
+                }`}
+              >
+                {message}
+              </p>
+            )}
 
             <button
               type="submit"
