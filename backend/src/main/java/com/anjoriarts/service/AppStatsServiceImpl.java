@@ -44,7 +44,8 @@ public class AppStatsServiceImpl implements AppStatsService{
     @Override
     public long getActiveUsers(){
         String key = env + ":active-users";
-        long visitorCount = redisTemplate.opsForSet().size(key);
+        String value = redisTemplate.opsForValue().get(key);
+        long visitorCount = (value != null) ? Long.parseLong(value) : 0;
         logger.info("Active user count for {} is {}", key, visitorCount );
         return visitorCount;
     }

@@ -1,0 +1,3 @@
+------- 0.4
+1. Run users table sql
+2. Add gmail credentials in .env

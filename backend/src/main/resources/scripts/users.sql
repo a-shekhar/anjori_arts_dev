@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE arts.users (
   user_id SERIAL PRIMARY KEY, -- Use BIGSERIAL for auto-incrementing ID
   first_name VARCHAR(30) NOT NULL,
   last_name VARCHAR(30),
