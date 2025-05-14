@@ -1,7 +1,6 @@
 package com.anjoriarts.controller;
 
 import com.anjoriarts.common.CommonResponse;
-import com.anjoriarts.dto.OtpVerificationDTO;
 import com.anjoriarts.dto.SignupDTO;
 import com.anjoriarts.service.*;
 import org.slf4j.Logger;
