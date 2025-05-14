@@ -37,7 +37,7 @@ public class AppStatsServiceImpl implements AppStatsService{
 
     @Override
     public void trackActiveUser() {
-        String key = env + "active-users";
+        String key = env + ":active-users";
         redisTemplate.opsForValue().increment(key); // just increase the count
     }
 

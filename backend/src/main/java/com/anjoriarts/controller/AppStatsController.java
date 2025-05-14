@@ -43,7 +43,7 @@ public class AppStatsController {
 
         @GetMapping("/active-users")
         public ResponseEntity<Long> getActiveUsers() {
-            return ResponseEntity.ok(appStatsService.getUniqueVisitorCount());
+            return ResponseEntity.ok(appStatsService.getActiveUsers());
         }
 
 }

@@ -4,7 +4,7 @@ import { API_BASE_URL } from "../utils/api";
 
 const Footer = () => {
      const [visitorCount, setVisitorCount] = useState(0);
-     const [activeUsers, setActiveUsers] = useState(0);
+     const [activeUsersCount, setActiveUsersCount] = useState(0);
 
      useEffect(() => {
          fetch(`${API_BASE_URL}/analytics/unique-visitors`)
@@ -19,10 +19,10 @@ const Footer = () => {
    useEffect(() => {
             fetch(`${API_BASE_URL}/analytics/active-users`)
               .then(res => res.json())
-              .then(data => setVisitorCount(data))
+              .then(data => setActiveUsersCount(data))
               .catch(err => {
-                console.error("Failed to fetch visitor count:", err);
-                setVisitorCount(0);
+                console.error("Failed to fetch Active user count:", err);
+                setActiveUsersCount(0);
               });
           }, []);
 
@@ -38,7 +38,7 @@ const Footer = () => {
           </p>
           <p className="flex items-center justify-center md:justify-end gap-2 text-purple-300">
             <Users size={16} className="animate-bounce" />
-            Active Users: 1
+            Active Users: {activeUsersCount !== null ? activeUsersCount : 0}
           </p>
           <p className="flex items-center justify-center md:justify-end gap-2 text-yellow-400">
             <Package size={16} className="animate-pulse" />
