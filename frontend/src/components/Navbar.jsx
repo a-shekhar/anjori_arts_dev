@@ -8,7 +8,7 @@ import { useAuth } from "../components/AuthContext";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, setUser, loading } = useAuth(); // ✅ now includes loading
+  const { user, setUser, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -25,15 +25,17 @@ const Navbar = () => {
     }
   };
 
-  // ⛔ Don’t show navbar profile section until user fetch completes
   if (loading) return null;
+
+  // ✅ Only show Admin link for ROLE_ADMIN
+  const isAdmin = user?.role === 'ROLE_ADMIN';
 
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Shop", href: "/shop" },
     { name: "Custom Order", href: "/custom-order" },
     { name: "About Us", href: "/about-us" },
-    { name: "Admin", href: "/admin" },
+    ...(isAdmin ? [{ name: "Admin", href: "/admin" }] : []),
   ];
 
   return (
@@ -52,14 +54,14 @@ const Navbar = () => {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-6 text-gray-700 font-medium">
           {navLinks.map(link => (
-            <a key={link.name} href={link.href} className="hover:text-purple-600 transition">
+            <Link key={link.name} to={link.href} className="hover:text-purple-600 transition">
               {link.name}
-            </a>
+            </Link>
           ))}
           <ProfileDropdown user={user} onLogout={handleLogout} />
         </div>
 
-        {/* Mobile Hamburger */}
+        {/* Mobile Hamburger Icon */}
         <div className="md:hidden">
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -67,19 +69,22 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Nav Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden px-4 pb-4 space-y-3 bg-white shadow">
+        <div className="md:hidden px-4 pb-4 space-y-3 bg-white shadow transition-all">
           {navLinks.map(link => (
-            <a
+            <Link
               key={link.name}
-              href={link.href}
+              to={link.href}
               className="block text-gray-700 hover:text-purple-600 font-medium"
+              onClick={() => setMobileMenuOpen(false)} // close on link click
             >
               {link.name}
-            </a>
+            </Link>
           ))}
-          <ProfileDropdown user={user} onLogout={handleLogout} />
+          <div onClick={() => setMobileMenuOpen(false)}>
+            <ProfileDropdown user={user} onLogout={handleLogout} />
+          </div>
         </div>
       )}
     </nav>

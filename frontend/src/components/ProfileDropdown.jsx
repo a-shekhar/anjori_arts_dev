@@ -34,7 +34,8 @@ export default function ProfileDropdown({ user, onLogout }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-44 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-20">
+         <div className="absolute right-0 mt-2 w-44 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-20
+                          transform transition-all duration-200 origin-top-right scale-95 opacity-0 animate-fade-in">
           <div className="py-2 text-sm">
             <Link
               to="/profile"
