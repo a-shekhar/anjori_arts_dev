@@ -86,6 +86,6 @@ public class AuthServiceImpl implements AuthService {
             logger.warn("Login failed for {}", loginDTO.getIdentifier());
             return null;
         }
-        return this.userService.convertUserDetailsToDto(userDetails);
+        return this.userService.fetchUserDto(userDetails.getUsername());
     }
 }

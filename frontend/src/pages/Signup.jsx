@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link , useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../utils/api';
 import OtpModal from '../components/OtpModal';
 
@@ -19,6 +19,7 @@ export default function SignupPage() {
   const [message, setMessage] = useState(null);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -215,7 +216,7 @@ export default function SignupPage() {
           onClose={() => setShowOtpModal(false)}
           onVerified={() => {
             setShowOtpModal(false);
-            window.location.href = '/login';
+            navigate('/login');
           }}
         />
       )}

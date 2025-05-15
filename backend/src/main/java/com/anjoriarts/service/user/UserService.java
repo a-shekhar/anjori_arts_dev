@@ -5,6 +5,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserService {
 
-    UserDTO convertUserDetailsToDto(UserDetails userDetails);
+    UserDTO fetchUserDto(String identifier);
 
 }

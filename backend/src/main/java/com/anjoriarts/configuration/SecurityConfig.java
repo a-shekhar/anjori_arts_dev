@@ -44,9 +44,10 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/**").hasRole("ADMIN")  // must be first
-                        .anyRequest().permitAll()                      // must be inside lambda
+                        .requestMatchers("/api/user/**").authenticated() // // ✅ Only logged-in users can access profile endpoints
+                        .anyRequest().permitAll()                       // Public access elsewhere
                 )
-                .formLogin(Customizer.withDefaults())
+                .formLogin(Customizer.withDefaults()) // Default login page
                 .build();
     }
 

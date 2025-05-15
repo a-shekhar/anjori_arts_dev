@@ -15,6 +15,7 @@ import CustomOrderPage from "./pages/CustomOrder"
 import AboutPage from "./pages/About"
 import LoginPage from "./pages/Login"
 import SignupPage from "./pages/Signup"
+import ProfilePage from "./pages/Profile"
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/custom-order" element={<CustomOrderPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/about-us" element={<AboutPage />} />
         {/* Admin Routes with Layout */}
         <Route path="/admin" element={<Admin />}>

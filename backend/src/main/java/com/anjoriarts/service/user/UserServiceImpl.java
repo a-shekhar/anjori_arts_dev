@@ -18,15 +18,15 @@ public class UserServiceImpl implements UserService {
 
     private  final UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository){
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
-    public UserDTO convertUserDetailsToDto(UserDetails userDetails) {
-        Optional<UserEntity> fetchedUser = userRepository.findByEmail(userDetails.getUsername());
+    public UserDTO fetchUserDto(String identifier) {
+        Optional<UserEntity> fetchedUser = userRepository.findByEmail(identifier);
         if(fetchedUser.isEmpty()){
-            throw new UsernameNotFoundException("Invalid credentials");
+            throw new UsernameNotFoundException("Invalid credentials!!");
         }
         UserEntity user = fetchedUser.get();
         return UserDTO.builder()
@@ -34,6 +34,7 @@ public class UserServiceImpl implements UserService {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .username(user.getUsername())
+                .email(user.getEmail())
                 .countryCode(user.getCountryCode())
                 .phoneNo(user.getPhoneNo())
                 .password(user.getPassword())
