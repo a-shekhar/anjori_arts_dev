@@ -21,7 +21,7 @@ const ShopPage = () => {
             "Accept": "application/json"
           }
         });
-        console.log("res is " + res)
+
         const data = await res.json();
         setArtworks(data.content || []);
         setTotalPages(data.totalPages || 0);

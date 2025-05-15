@@ -2,15 +2,12 @@ package com.anjoriarts.controller;
 
 import com.anjoriarts.common.CommonResponse;
 import com.anjoriarts.dto.UserDTO;
-import com.anjoriarts.repository.UserRepository;
 import com.anjoriarts.service.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -28,15 +25,29 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(Principal principal) {
         try {
-            System.out.println("Aditya hai idher");
             if (principal == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(CommonResponse.failure("User not found!!!", null));
             }
-            UserDTO userDTO = userService.fetchUserDto( principal.getName());
+            UserDTO userDTO = userService.fetchAndConvertToUserDto(principal.getName());
            if(userDTO == null){
                return ResponseEntity.ok().body(CommonResponse.failure("User not found!!!", null));
            }
             return ResponseEntity.ok().body(CommonResponse.success("User profile loaded", userDTO));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(CommonResponse.failure("User not found!!!", null));
+        }
+    }
+
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateUserProfile(Principal principal, @RequestBody UserDTO userDTO) {
+        try {
+            if (principal == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(CommonResponse.failure("User not found!!!", null));
+            }
+            userDTO = userService.updateUserProfile(principal, userDTO);
+            return ResponseEntity.ok().body(CommonResponse.success("User profile updated", userDTO));
         } catch (Exception e) {
             logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(CommonResponse.failure("User not found!!!", null));

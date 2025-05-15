@@ -45,7 +45,7 @@ export default function LoginPage() {
       if (profileRes.ok) {
         const userData = await profileRes.json();
         setUser(userData.data);
-        console.log('Logged in user:', userData.data);
+
       }
 
       navigate('/', { replace: true }); // Redirect only on success

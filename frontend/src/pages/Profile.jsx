@@ -3,6 +3,7 @@ import ImageZoomModal from "../components/ImageZoomModal";
 import CountryCodeDropdown from "../components/CountryCodeDropdown";
 import { API_BASE_URL } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
+import { toast } from "react-toastify";
 
 export default function ProfilePage() {
   const [username, setUsername] = useState('');
@@ -38,19 +39,23 @@ export default function ProfilePage() {
     };
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/user/profile/update`, {
-        method: 'POST',
+      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include', // 👈 this is required for session to work
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      alert(data.message || 'Profile updated successfully');
+      const result = await response.json();
+      if(response.ok && result.success){
+        toast.success(result.message || 'Profile updated successfully.');
+      }else{
+          toast.error(result.message || 'Profile update failed.');
+      }
     } catch (err) {
       console.error(err);
-      alert('Internal Server Issue');
+      toast.error('Internal Server Issue');
     }
   };
 
@@ -79,7 +84,7 @@ export default function ProfilePage() {
         const result = await res.json();
         const data = result.data;
 
-        console.log("Aditya" + data);
+
 
         setUsername(data.username || '');
         setFirstName(data.firstName || '');

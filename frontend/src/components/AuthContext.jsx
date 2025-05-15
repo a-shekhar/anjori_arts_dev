@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
       if (res.ok) {
         const resJson = await res.json();
         setUser(resJson.data);
-        console.log("Fetched user:", resJson.data);
+
       } else {
         setUser(null);
       }
