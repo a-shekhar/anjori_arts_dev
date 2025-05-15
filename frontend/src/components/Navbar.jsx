@@ -1,13 +1,35 @@
-import React, { useState } from "react";
-import { Menu, X, Lock } from "lucide-react";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 import ImageZoomModal from "./ImageZoomModal";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import ProfileDropdown from './ProfileDropdown';
+import { API_BASE_URL } from "../utils/api";
+import { useAuth } from "../components/AuthContext";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, setUser, loading } = useAuth(); // ✅ now includes loading
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      setUser(null);
+      navigate('/login');
+    } catch (err) {
+      console.error('Logout failed:', err);
+      alert('Logout failed');
+    }
+  };
+
+  // ⛔ Don’t show navbar profile section until user fetch completes
+  if (loading) return null;
 
   const navLinks = [
-      { name: "Home", href: "/" },
+    { name: "Home", href: "/" },
     { name: "Shop", href: "/shop" },
     { name: "Custom Order", href: "/custom-order" },
     { name: "About Us", href: "/about-us" },
@@ -34,13 +56,7 @@ const Navbar = () => {
               {link.name}
             </a>
           ))}
-          <a
-            href="/login"
-            className="inline-flex items-center space-x-1 px-4 py-2 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 transition"
-          >
-            <Lock size={16} className="text-yellow-500" />
-            <span>Login</span>
-          </a>
+          <ProfileDropdown user={user} onLogout={handleLogout} />
         </div>
 
         {/* Mobile Hamburger */}
@@ -63,13 +79,7 @@ const Navbar = () => {
               {link.name}
             </a>
           ))}
-          <a
-            href="/login"
-            className="flex items-center space-x-2 text-gray-700 hover:text-purple-600"
-          >
-            <Lock size={16} className="text-yellow-500" />
-            <span>Login</span>
-          </a>
+          <ProfileDropdown user={user} onLogout={handleLogout} />
         </div>
       )}
     </nav>

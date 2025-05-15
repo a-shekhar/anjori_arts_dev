@@ -1,5 +1,6 @@
 package com.anjoriarts.configuration;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +49,20 @@ public class SecurityConfig {
                         .anyRequest().permitAll()                       // Public access elsewhere
                 )
                 .formLogin(Customizer.withDefaults()) // Default login page
+               // .logout(logout -> logout.logoutUrl("/logout"))
+              //  .logout(Customizer.withDefaults())
+                .logout(logout -> logout
+                        .logoutUrl("/logout") // default
+                        .logoutSuccessHandler((request, response, auth) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        }))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"message\":\"Unauthorized\"}");
+                        })
+                )
                 .build();
     }
 

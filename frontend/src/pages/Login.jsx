@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate  } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../utils/api';
+import { useAuth } from '../components/AuthContext';
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
@@ -8,32 +9,43 @@ export default function LoginPage() {
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState('');
   const navigate = useNavigate();
+  const { setUser } = useAuth(); // ✅ Set user on success
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier, password }),
-         credentials: 'include', // ✅ this is essential
+        credentials: 'include',
       });
 
       const result = await response.json();
       if (response.ok && result.success) {
-          setMessage(result.message || 'Login successful ✨');
-          setMessageType('success');
-          setTimeout(() => {
-              navigate('/profile');
-            }, 2000); // 2 seconds delay
+        setMessage(result.message || 'Login successful ✨');
+        setMessageType('success');
+
+        const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, {
+          credentials: 'include',
+        });
+
+        if (profileRes.ok) {
+          const userData = await profileRes.json();
+          setUser(userData.data); // ✅ Set only the data object
+          console.log('Logged in user:', userData.data);
+        }
+
+        // ✅ Navigate to home and trigger navbar re-render
+        navigate('/', { replace: true });
       } else {
         setMessage(result.message || 'Login failed. Please try again.');
         setMessageType('error');
       }
-    } catch {
+    } catch (error) {
+      console.error('Login error:', error);
       setMessage('Internal Server Issue');
-       setMessageType('error');
+      setMessageType('error');
     }
   };
 
@@ -43,7 +55,7 @@ export default function LoginPage() {
         {/* Left Art Image */}
         <div className="hidden md:block">
           <img
-            src="/images/Login.png" // use any of the uploaded ones
+            src="/images/Login.png"
             alt="art-login"
             className="w-full max-w-sm mx-auto"
           />
