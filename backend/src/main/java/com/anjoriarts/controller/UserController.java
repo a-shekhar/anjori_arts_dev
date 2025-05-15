@@ -34,7 +34,7 @@ public class UserController {
             }
             UserDTO userDTO = userService.fetchUserDto( principal.getName());
            if(userDTO == null){
-               return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(CommonResponse.failure("User not found!!!", null));
+               return ResponseEntity.ok().body(CommonResponse.failure("User not found!!!", null));
            }
             return ResponseEntity.ok().body(CommonResponse.success("User profile loaded", userDTO));
         } catch (Exception e) {

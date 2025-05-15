@@ -1,3 +1,6 @@
 ------- 0.4
 1. Run users table sql
 2. Add gmail credentials in .env
+
+----- 0.5
+UPDATE arts.users SET role = 'ROLE_ADMIN' WHERE email = 'rajadityasingh31@gmail.com';

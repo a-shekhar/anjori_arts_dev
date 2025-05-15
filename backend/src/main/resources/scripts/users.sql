@@ -12,3 +12,7 @@ CREATE TABLE arts.users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+-- 15/05/2025
+UPDATE arts.users SET role = 'ROLE_ADMIN' WHERE email = 'rajadityasingh31@gmail.com';

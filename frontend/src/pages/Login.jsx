@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState('');
   const navigate = useNavigate();
-  const { setUser } = useAuth(); // ✅ Set user on success
+  const { setUser } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -22,26 +22,33 @@ export default function LoginPage() {
       });
 
       const result = await response.json();
-      if (response.ok && result.success) {
-        setMessage(result.message || 'Login successful ✨');
-        setMessageType('success');
 
-        const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, {
-          credentials: 'include',
-        });
-
-        if (profileRes.ok) {
-          const userData = await profileRes.json();
-          setUser(userData.data); // ✅ Set only the data object
-          console.log('Logged in user:', userData.data);
-        }
-
-        // ✅ Navigate to home and trigger navbar re-render
-        navigate('/', { replace: true });
-      } else {
-        setMessage(result.message || 'Login failed. Please try again.');
+      // ❌ If login failed — show friendly message & exit
+      if (!response.ok || !result.success) {
+        setMessage(
+          result.message === 'Bad credentials'
+            ? 'Oops! Incorrect email or password.'
+            : result.message || 'Login failed. Please try again.'
+        );
         setMessageType('error');
+        return;
       }
+
+      // ✅ Login successful
+      setMessage(result.message || 'Login successful ✨');
+      setMessageType('success');
+
+      const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, {
+        credentials: 'include',
+      });
+
+      if (profileRes.ok) {
+        const userData = await profileRes.json();
+        setUser(userData.data);
+        console.log('Logged in user:', userData.data);
+      }
+
+      navigate('/', { replace: true }); // Redirect only on success
     } catch (error) {
       console.error('Login error:', error);
       setMessage('Internal Server Issue');
@@ -97,8 +104,8 @@ export default function LoginPage() {
 
             {message && (
               <p
-                className={`text-sm text-center ${
-                  messageType === 'success' ? 'text-green-600' : 'text-red-500'
+                className={`text-sm text-center px-2 py-1 rounded-md ${
+                  messageType === 'success' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
                 }`}
               >
                 {message}

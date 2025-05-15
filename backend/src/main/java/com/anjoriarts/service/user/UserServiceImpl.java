@@ -39,6 +39,7 @@ public class UserServiceImpl implements UserService {
                 .phoneNo(user.getPhoneNo())
                 .password(user.getPassword())
                 .publicImageUrl(user.getProfileImageUrl())
+                .role(user.getRole())
                 .build();
     }
 }
