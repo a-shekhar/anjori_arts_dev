@@ -1,30 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { Footprints, Users, Package } from "lucide-react";
-import { API_BASE_URL } from "../utils/api";
+
 
 const Footer = () => {
      const [visitorCount, setVisitorCount] = useState(0);
      const [activeUsersCount, setActiveUsersCount] = useState(0);
 
      useEffect(() => {
-         fetch('/analytics/unique-visitors')
-           .then(res => res.json())
-           .then(data => setVisitorCount(data))
-           .catch(err => {
-             console.error("Failed to fetch visitor count:", err);
-             setVisitorCount(0);
-           });
-       }, []);
+       fetch('/analytics/unique-visitors')
+         .then(res => {
+           const contentType = res.headers.get('content-type');
+           if (res.ok && contentType && contentType.includes('application/json')) {
+             return res.json();
+           }
+           return 0;
+         })
+         .then(data => setVisitorCount(data))
+         .catch(() => setVisitorCount(0)); // Fully silent
+     }, []);
+
 
    useEffect(() => {
-            fetch('/analytics/active-users')
-              .then(res => res.json())
-              .then(data => setActiveUsersCount(data))
-              .catch(err => {
-                console.error("Failed to fetch Active user count:", err);
-                setActiveUsersCount(0);
-              });
-          }, []);
+     fetch('/analytics/active-users')
+       .then(res => {
+         const contentType = res.headers.get('content-type');
+         if (res.ok && contentType && contentType.includes('application/json')) {
+           return res.json();
+         }
+         return 0;
+       })
+       .then(data => setActiveUsersCount(data))
+       .catch(() => setActiveUsersCount(0));
+   }, []);
+
 
   return (
     <footer className="bg-[#0b1120] text-white py-6 px-4 md:px-8 text-sm">

@@ -3,7 +3,6 @@ import ParticlesBackground from "../components/ParticlesBackground";
 import axios from "axios";
 import { showMessage } from "../utils/toast";
 import HeroLoader from "../components/HeroLoader";
-import { API_BASE_URL } from "../utils/api";
 import ArtworkCard from "../components/ArtworkCard";
 import ArtworkModal from "../components/ArtworkModal";
 

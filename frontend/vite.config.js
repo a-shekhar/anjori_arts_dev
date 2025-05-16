@@ -7,5 +7,10 @@ export default defineConfig({
     port: 3000, // ✅ Use this port
 
     host: true, // 👈 allow LAN access
+    proxy: {
+      '/api': 'http://localhost:8080',
+      '/logout': 'http://localhost:8080', // 👈 Optional: to ensure it hits backend cleanly in dev
+
+    }
   },
 });

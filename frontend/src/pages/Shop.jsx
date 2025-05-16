@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import ArtworkCard from "../components/ArtworkCard";
 import ArtworkModal from "../components/ArtworkModal";
-import { API_BASE_URL } from "../utils/api";
 
 const ShopPage = () => {
   const artworksPerPage = 20;

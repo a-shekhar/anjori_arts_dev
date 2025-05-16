@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import ImageZoomModal from "../components/ImageZoomModal";
 import CountryCodeDropdown from "../components/CountryCodeDropdown";
-import { API_BASE_URL } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "react-toastify";
 

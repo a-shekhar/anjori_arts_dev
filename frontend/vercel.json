@@ -5,6 +5,10 @@
       "destination": "https://anjori-arts-dev.onrender.com/api/$1"
     },
     {
+      "source": "/logout",
+      "destination": "https://anjori-arts-dev.onrender.com/logout"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }

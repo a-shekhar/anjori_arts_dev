@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import { API_BASE_URL } from '../utils/api';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 

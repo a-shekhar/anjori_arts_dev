@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../utils/api';
 import { toast } from 'react-toastify';
 import { useAuth } from '../components/AuthContext';
 import PaintbrushLoader from '../components/PaintbrushLoader';

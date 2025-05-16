@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { API_BASE_URL } from '../utils/api';
 
 export default function OtpModal({ signupData, onClose, onVerified }) {
   const [otp, setOtp] = useState('');

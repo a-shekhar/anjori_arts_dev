@@ -3,7 +3,7 @@ import { Menu, X } from "lucide-react";
 import ImageZoomModal from "./ImageZoomModal";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileDropdown from './ProfileDropdown';
-import { API_BASE_URL } from "../utils/api";
+
 import { useAuth } from "../components/AuthContext";
 
 const Navbar = () => {

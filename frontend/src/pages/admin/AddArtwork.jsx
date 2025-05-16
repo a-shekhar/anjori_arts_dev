@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { API_BASE_URL } from "../../utils/api";
+
 
 export default function AddArtwork() {
   const fileInputRef = useRef(null);
