@@ -115,6 +115,7 @@ public class AuthController {
             if(userDTO == null){
                 return ResponseEntity.ok().body(CommonResponse.failure("Invalid credentials!!!", null));
             }
+            request.getSession(true); // ensure session is created
             return ResponseEntity.ok().body(CommonResponse.success("Login successful, Redirecting you to profile!!!", userDTO));
         } catch (Exception e) {
             logger.error("Login failed for {}  Error is", dto.getIdentifier(), e);

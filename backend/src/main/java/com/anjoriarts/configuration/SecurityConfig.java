@@ -53,6 +53,8 @@ public class SecurityConfig {
               //  .logout(Customizer.withDefaults())
                 .logout(logout -> logout
                         .logoutUrl("/logout") // default
+                        .deleteCookies("JSESSIONID")  // ✅ Clear the cookie
+                        .invalidateHttpSession(true)  // ✅ Invalidate Redis session
                         .logoutSuccessHandler((request, response, auth) -> {
                             response.setStatus(HttpServletResponse.SC_OK);
                         }))
