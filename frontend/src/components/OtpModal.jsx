@@ -45,7 +45,7 @@ export default function OtpModal({ signupData, onClose, onVerified }) {
         otp: otp,
       };
 
-      const response = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
+      const response = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(fullPayload),
@@ -75,7 +75,7 @@ export default function OtpModal({ signupData, onClose, onVerified }) {
 
   const handleResend = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/resend-otp`, {
+      const response = await fetch('/api/auth/resend-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: signupData.email, firstName: signupData.firstName }),

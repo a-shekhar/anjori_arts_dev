@@ -16,7 +16,7 @@ const ShopPage = () => {
     const fetchArtworks = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/api/artworks?page=${currentPage}&size=${artworksPerPage}`, {
+        const res = await fetch(`/api/artworks?page=${currentPage}&size=${artworksPerPage}`, {
           headers: {
             "Accept": "application/json"
           }

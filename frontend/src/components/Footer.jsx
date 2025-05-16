@@ -7,7 +7,7 @@ const Footer = () => {
      const [activeUsersCount, setActiveUsersCount] = useState(0);
 
      useEffect(() => {
-         fetch(`${API_BASE_URL}/analytics/unique-visitors`)
+         fetch('/analytics/unique-visitors')
            .then(res => res.json())
            .then(data => setVisitorCount(data))
            .catch(err => {
@@ -17,7 +17,7 @@ const Footer = () => {
        }, []);
 
    useEffect(() => {
-            fetch(`${API_BASE_URL}/analytics/active-users`)
+            fetch('/analytics/active-users')
               .then(res => res.json())
               .then(data => setActiveUsersCount(data))
               .catch(err => {

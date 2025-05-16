@@ -27,7 +27,7 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier, password }),
@@ -51,7 +51,7 @@ export default function LoginPage() {
       setMessage(result.message || 'Login successful ✨');
       setMessageType('success');
 
-      const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, {
+      const profileRes = await fetch('/api/user/profile', {
         credentials: 'include',
       });
 

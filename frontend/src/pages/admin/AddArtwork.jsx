@@ -75,7 +75,7 @@ export default function AddArtwork() {
     });
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/artworks/add`, {
+      const response = await fetch('/api/artworks/add', {
         method: "POST",
         body: form,
       });

@@ -25,7 +25,7 @@ const Homepage = () => {
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/artworks/featured?page=0&size=12`);
+        const response = await axios.get('/api/artworks/featured?page=0&size=12');
         const artworkArray = response.data?.content;
 
         if (!Array.isArray(artworkArray)) {

@@ -39,7 +39,7 @@ export default function ProfilePage() {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+      const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/user/profile`, {
+        const res = await fetch('/api/user/profile', {
             credentials: 'include' // 👈 this is required for session to work
         });
 
