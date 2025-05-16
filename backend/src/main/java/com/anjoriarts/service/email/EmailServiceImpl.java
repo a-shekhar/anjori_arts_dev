@@ -38,7 +38,7 @@ public class EmailServiceImpl implements EmailService{
         try{
             String subject = "Welcome to " + Consonants.COMPANY_NAME;
             String htmlContent = this.generateHtmlWelcomeEmailContent(firstName);
-            //this.sendEmail(recipientEmail, subject, htmlContent);
+            this.sendEmail(recipientEmail, subject, htmlContent);
         } catch (Exception e) {
             logger.error("Email could not be sent", e);
         }
