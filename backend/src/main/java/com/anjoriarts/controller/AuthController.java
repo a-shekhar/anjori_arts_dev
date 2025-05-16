@@ -69,18 +69,24 @@ public class AuthController {
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody SignupDTO dto){
         try {
+            logger.info("OTP verification started...");
             boolean res = otpService.verifyOtp(dto.getEmail(), dto.getOtp());
+            logger.info("OTP verification result is..." + res);
             if(res) {
                 String err = this.validateUser(dto);
                 if(!err.isEmpty()){
                     return ResponseEntity.ok(CommonResponse.failure(err, dto));
                 }
+                logger.info("OTP verified successfully...");
                 dto = authService.saveUser(dto);
+                logger.info("User saved successfully...");
                 if(dto.getUserId() ==  null){
                     return ResponseEntity.ok(CommonResponse.failure("Signup failed. Please try again.", null));
                 }
                 emailService.sendWelcomeEmail(dto.getEmail(), dto.getFirstName());
+                logger.info("Email Sent successfully...");
                 appStatsService.trackActiveUser();
+                logger.info("Active user tracked successfully...");
                 return ResponseEntity.ok().body(CommonResponse.success("OTP verified. Redirecting you to Login..", dto));
             }
                 return ResponseEntity.ok().body(CommonResponse.failure("OTP verification failed.", null));
