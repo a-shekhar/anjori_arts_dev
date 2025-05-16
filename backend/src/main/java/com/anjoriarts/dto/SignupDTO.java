@@ -9,6 +9,7 @@ import java.math.BigInteger;
 @Getter
 @Setter
 @ToString
+@Builder
 public class SignupDTO {
     private Long userId;
     private String firstName;

@@ -46,11 +46,7 @@ public class OtpServiceImpl implements OtpService{
             return false;
         }
 
-        if(!otp.equals(otpStore.get(email).otp)){
-            return false;
-        }
-        otpStore.remove(email);
-        return true;
+        return otp.equals(otpStore.get(email).otp);
     }
 
     // class for storing expiration time

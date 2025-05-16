@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link , useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../utils/api';
 import OtpModal from '../components/OtpModal';
+import { useAuth } from '../components/AuthContext';
+import PaintbrushLoader from '../components/PaintbrushLoader';
 
 export default function SignupPage() {
+
+   const { user, setUser, loading  } = useAuth(); // ✅ added user check
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,6 +25,15 @@ export default function SignupPage() {
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+
+  // ✅ Redirect if already logged in
+        useEffect(() => {
+          if (user) {
+            navigate('/profile', { replace: true });
+          }
+        }, [user, navigate]);
+
+     if (loading) return <PaintbrushLoader />;
 
   const handleChange = (e) => {
     const { name, value } = e.target;

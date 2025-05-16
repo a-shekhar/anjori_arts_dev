@@ -3,9 +3,11 @@ package com.anjoriarts.service.user;
 import com.anjoriarts.dto.UserDTO;
 import com.anjoriarts.entity.UserEntity;
 import com.anjoriarts.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -16,10 +18,12 @@ public class UserServiceImpl implements UserService {
 
     Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-    private  final UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -48,6 +52,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDTO updateUserProfile(Principal principal, UserDTO userDTO) {
         Optional<UserEntity> userOpt = userRepository.findByEmail(principal.getName());
 
@@ -64,6 +69,28 @@ public class UserServiceImpl implements UserService {
 
         UserEntity savedUser = userRepository.save(fetchedUser);
 
+        logger.info("User profile updated successfully..");
+
         return this.convertUserEntityToDto(savedUser);
+    }
+
+    @Override
+    @Transactional
+    public UserDTO updatePassword(String identifier, String rawPassword){
+        Optional<UserEntity> userOpt = userRepository.findByEmail(identifier);
+
+        if(userOpt.isEmpty()){
+            throw  new UsernameNotFoundException("User not found");
+        }
+
+        UserEntity fetchedUser = userOpt.get();
+
+        fetchedUser.setPassword(passwordEncoder.encode(rawPassword));
+
+        userRepository.save(fetchedUser);
+
+        logger.info("User reset password successfully...");
+
+        return this.convertUserEntityToDto(fetchedUser);
     }
 }

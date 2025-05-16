@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../utils/api';
 import { useAuth } from '../components/AuthContext';
+import PaintbrushLoader from '../components/PaintbrushLoader';
+
+
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
@@ -9,7 +12,17 @@ export default function LoginPage() {
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState('');
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { user, setUser, loading  } = useAuth(); // ✅ added user check
+
+
+     // ✅ Redirect if already logged in
+      useEffect(() => {
+        if (user) {
+          navigate('/profile', { replace: true });
+        }
+      }, [user, navigate]);
+
+    if (loading) return <PaintbrushLoader />;
 
   const handleLogin = async (e) => {
     e.preventDefault();

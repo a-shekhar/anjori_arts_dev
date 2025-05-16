@@ -11,4 +11,6 @@ public interface UserService {
 
     UserDTO updateUserProfile(Principal principal, UserDTO userDTO);
 
+    UserDTO updatePassword(String identifier, String rawPassword);
+
 }

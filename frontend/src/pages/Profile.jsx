@@ -116,7 +116,7 @@ export default function ProfilePage() {
         <h2 className="text-3xl font-bold text-center text-pink-600">My Profile</h2>
 
         <div className="flex flex-col items-center">
-          <img
+          <ImageZoomModal
             src={previewURL || currentImage}
             alt="Profile Preview"
             className="w-32 h-32 rounded-full object-cover cursor-pointer border-2"

@@ -1,20 +1,22 @@
 package com.anjoriarts.controller;
 
 import com.anjoriarts.common.CommonResponse;
-import com.anjoriarts.dto.LoginDTO;
-import com.anjoriarts.dto.SignupDTO;
-import com.anjoriarts.dto.UserDTO;
+import com.anjoriarts.dto.*;
 import com.anjoriarts.service.*;
 import com.anjoriarts.service.auth.AuthService;
 import com.anjoriarts.service.email.EmailService;
 import com.anjoriarts.service.email.OtpService;
 import com.anjoriarts.service.email.OtpServiceImpl;
+import com.anjoriarts.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -26,13 +28,16 @@ public class AuthController {
     private final EmailService emailService;
     private final AuthService authService;
     private final AppStatsService appStatsService;
+    private final UserService userService;
 
     public AuthController(OtpServiceImpl otpService, EmailService emailService,
-                          AuthService authService, AppStatsService appStatsService){
+                          AuthService authService, AppStatsService appStatsService,
+                          UserService userService){
         this.otpService = otpService;
         this.emailService = emailService;
         this.authService = authService;
         this.appStatsService = appStatsService;
+        this.userService = userService;
     }
 
     @PostMapping("/send-otp")
@@ -41,7 +46,8 @@ public class AuthController {
             String generatedOtp = otpService.generateOTP(signupDTO.getEmail());
 
             if (generatedOtp.length() == 6) {
-                emailService.sendOTP(signupDTO.getEmail(), signupDTO.getFirstName(), "Signup", generatedOtp);
+           //     emailService.sendOTP(signupDTO.getEmail(), signupDTO.getFirstName(), "Signup", generatedOtp);
+                System.out.println("OTP is" + generatedOtp);
                 return ResponseEntity.ok(CommonResponse.success("OTP Sent", generatedOtp));
             } else if (generatedOtp.startsWith("Please try again")) {
                 return ResponseEntity.ok(CommonResponse.success("Please Try again after sometime.", generatedOtp));
@@ -116,5 +122,47 @@ public class AuthController {
                     .body(CommonResponse.failure("Login failed. Please try again..", null));
 
         }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordDTO dto){
+        try {
+            String generatedOtp = otpService.generateOTP(dto.getEmail());
+
+            if (generatedOtp.length() == 6) {
+                //emailService.sendOTP(dto.getEmail(), "User", "Forgot Password", generatedOtp);
+                return ResponseEntity.ok().body(CommonResponse.success("Reset Email OTP sent..", dto.getEmail()));
+            } else if (generatedOtp.startsWith("Please try again")) {
+                return ResponseEntity.ok(CommonResponse.success("Please Try again after sometime.", generatedOtp));
+            } else {
+                return ResponseEntity.badRequest().body(CommonResponse.failure("Unknown OTP generation error", null));
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.ok().body(CommonResponse.failure("Reset password failed..", null));
+        }
+
+    }
+
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO dto){
+        try {
+            boolean res = otpService.verifyOtp(dto.getEmail(), dto.getOtp());
+
+            if (res) {
+                UserDTO userDTO = userService.updatePassword(dto.getEmail(), dto.getNewPassword());
+                return ResponseEntity.ok().body(CommonResponse.success("User password reset successfully..", userDTO));
+            } else {
+                return ResponseEntity.badRequest().body(CommonResponse.failure("OTP verification failed..", null));
+            }
+        } catch (UsernameNotFoundException e){
+            logger.error(e.getMessage());
+            return ResponseEntity.ok().body(CommonResponse.failure("Invalid credentials..", null));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.ok().body(CommonResponse.failure("Reset password failed..", null));
+        }
+
     }
 }
