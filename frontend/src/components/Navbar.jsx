@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Home, ShoppingBag, Brush, Info, User, ShieldCheck } from "lucide-react";
 import ImageZoomModal from "./ImageZoomModal";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileDropdown from './ProfileDropdown';
-
 import { useAuth } from "../components/AuthContext";
 
 const Navbar = () => {
@@ -27,15 +26,14 @@ const Navbar = () => {
 
   if (loading) return null;
 
-  // ✅ Only show Admin link for ROLE_ADMIN
   const isAdmin = user?.role === 'ROLE_ADMIN';
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Shop", href: "/shop" },
-    { name: "Custom Order", href: "/custom-order" },
-    { name: "About Us", href: "/about-us" },
-    ...(isAdmin ? [{ name: "Admin", href: "/admin" }] : []),
+    { name: "Home", href: "/", icon: <Home size={18} /> },
+    { name: "Shop", href: "/shop", icon: <ShoppingBag size={18} /> },
+    { name: "Custom Order", href: "/custom-order", icon: <Brush size={18} /> },
+    ...(isAdmin ? [{ name: "Admin", href: "/admin", icon: <ShieldCheck size={18} /> }] : []),
+    { name: "About Us", href: "/about-us", icon: <Info size={18} /> },
   ];
 
   return (
@@ -69,23 +67,88 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Nav Menu */}
+      {/* Mobile Menu: Slide-In from Right */}
       {mobileMenuOpen && (
-        <div className="md:hidden px-4 pb-4 space-y-3 bg-white shadow transition-all">
-          {navLinks.map(link => (
-            <Link
-              key={link.name}
-              to={link.href}
-              className="block text-gray-700 hover:text-purple-600 font-medium"
-              onClick={() => setMobileMenuOpen(false)} // close on link click
-            >
-              {link.name}
-            </Link>
-          ))}
-          <div onClick={() => setMobileMenuOpen(false)}>
-            <ProfileDropdown user={user} onLogout={handleLogout} />
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-30 z-40"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Sidebar Panel */}
+          <div className="fixed top-0 right-0 w-64 h-full bg-white z-50 shadow-lg transform transition-transform duration-300 ease-in-out translate-x-0">
+            <div className="p-5 space-y-4">
+              {/* Close Button */}
+              <div className="flex justify-end">
+                <button onClick={() => setMobileMenuOpen(false)}>
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Nav Links (except About Us) */}
+              {navLinks.filter(link => link.name !== "About Us").map(link => (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  className="flex items-center gap-2 text-gray-800 font-medium hover:text-purple-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.icon}
+                  {link.name}
+                </Link>
+              ))}
+
+              {/* About Us — Always Last in nav group */}
+              {navLinks.find(link => link.name === "About Us") && (
+                <Link
+                  to="/about-us"
+                  className="flex items-center gap-2 text-gray-800 font-medium hover:text-purple-600 pt-2 border-t border-gray-200"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Info size={18} />
+                  About Us
+                </Link>
+              )}
+
+              {/* ✅ Divider before auth actions */}
+              <hr className="border-t border-gray-300 my-2" />
+
+              {/* Auth Section */}
+              {!user ? (
+                <Link
+                  to="/login"
+                  className="flex items-center gap-2 text-gray-800 font-medium hover:text-purple-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <User size={18} />
+                  Login
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/profile"
+                    className="flex items-center gap-2 text-gray-800 font-medium hover:text-purple-600"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User size={18} />
+                    Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-left flex items-center gap-2 text-red-600 font-medium hover:text-red-700"
+                  >
+                    <X size={18} />
+                    Logout
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </nav>
   );

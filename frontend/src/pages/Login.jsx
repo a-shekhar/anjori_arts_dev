@@ -1,9 +1,7 @@
-import React, { useState, useEffect  } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import PaintbrushLoader from '../components/PaintbrushLoader';
-
-
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
@@ -11,17 +9,16 @@ export default function LoginPage() {
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState('');
   const navigate = useNavigate();
-  const { user, setUser, loading  } = useAuth(); // ✅ added user check
+  const { user, setUser, loading } = useAuth();
 
+  // ✅ Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/profile', { replace: true });
+    }
+  }, [user, navigate]);
 
-     // ✅ Redirect if already logged in
-      useEffect(() => {
-        if (user) {
-          navigate('/profile', { replace: true });
-        }
-      }, [user, navigate]);
-
-    if (loading) return <PaintbrushLoader />;
+  if (loading) return <PaintbrushLoader />;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -35,7 +32,6 @@ export default function LoginPage() {
 
       const result = await response.json();
 
-      // ❌ If login failed — show friendly message & exit
       if (!response.ok || !result.success) {
         setMessage(
           result.message === 'Bad credentials'
@@ -46,21 +42,12 @@ export default function LoginPage() {
         return;
       }
 
-      // ✅ Login successful
+      // ✅ Set user from login response
+      setUser(result.data);
       setMessage(result.message || 'Login successful ✨');
       setMessageType('success');
 
-      const profileRes = await fetch('/api/user/profile', {
-        credentials: 'include',
-      });
-
-      if (profileRes.ok) {
-        const userData = await profileRes.json();
-        setUser(userData.data);
-
-      }
-
-      navigate('/', { replace: true }); // Redirect only on success
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Login error:', error);
       setMessage('Internal Server Issue');
@@ -117,7 +104,9 @@ export default function LoginPage() {
             {message && (
               <p
                 className={`text-sm text-center px-2 py-1 rounded-md ${
-                  messageType === 'success' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
+                  messageType === 'success'
+                    ? 'text-green-600 bg-green-50'
+                    : 'text-red-600 bg-red-50'
                 }`}
               >
                 {message}
