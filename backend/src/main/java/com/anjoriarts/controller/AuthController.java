@@ -46,7 +46,7 @@ public class AuthController {
             String generatedOtp = otpService.generateOTP(signupDTO.getEmail());
 
             if (generatedOtp.length() == 6) {
-           //     emailService.sendOTP(signupDTO.getEmail(), signupDTO.getFirstName(), "Signup", generatedOtp);
+                emailService.sendOTP(signupDTO.getEmail(), signupDTO.getFirstName(), "Signup", generatedOtp);
                 System.out.println("OTP is" + generatedOtp);
                 return ResponseEntity.ok(CommonResponse.success("OTP Sent", generatedOtp));
             } else if (generatedOtp.startsWith("Please try again")) {
