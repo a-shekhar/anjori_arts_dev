@@ -130,7 +130,7 @@ public class AuthController {
             String generatedOtp = otpService.generateOTP(dto.getEmail());
 
             if (generatedOtp.length() == 6) {
-                //emailService.sendOTP(dto.getEmail(), "User", "Forgot Password", generatedOtp);
+                emailService.sendOTP(dto.getEmail(), "User", "Forgot Password", generatedOtp);
                 return ResponseEntity.ok().body(CommonResponse.success("Reset Email OTP sent..", dto.getEmail()));
             } else if (generatedOtp.startsWith("Please try again")) {
                 return ResponseEntity.ok(CommonResponse.success("Please Try again after sometime.", generatedOtp));
