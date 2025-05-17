@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import ImageZoomModal from "../components/ImageZoomModal";
-import CountryCodeDropdown from "../components/CountryCodeDropdown";
+import CountryCodeDropdown from "../components/dropdowns/CountryCodeDropdown";
 import { useNavigate } from 'react-router-dom';
 import { toast } from "react-toastify";
 

@@ -3,6 +3,8 @@ import { Link , useNavigate } from 'react-router-dom';
 import OtpModal from '../components/OtpModal';
 import { useAuth } from '../components/AuthContext';
 import PaintbrushLoader from '../components/PaintbrushLoader';
+import CountryCodeDropdown from "../components/dropdowns/CountryCodeDropdown";
+
 
 export default function SignupPage() {
 
@@ -145,28 +147,19 @@ export default function SignupPage() {
               {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
             </div>
 
-            <div className="flex gap-2">
-              <select
-                name="countryCode"
-                value={formData.countryCode}
-                onChange={handleChange}
-                className="border border-gray-300 rounded-md px-2 py-2 w-24 text-sm"
-              >
-                <option value="+91">🇮🇳 +91</option>
-                <option value="+1">🇺🇸 +1</option>
-                <option value="+44">🇬🇧 +44</option>
-                <option value="+61">🇦🇺 +61</option>
-                <option value="+1">🇨🇦 +1</option>
-              </select>
+            <div className="flex gap-2 w-full">
+               <CountryCodeDropdown value={formData.countryCode} onChange={handleChange} />
+
               <input
                 name="phoneNo"
                 type="tel"
                 value={formData.phoneNo}
                 onChange={handleChange}
                 placeholder="Phone (optional)"
-                className="border border-gray-300 rounded-md px-4 py-2 flex-1"
+                className="border border-gray-300 rounded-md px-4 py-2 w-2/3 flex-1"
               />
             </div>
+
             {errors.phoneNo && <p className="text-sm text-red-500">{errors.phoneNo}</p>}
 
             <div>
