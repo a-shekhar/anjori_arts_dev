@@ -29,21 +29,33 @@ public class AppStatsController {
         }
 
         @GetMapping("/track-visitor")
-        public ResponseEntity<String> trackVisitors(HttpServletRequest request) {
+        public ResponseEntity<?> trackVisitors(HttpServletRequest request) {
             String ip = IpUtil.getClientIp(request);
             appStatsService.trackVisitor(ip);
-            return ResponseEntity.ok("Visitor tracked");
+            return ResponseEntity.ok(CommonResponse.success("Visitor tracked", null));
         }
 
         @GetMapping("/unique-visitors")
-        public ResponseEntity<Long> getUniqueVisitors() {
-            return ResponseEntity.ok(appStatsService.getUniqueVisitorCount());
+        public ResponseEntity<?> getUniqueVisitors() {
+            try {
+                long uniqueVisitors = appStatsService.getUniqueVisitorCount();
+                return ResponseEntity.ok(CommonResponse.success("Unique visitors count fetched", uniqueVisitors));
+            } catch (Exception e) {
+                logger.error("Error fetching unique visitors" + e.getMessage());
+                return ResponseEntity.ok(CommonResponse.success("Unique visitors count fetch failed...", null));
+            }
         }
 
 
         @GetMapping("/active-users")
-        public ResponseEntity<Long> getActiveUsers() {
-            return ResponseEntity.ok(appStatsService.getActiveUsers());
+        public ResponseEntity<?> getActiveUsers() {
+            try {
+                long activeUsers = appStatsService.getActiveUsers();
+                return ResponseEntity.ok(CommonResponse.success("Active Users count fetched", activeUsers));
+            } catch (Exception e) {
+                logger.error("Error fetching active users" + e.getMessage());
+                return ResponseEntity.ok(CommonResponse.success("Unique Active Users count fetch failed...", null));
+            }
         }
 
 }

@@ -49,8 +49,6 @@ public class SecurityConfig {
                         .anyRequest().permitAll()                       // Public access elsewhere
                 )
                 .formLogin(Customizer.withDefaults()) // Default login page
-               // .logout(logout -> logout.logoutUrl("/logout"))
-              //  .logout(Customizer.withDefaults())
                 .logout(logout -> logout
                         .logoutUrl("/logout") // default
                         .deleteCookies("JSESSIONID")  // ✅ Clear the cookie

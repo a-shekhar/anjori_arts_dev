@@ -6,32 +6,32 @@ const Footer = () => {
      const [visitorCount, setVisitorCount] = useState(0);
      const [activeUsersCount, setActiveUsersCount] = useState(0);
 
-     useEffect(() => {
-       fetch('/analytics/unique-visitors')
-         .then(res => {
-           const contentType = res.headers.get('content-type');
-           if (res.ok && contentType && contentType.includes('application/json')) {
-             return res.json();
-           }
-           return 0;
-         })
-         .then(data => setVisitorCount(data))
-         .catch(() => setVisitorCount(0)); // Fully silent
-     }, []);
-
+    useEffect(() => {
+         fetch('/analytics/unique-visitors')
+           .then(res => res.json())
+           .then(result => {
+             if (result && result.success && result.data != null) {
+               setVisitorCount(result.data);
+             } else {
+               setVisitorCount(0);
+             }
+           })
+           .catch(() => setVisitorCount(0));
+       }, []);
 
    useEffect(() => {
      fetch('/analytics/active-users')
-       .then(res => {
-         const contentType = res.headers.get('content-type');
-         if (res.ok && contentType && contentType.includes('application/json')) {
-           return res.json();
+       .then(res => res.json())
+       .then(result => {
+         if (result && result.success && result.data != null) {
+           setActiveUsersCount(result.data);
+         } else {
+           setActiveUsersCount(0);
          }
-         return 0;
        })
-       .then(data => setActiveUsersCount(data))
        .catch(() => setActiveUsersCount(0));
    }, []);
+
 
 
   return (
@@ -89,7 +89,7 @@ const Footer = () => {
         <div className="self-start text-center order-3 md:order-2">
           <p className="mb-1">© 2025 Anjori Arts. All rights reserved.</p>
           <p className="mb-2">
-           🛠️ App <span className="font-semibold">Version: 0.5</span>
+           🛠️ App <span className="font-semibold">Version: 0.6</span>
           </p>
           <div className="space-x-4">
             <a
