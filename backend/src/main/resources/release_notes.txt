@@ -4,3 +4,6 @@
 
 ----- 0.5
 UPDATE arts.users SET role = 'ROLE_ADMIN' WHERE email = 'rajadityasingh31@gmail.com';
+
+----- 0.6
+Add script for custom order

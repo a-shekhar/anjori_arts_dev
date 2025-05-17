@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function NumberOfCopiesDropdown({ value, onChange, name = "copies" }) {
+export default function NumberOfCopiesDropdown({ value, onChange, name = "noOfCopies" }) {
   return (
     <select name={name} value={value} onChange={onChange} className="input">
       <option value="">No. of Copies</option>

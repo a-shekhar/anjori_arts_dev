@@ -1,4 +1,3 @@
-// pages/CustomOrderPage.jsx
 import { useState } from "react";
 import ArtTypeDropdown from "../components/dropdowns/ArtTypeDropdown";
 import BudgetRangeDropdown from "../components/dropdowns/BudgetRangeDropdown";
@@ -6,6 +5,7 @@ import SurfaceDropdown from "../components/dropdowns/SurfaceDropdown";
 import MediumDropdown from "../components/dropdowns/MediumDropdown";
 import NumberOfCopiesDropdown from "../components/dropdowns/NumberOfCopiesDropdown";
 import CountryCodeDropdown from "../components/dropdowns/CountryCodeDropdown";
+import { toast } from "react-toastify";
 
 export default function CustomOrderPage() {
   const [formData, setFormData] = useState({
@@ -18,16 +18,16 @@ export default function CustomOrderPage() {
     surface: "",
     medium: "",
     budget: "",
-    size: "",
-    copies: "",
-    notes: "",
+    preferredSize: "",
+    noOfCopies: "",
+    additionalNotes: "",
     suggestOptions: false,
     referenceImages: []
   });
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
-  const [status, setStatus] = useState({ loading: false, message: "", type: "" });
+  const [status, setStatus] = useState({ loading: false });
 
   const handleChange = (e) => {
     const { name, value, files, type, checked } = e.target;
@@ -37,59 +37,100 @@ export default function CustomOrderPage() {
   };
 
   const validateField = (name, value) => {
-    switch (name) {
-      case "firstName":
-      case "lastName":
-        return value.trim() === "" ? "This field is required" : "";
-      case "email":
-        if (!value.trim()) return "Email is required";
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return !emailRegex.test(value) ? "Invalid email format" : "";
-      case "phoneNo":
-        if (!value.trim()) return "";
-        const phoneRegex = /^[0-9]{10}$/;
-        return !phoneRegex.test(value) ? "Phone must be 10 digits" : "";
-      case "artType":
-      case "budget":
-        return value === "" ? "This field is required" : "";
-      case "copies":
-        return !value || parseInt(value) < 1 ? "Please select at least 1 copy" : "";
-      case "size":
-        return value.trim() === "" ? "Please specify the preferred size" : "";
-      default:
-        return "";
-    }
+    // switch (name) {
+    //   case "firstName":
+    //   case "lastName":
+    //     return value.trim() === "" ? "This field is required" : "";
+    //   case "email":
+    //     if (!value.trim()) return "Email is required";
+    //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //     return !emailRegex.test(value) ? "Invalid email format" : "";
+    //   case "phoneNo":
+    //     if (!value.trim()) return "";
+    //     const phoneRegex = /^[0-9]{10}$/;
+    //     return !phoneRegex.test(value) ? "Phone must be 10 digits" : "";
+    //   case "artType":
+    //   case "budget":
+    //     return value === "" ? "This field is required" : "";
+    //   case "noOfCopies":
+    //     return !value || parseInt(value) < 1 ? "Please select at least 1 copy" : "";
+    //   case "preferredSize":
+    //     return value.trim() === "" ? "Please specify the preferred size" : "";
+    //   default:
+    //     return "";
+    // }
+    return "";
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate form fields
     const newErrors = {};
     for (const field in formData) {
       const error = validateField(field, formData[field]);
       if (error) newErrors[field] = error;
     }
-    setTouched(Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
 
+    // Mark all fields as touched
+    setTouched(
+      Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+    );
+
+    // If errors exist, show them and stop
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      toast.error("Some details are missing or invalid. Please fix them before submitting.");
       return;
     }
 
-    setStatus({ loading: true, message: "", type: "" });
-    setTimeout(() => {
-      setStatus({
-        loading: false,
-        message: "Your custom order has been submitted!",
-        type: "success"
+    // Show loading state
+    setStatus({ loading: true });
+    const loadingToastId = toast.loading("Submitting your custom order...");
+
+    try {
+      const { referenceImages, ...orderDetails } = formData;
+
+      // Build multipart form data
+      const formPayload = new FormData();
+      formPayload.append(
+        "order",
+        new Blob([JSON.stringify(orderDetails)], { type: "application/json" })
+      );
+
+      if (referenceImages && referenceImages.length > 0) {
+        for (const file of referenceImages) {
+          formPayload.append("images", file);
+        }
+      }
+
+      const res = await fetch("/api/custom-order", {
+        method: "POST",
+        body: formPayload,
       });
-    }, 1500);
+
+      const result = await res.json();
+
+      setStatus({ loading: false });
+      toast.dismiss(loadingToastId);
+
+      if (!res.ok) {
+        throw new Error(result.message || "Submission failed");
+      }
+
+      toast.success(result.message || "Your custom order has been submitted!");
+    } catch (err) {
+      setStatus({ loading: false });
+      toast.dismiss();
+
+      const errorMsg = err.message || "Something went wrong while submitting your order.";
+      toast.error(errorMsg);
+    }
   };
 
   return (
     <div className="min-h-screen px-4 py-8 md:px-16 bg-white">
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10 items-start">
-        {/* Header and image */}
         <div className="space-y-4 text-center md:text-left">
           <h1 className="text-3xl font-bold text-gray-800">🎨 Have something in mind?</h1>
           <p className="text-gray-600">Submit a custom order request and we'll bring your imagination to life!</p>
@@ -100,7 +141,6 @@ export default function CustomOrderPage() {
           />
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="bg-gray-50 p-6 rounded-2xl shadow-md space-y-4 w-full">
           <p className="text-sm text-violet-700 font-medium bg-violet-50 p-2 rounded-lg">
             If you're unsure about any field, feel free to leave it blank — we'll connect with you via email or WhatsApp!
@@ -110,11 +150,8 @@ export default function CustomOrderPage() {
             <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} className="input" />
             <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} className="input" />
           </div>
-          {touched.firstName && errors.firstName && <p className="text-sm text-red-600">{errors.firstName}</p>}
-          {touched.lastName && errors.lastName && <p className="text-sm text-red-600">{errors.lastName}</p>}
 
           <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} className="input" />
-          {touched.email && errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
 
           <div className="flex gap-2 w-full">
             <CountryCodeDropdown value={formData.countryCode} onChange={handleChange} />
@@ -127,10 +164,8 @@ export default function CustomOrderPage() {
               className="input flex-1"
             />
           </div>
-          {touched.phoneNo && errors.phoneNo && <p className="text-sm text-red-600">{errors.phoneNo}</p>}
 
           <ArtTypeDropdown value={formData.artType} onChange={handleChange} />
-          {touched.artType && errors.artType && <p className="text-sm text-red-600">{errors.artType}</p>}
 
           <div className="flex items-start space-x-2">
             <input
@@ -149,21 +184,17 @@ export default function CustomOrderPage() {
 
           {!formData.suggestOptions && <SurfaceDropdown value={formData.surface} onChange={handleChange} />}
           {!formData.suggestOptions && <MediumDropdown value={formData.medium} onChange={handleChange} />}
-
           <BudgetRangeDropdown value={formData.budget} onChange={handleChange} />
-          {touched.budget && errors.budget && <p className="text-sm text-red-600">{errors.budget}</p>}
 
           <input
-            name="size"
+            name="preferredSize"
             placeholder="Preferred Size (e.g. 12x16 inches)"
-            value={formData.size}
+            value={formData.preferredSize}
             onChange={handleChange}
             className="input"
           />
-          {touched.size && errors.size && <p className="text-sm text-red-600">{errors.size}</p>}
 
-          <NumberOfCopiesDropdown value={formData.copies} onChange={handleChange} />
-          {touched.copies && errors.copies && <p className="text-sm text-red-600">{errors.copies}</p>}
+          <NumberOfCopiesDropdown value={formData.noOfCopies} onChange={handleChange} name="noOfCopies" />
 
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-700">Upload Images</label>
@@ -181,17 +212,20 @@ export default function CustomOrderPage() {
                 />
               </label>
             </div>
+            <p className="text-xs text-gray-500 italic">
+              Uploading images is optional — but helpful for visualizing your request.
+            </p>
             {formData.referenceImages.length > 0 && (
               <p className="text-xs text-green-600">{formData.referenceImages.length} file(s) selected</p>
             )}
           </div>
 
           <textarea
-            name="notes"
+            name="additionalNotes"
             rows="3"
             placeholder="Additional Notes"
             className="input"
-            value={formData.notes}
+            value={formData.additionalNotes}
             onChange={handleChange}
           />
 
@@ -203,11 +237,11 @@ export default function CustomOrderPage() {
             {status.loading ? "Submitting..." : "Submit Custom Order"}
           </button>
 
-          {status.message && (
-            <p className={`text-sm ${status.type === "success" ? "text-green-600" : "text-red-600"}`}>
-              {status.message}
-            </p>
-          )}
+          <p className="text-xs text-gray-500 text-center mt-2 italic">
+            Want to view your order history and track orders?{" "}
+            <a href="/login" className="font-medium text-violet-600 hover:underline">Login or Sign Up</a> for a more professional experience.
+          </p>
+
         </form>
       </div>
     </div>
