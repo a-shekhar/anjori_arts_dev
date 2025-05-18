@@ -5,6 +5,7 @@ import { showMessage } from "../utils/toast";
 import HeroLoader from "../components/HeroLoader";
 import ArtworkCard from "../components/ArtworkCard";
 import ArtworkModal from "../components/ArtworkModal";
+import NewsTicker from "../components/NewsTicker";
 
 const Homepage = () => {
   const [artworks, setArtworks] = useState([]);
@@ -12,6 +13,11 @@ const Homepage = () => {
   const [showLoader, setShowLoader] = useState(true);
   const [error, setError] = useState("");
   const [selectedArtwork, setSelectedArtwork] = useState(null);
+
+  useEffect(() => {
+    fetch('/analytics/increment-total-visitors', { method: 'POST' });
+  }, []);
+
 
   useEffect(() => {
     // Show the HeroLoader for 3 seconds
@@ -74,6 +80,8 @@ const Homepage = () => {
             </div>
           </div>
         </section>
+
+        <NewsTicker />
 
         {/* Artworks Grid */}
         <section>

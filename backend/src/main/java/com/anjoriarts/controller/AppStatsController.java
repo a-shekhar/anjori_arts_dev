@@ -31,7 +31,7 @@ public class AppStatsController {
         @GetMapping("/track-visitor")
         public ResponseEntity<?> trackVisitors(HttpServletRequest request) {
             String ip = IpUtil.getClientIp(request);
-            appStatsService.trackVisitor(ip);
+            appStatsService.trackUniqueVisitor(ip);
             return ResponseEntity.ok(CommonResponse.success("Visitor tracked", null));
         }
 
@@ -50,11 +50,45 @@ public class AppStatsController {
         @GetMapping("/active-users")
         public ResponseEntity<?> getActiveUsers() {
             try {
-                long activeUsers = appStatsService.getActiveUsers();
+                long activeUsers = appStatsService.getActiveUsersCount();
                 return ResponseEntity.ok(CommonResponse.success("Active Users count fetched", activeUsers));
             } catch (Exception e) {
                 logger.error("Error fetching active users" + e.getMessage());
                 return ResponseEntity.ok(CommonResponse.success("Unique Active Users count fetch failed...", null));
+            }
+        }
+
+
+        @GetMapping("/news/latest")
+        public ResponseEntity<?> getLatestNews() {
+            try {
+                String latestNews = appStatsService.getLatestNews();
+                return ResponseEntity.ok(CommonResponse.success("Latest news fetched", latestNews));
+            } catch (Exception e) {
+                logger.error("Error fetching latest news" + e.getMessage());
+                return ResponseEntity.ok(CommonResponse.success("Latest news fetch failed...", null));
+            }
+        }
+
+        @PostMapping("/increment-total-visitors")
+        public ResponseEntity<?> incrementVisitors() {
+            try {
+                appStatsService.trackVisitorCount();
+                return ResponseEntity.ok(CommonResponse.success("Visitor tracked.", true));
+            }catch (Exception e){
+                logger.error("Visitor track failed..." + e.getMessage());
+                return ResponseEntity.ok(CommonResponse.failure("Visitor track failed...", null));
+            }
+        }
+
+        @GetMapping("/total-visitors")
+        public ResponseEntity<?> getTotalVisitors() {
+            try {
+                long totalVisitors = appStatsService.getVisitorsCount();
+                return ResponseEntity.ok(CommonResponse.success("Visitor tracked.", totalVisitors));
+            }catch (Exception e){
+                logger.error("Visitor track count fetch failed..." + e.getMessage());
+                return ResponseEntity.ok(CommonResponse.failure("Visitor track count fetch failed...", null));
             }
         }
 

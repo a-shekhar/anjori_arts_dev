@@ -16,37 +16,51 @@ public class AppStatsServiceImpl implements AppStatsService{
     @Value("${spring.application.env}") // fallback to "prod"
     private String env;
 
+    private final String anjori = "anjori";
+    private final String visitorsKey =  anjori + "-" + env + ":visitors";
+    private final String activeUsersKey = anjori + "-" + env + ":active-users";
+    private final String uniqueVisitorsKey = anjori + "-" + env + ":unique-visitors";
+
+
     public AppStatsServiceImpl(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
     @Override
-    public void trackVisitor(String ip) {
-        String key = env + ":unique-visitors";
-        redisTemplate.opsForSet().add(key, ip); // Add only if not already present
+    public void trackUniqueVisitor(String ip) {
+        redisTemplate.opsForSet().add(uniqueVisitorsKey, ip); // Add only if not already present
     }
 
     @Override
     public long getUniqueVisitorCount() {
-        String key = env + ":unique-visitors";
-        long visitorCount = redisTemplate.opsForSet().size(key);
-        logger.info("Visitor count for {} is {}", key,visitorCount );
-        return visitorCount;
+        return  redisTemplate.opsForSet().size(uniqueVisitorsKey);
     }
-
 
     @Override
     public void trackActiveUser() {
-        String key = env + ":active-users";
-        redisTemplate.opsForValue().increment(key); // just increase the count
+        redisTemplate.opsForValue().increment(activeUsersKey); // just increase the count
     }
 
     @Override
-    public long getActiveUsers(){
-        String key = env + ":active-users";
-        String value = redisTemplate.opsForValue().get(key);
-        long visitorCount = (value != null) ? Long.parseLong(value) : 0;
-        logger.info("Active user count for {} is {}", key, visitorCount );
-        return visitorCount;
+    public long getActiveUsersCount(){
+        String value = redisTemplate.opsForValue().get(activeUsersKey);
+        return  (value != null) ? Long.parseLong(value) : 0;
+    }
+
+    @Override
+    public String getLatestNews(){
+        String key = env + ":latest-news";
+       return redisTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    public void trackVisitorCount(){
+        redisTemplate.opsForValue().increment(visitorsKey); // just increase the count
+    }
+
+    @Override
+    public long getVisitorsCount(){
+        String value = redisTemplate.opsForValue().get(visitorsKey);
+        return  (value != null) ? Long.parseLong(value) : 0;
     }
 }

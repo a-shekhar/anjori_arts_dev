@@ -6,7 +6,7 @@ const Footer = () => {
      const [visitorCount, setVisitorCount] = useState(0);
      const [activeUsersCount, setActiveUsersCount] = useState(0);
 
-    useEffect(() => {
+    /* useEffect(() => {
          fetch('/analytics/unique-visitors')
            .then(res => res.json())
            .then(result => {
@@ -17,7 +17,20 @@ const Footer = () => {
              }
            })
            .catch(() => setVisitorCount(0));
-       }, []);
+       }, []); */
+
+   useEffect(() => {
+            fetch('/analytics/total-visitors')
+              .then(res => res.json())
+              .then(result => {
+                if (result && result.success && result.data != null) {
+                  setVisitorCount(result.data);
+                } else {
+                  setVisitorCount(0);
+                }
+              })
+              .catch(() => setVisitorCount(0));
+          }, []);
 
    useEffect(() => {
      fetch('/analytics/active-users')
@@ -42,7 +55,7 @@ const Footer = () => {
         <div className="self-start text-center md:text-right space-y-2 order-1 md:order-3">
           <p className="flex items-center justify-center md:justify-end gap-2 text-purple-300">
             <Footprints size={16} className="animate-pulse" />
-            Unique Visitors:  {visitorCount !== null ? visitorCount : 0}
+             Visitors:  {visitorCount !== null ? visitorCount : 0}
           </p>
           <p className="flex items-center justify-center md:justify-end gap-2 text-purple-300">
             <Users size={16} className="animate-bounce" />
