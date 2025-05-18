@@ -32,7 +32,19 @@ public class CloudinaryServiceImpl  implements CloudinaryService{
             logger.info("File uploaded successfully ===> " + uploadResult);
             return uploadResult.get("secure_url").toString();
         }catch (IOException e){
-            logger.error("File could not be uploaded");
+            logger.error("File could not be uploaded", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String uploadImagesWithConfig(MultipartFile file, Map<String, Object> config) {
+        try {
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), config);
+            logger.info("File uploaded successfully ===> " + uploadResult);
+            return uploadResult.get("secure_url").toString();
+        }catch (IOException e){
+            logger.error("File could not be uploaded", e);
             throw new RuntimeException(e);
         }
     }

@@ -14,8 +14,7 @@ export default function ProfilePage() {
   const [currentImage, setCurrentImage] = useState('/images/default-profile.png');
   const [newImage, setNewImage] = useState(null);
   const [previewURL, setPreviewURL] = useState(null);
-  const [showZoom, setShowZoom] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -28,86 +27,101 @@ export default function ProfilePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const payload = {
+    const profileData = {
       username,
       firstName,
       lastName,
       countryCode,
       phoneNo,
-      profileImageUrl: previewURL || currentImage,
     };
 
+    const formData = new FormData();
+    formData.append(
+      "profile",
+      new Blob([JSON.stringify(profileData)], { type: "application/json" })
+    );
+
+    if (newImage) {
+      formData.append("profileImage", newImage);
+    }
+
     try {
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // 👈 this is required for session to work
-        body: JSON.stringify(payload),
+      const response = await fetch("/api/user/profile", {
+        method: "PUT",
+        credentials: "include",
+        body: formData,
       });
+
       const result = await response.json();
-      if(response.ok && result.success){
-        toast.success(result.message || 'Profile updated successfully.');
-      }else{
-          toast.error(result.message || 'Profile update failed.');
+      if (response.ok && result.success) {
+        toast.success(result.message || "Profile updated successfully.");
+        const newImageUrl = result.data?.profileImageUrl;
+        if (newImageUrl) {
+          setCurrentImage(newImageUrl);
+        }
+        setNewImage(null);
+        setPreviewURL(null);
+      } else {
+        toast.error(result.message || "Profile update failed.");
       }
     } catch (err) {
       console.error(err);
-      toast.error('Internal Server Issue');
+      toast.error("Internal Server Issue");
+    }
+  };
+
+  const fetchProfile = async () => {
+    try {
+      const res = await fetch('/api/user/profile', {
+        credentials: 'include'
+      });
+
+      const contentType = res.headers.get('content-type');
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          console.warn('Unauthorized → redirecting to login');
+          navigate('/login');
+          return;
+        }
+        throw new Error(`Server error: ${res.status}`);
+      }
+
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Expected JSON but received non-JSON response');
+      }
+
+      const result = await res.json();
+      const data = result.data;
+
+      setUsername(data.username || '');
+      setFirstName(data.firstName || '');
+      setLastName(data.lastName || '');
+      setCountryCode(data.countryCode || '+91');
+      setPhoneNo(data.phoneNo || '');
+      setEmail(data.email || '');
+      setCurrentImage(data.profileImageUrl || '/images/default-profile.png'); // 🔥 Make sure backend sends this
+    } catch (err) {
+      console.error(err);
     }
   };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch('/api/user/profile', {
-            credentials: 'include' // 👈 this is required for session to work
-        });
-
-        const contentType = res.headers.get('content-type');
-
-        if (!res.ok) {
-          if (res.status === 401 || res.status === 403) {
-            console.warn('Unauthorized → redirecting to login');
-            navigate('/login');
-            return;
-          }
-          throw new Error(`Server error: ${res.status}`);
-        }
-
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Expected JSON but received non-JSON response');
-        }
-
-        const result = await res.json();
-        const data = result.data;
-
-
-
-        setUsername(data.username || '');
-        setFirstName(data.firstName || '');
-        setLastName(data.lastName || '');
-        setCountryCode(data.countryCode || '+91');
-        setPhoneNo(data.phoneNo || '');
-        setEmail(data.email || '');
-        setCurrentImage(data.profileImageUrl || '/images/default-profile.png');
-      } catch (err) {
-        console.error(err);
-      }
-    };
     fetchProfile();
   }, []);
 
   return (
     <div className="flex flex-col lg:flex-row max-w-6xl mx-auto p-6 gap-8">
-      {/* Left: Artistic Side */}
+      {/* Left: Artistic Inspiration Image */}
       <div className="hidden lg:flex flex-col items-center justify-center w-1/2 space-y-6">
         <img
           src="/images/Profile3.png"
-          alt="Art"
-          className="w-full max-w-sm rounded-xl shadow-md object-contain"
+          onError={(e) => { e.target.src = "/images/default-art.png" }}
+          alt="Inspiration"
+          className="w-full max-w-sm rounded-xl shadow-lg border border-pink-100 object-contain"
         />
+        <p className="text-center text-gray-500 text-sm italic">
+          Creativity is the soul's most sincere expression.
+        </p>
       </div>
 
       {/* Right: Profile Form */}
@@ -118,13 +132,13 @@ export default function ProfilePage() {
           <ImageZoomModal
             src={previewURL || currentImage}
             alt="Profile Preview"
-            className="w-32 h-32 rounded-full object-cover cursor-pointer border-2"
-            onClick={() => setShowZoom(true)}
+            className="w-32 h-32 rounded-full object-cover cursor-pointer border-2 hover:scale-105 transition-all duration-300"
           />
           <label className="mt-2 cursor-pointer">
             <span className="text-sm text-pink-500 underline">Change Photo</span>
             <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
           </label>
+          <small className="text-gray-400 text-xs">Max 2MB • JPG or PNG</small>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -193,13 +207,6 @@ export default function ProfilePage() {
             Update Profile
           </button>
         </form>
-
-        {showZoom && (previewURL || currentImage) && (
-          <ImageZoomModal
-            imageUrl={previewURL || currentImage}
-            onClose={() => setShowZoom(false)}
-          />
-        )}
       </div>
     </div>
   );

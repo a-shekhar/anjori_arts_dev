@@ -17,7 +17,7 @@ public class Consonants {
     // cloudinary path
     public static final String ARTWORKS_PATH = "Anjori/arts/%s/artworks/%s"; //first s is env, 2nd s is slug
     public static final String CUSTOM_ORDERS_PATH = "Anjori/arts/%s/custom-orders/%s"; //first s is env, 2nd s is custom order id
-    public static final String USER_PROFILE_IMAGES_PATH = "Anjori/arts/%s/users/%s"; //first s is env, 2nd s is user id
+    public static final String USER_PROFILE_IMAGES_PATH = "Anjori/arts/%s/users/%s/profile"; //first s is env, 2nd s is user id
 
     // redis keys
     public static final String REDIS_VISITORS_KEY =  "anjori-%s:visitors";

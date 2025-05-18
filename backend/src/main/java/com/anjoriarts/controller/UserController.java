@@ -1,13 +1,16 @@
 package com.anjoriarts.controller;
 
 import com.anjoriarts.common.CommonResponse;
+import com.anjoriarts.common.Consonants;
 import com.anjoriarts.dto.UserDTO;
 import com.anjoriarts.service.user.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 
@@ -41,16 +44,18 @@ public class UserController {
 
 
     @PutMapping("/profile")
-    public ResponseEntity<?> updateUserProfile(Principal principal, @RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> updateUserProfile(@RequestPart("profile") UserDTO userDTO,
+                                               @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+                                               Principal principal) {
         try {
             if (principal == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(CommonResponse.failure("User not found!!!", null));
             }
-            userDTO = userService.updateUserProfile(principal, userDTO);
+            userDTO = userService.updateUserProfile(principal, userDTO, profileImage);
             return ResponseEntity.ok().body(CommonResponse.success("User profile updated", userDTO));
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(CommonResponse.failure("User not found!!!", null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(CommonResponse.failure(Consonants.INTERNAL_SERVER_ERROR, null));
         }
     }
 }

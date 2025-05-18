@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LogOut, User, Lock, ChevronDown } from 'lucide-react';
+import ImageZoomModal from "../components/ImageZoomModal";
 
 export default function ProfileDropdown({ user, onLogout }) {
   const [open, setOpen] = useState(false);
@@ -24,10 +25,10 @@ export default function ProfileDropdown({ user, onLogout }) {
         onClick={toggleDropdown}
         className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100 transition border border-gray-200"
       >
-        <img
+        <ImageZoomModal
           src={user.profileImageUrl || '/images/default-profile.png'} // fallback if no profile image
           alt="Profile"
-          className="w-7 h-7 rounded-full object-cover"
+          className="w-9 h-9 rounded-full object-cover border cursor-pointer"
         />
         <span className="text-sm text-gray-800 font-medium">Hi, {user.firstName}</span>
         <ChevronDown size={16} className="text-gray-500" />

@@ -19,7 +19,6 @@ public class UserDTO {
     private BigInteger phoneNo;
     private String username;
     private String password;
-    private String publicImageUrl;
+    private String profileImageUrl;
     private String role;
-    private MultipartFile image;
 }
