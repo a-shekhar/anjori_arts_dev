@@ -14,6 +14,10 @@ const Homepage = () => {
   const [error, setError] = useState("");
   const [selectedArtwork, setSelectedArtwork] = useState(null);
 
+   useEffect(() => {
+       fetch('/analytics/track-visitor', { method: 'POST' });
+     }, []);
+
   useEffect(() => {
     fetch('/analytics/increment-total-visitors', { method: 'POST' });
   }, []);

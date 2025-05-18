@@ -28,11 +28,16 @@ public class AppStatsController {
             this.appStatsService = appStatsService;
         }
 
-        @GetMapping("/track-visitor")
+        @PostMapping("/track-visitor")
         public ResponseEntity<?> trackVisitors(HttpServletRequest request) {
-            String ip = IpUtil.getClientIp(request);
-            appStatsService.trackUniqueVisitor(ip);
-            return ResponseEntity.ok(CommonResponse.success("Visitor tracked", null));
+            try {
+                String ip = IpUtil.getClientIp(request);
+                appStatsService.trackUniqueVisitor(ip);
+                return ResponseEntity.ok(CommonResponse.success("Visitor tracked", true));
+            }catch (Exception e){
+                logger.error("Visitor track error...", e);
+                return ResponseEntity.ok(CommonResponse.failure("Visitor track error...", false));
+            }
         }
 
         @GetMapping("/unique-visitors")
