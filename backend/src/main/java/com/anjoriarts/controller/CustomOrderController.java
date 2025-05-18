@@ -4,6 +4,7 @@ import com.anjoriarts.common.CommonResponse;
 import com.anjoriarts.common.Consonants;
 import com.anjoriarts.dto.CustomOrderRequestDTO;
 import com.anjoriarts.dto.CustomOrderResponseDTO;
+import com.anjoriarts.service.email.EmailService;
 import com.anjoriarts.service.orders.CustomOrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +20,11 @@ public class CustomOrderController {
     Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     private final CustomOrderService customOrderService;
+    private final EmailService emailService;
 
-    public CustomOrderController(CustomOrderService customOrderService){
+    public CustomOrderController(CustomOrderService customOrderService, EmailService emailService){
         this.customOrderService = customOrderService;
+        this.emailService = emailService;
     }
 
     @PostMapping("/custom-order")
@@ -37,6 +40,9 @@ public class CustomOrderController {
           if(savedCustomOrder.getCustomOrderId() == null){
                 return ResponseEntity.ok().body(CommonResponse.failure("Custom Order creation failed. Please try again..", null));
             }
+            // add emails to both artist and users
+            this.emailService.sendCustomOrderArtistConfirmation(savedCustomOrder);
+            this.emailService.sendCustomOrderUserConfirmation(savedCustomOrder);
             return ResponseEntity.ok().body(CommonResponse.success("Custom order created.", null));
         } catch (Exception e) {
             logger.error(e.getMessage());

@@ -1,6 +1,7 @@
 package com.anjoriarts.service.email;
 
 import com.anjoriarts.common.Consonants;
+import com.anjoriarts.dto.CustomOrderResponseDTO;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +35,40 @@ public class EmailServiceImpl implements EmailService{
     }
 
     @Override
+    @Async
     public void sendWelcomeEmail(String recipientEmail, String firstName) {
         try{
             String subject = "Welcome to " + Consonants.COMPANY_NAME;
             String htmlContent = this.generateHtmlWelcomeEmailContent(firstName);
             this.sendEmail(recipientEmail, subject, htmlContent);
+        } catch (Exception e) {
+            logger.error("Email could not be sent", e);
+        }
+    }
+
+    @Override
+    @Async
+    public void sendCustomOrderArtistConfirmation(CustomOrderResponseDTO order){
+        try{
+            String subject = "🎨 New Custom Order Received – ID #" + order.getCustomOrderId() + " | " +
+                    Consonants.COMPANY_NAME;
+            String htmlContent = this.generateCustomOrderArtistConfirmation(order);
+            this.sendEmail(Consonants.COMPANY_EMAIL_1, subject, htmlContent);
+        } catch (Exception e) {
+            logger.error("Email could not be sent", e);
+        }
+    }
+
+
+
+    @Override
+    @Async
+    public void sendCustomOrderUserConfirmation(CustomOrderResponseDTO order){
+        try{
+            String subject = "🎉 Your Custom Order Has Been Received – ID #" + order.getCustomOrderId() + " | " +
+                    Consonants.COMPANY_NAME;
+            String htmlContent = this.generateCustomOrderUserConfirmation(order);
+            this.sendEmail(order.getEmail(), subject, htmlContent);
         } catch (Exception e) {
             logger.error("Email could not be sent", e);
         }
@@ -165,4 +195,173 @@ public class EmailServiceImpl implements EmailService{
             """.formatted(firstName, Consonants.COMPANY_NAME);
         return htmlContent;
     }
+
+    private String generateCustomOrderUserConfirmation(CustomOrderResponseDTO order){
+        String htmlContent = """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+              <style>
+                body {
+                  margin: 0;
+                  padding: 0;
+                  background-color: #f9f4f0;
+                  font-family: 'Segoe UI', sans-serif;
+                }
+              </style>
+            </head>
+            <body>
+              <table width="100%%" style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <tr style="background: linear-gradient(to right, #ffecd2, #fcb69f);">
+                  <td style="padding: 30px; text-align: center;">
+                    <h2 style="margin: 0; font-size: 24px; color: #3b0a45;">🎨 Custom Order Received</h2>
+                    <p style="font-size: 14px; color: #6b4c5f;">Order ID: <strong>#%s</strong></p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 30px;">
+                    <p style="font-size: 16px; color: #333;">Hello <strong>%s</strong>,</p>
+                    <p style="font-size: 16px; color: #555;">
+                      We're excited to start working on your custom artwork request! Here's a quick summary of your order:
+                    </p>
+            
+                    <table style="width: 100%%; font-size: 15px; color: #444; margin: 20px 0;">
+                      <tr><td><strong>Art Type:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>Budget:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>Preferred Size:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>No. of Copies:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>Surface & Medium:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>Notes:</strong></td><td>%s</td></tr>
+                    </table>
+            
+                    <p style="font-size: 15px; color: #666;">
+                      We'll be in touch shortly via email or WhatsApp to discuss further.
+                    </p>
+            
+                    <div style="text-align: center; margin: 30px 0;">
+                      <a href="https://anjori-arts.vercel.app/" target="_blank"
+                        style="background: #ff4d6d; color: white; padding: 12px 24px; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 16px;">
+                        Visit Anjori Arts
+                      </a>
+                    </div>
+            
+                    <p style="font-size: 14px; color: #888;">
+                      If you have any updates or questions, just reply to this email.
+                    </p>
+            
+                    <p style="font-size: 15px; color: #444;">With creativity and care,</p>
+                    <p style="font-size: 16px; color: #3b0a45;"><strong>The Anjori Team</strong></p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #f0eaf4; padding: 20px; text-align: center; font-size: 12px; color: #777;">
+                    © 2025 Anjori Arts • Made with ❤️ in India
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+            """.formatted(
+                order.getCustomOrderId(),
+                order.getFirstName(),
+                order.getArtType(),
+                order.getBudget(),
+                order.getPreferredSize(),
+                order.getNoOfCopies(),
+                order.isSuggestOptions() ? "Artist will suggest" : order.getSurface() + " + " + order.getMedium(),
+                order.getAdditionalNotes() == null || order.getAdditionalNotes().isBlank() ? "None" : order.getAdditionalNotes()
+        );
+        return htmlContent;
+    }
+
+    private String generateCustomOrderArtistConfirmation(CustomOrderResponseDTO order) {
+        String htmlContent = """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+              <style>
+                body {
+                  margin: 0;
+                  padding: 0;
+                  background-color: #f9f4f0;
+                  font-family: 'Segoe UI', sans-serif;
+                }
+              </style>
+            </head>
+            <body>
+              <table width="100%%" style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <tr style="background: linear-gradient(to right, #cfd9df, #e2ebf0);">
+                  <td style="padding: 30px; text-align: center;">
+                    <h2 style="margin: 0; font-size: 24px; color: #3b0a45;">🎨 New Custom Order Received</h2>
+                    <p style="font-size: 14px; color: #6b4c5f;">Order ID: <strong>#%s</strong></p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 30px;">
+                    <p style="font-size: 16px; color: #333;">Dear <strong>%s</strong>,</p>
+            
+                    <p style="font-size: 16px; color: #555;">
+                      A new custom artwork request has just arrived. Here are the full details:
+                    </p>
+            
+                    <table style="width: 100%%; font-size: 15px; color: #444; margin: 20px 0;">
+                      <tr><td><strong>Customer:</strong></td><td>%s %s</td></tr>
+                      <tr><td><strong>Email:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>Phone:</strong></td><td>%s %s</td></tr>
+                      <tr><td><strong>Art Type:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>Budget:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>Preferred Size:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>No. of Copies:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>Surface & Medium:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>Notes:</strong></td><td>%s</td></tr>
+                      <tr><td><strong>Reference Images:</strong></td><td>%d uploaded</td></tr>
+                    </table>
+            
+                    <p style="font-size: 14px; color: #555;">
+                      You can now view or start working on this request from the admin panel.
+                    </p>
+            
+                    <div style="text-align: center; margin: 30px 0;">
+                      <a href="https://anjori-arts.vercel.app/admin/custom-orders" target="_blank"
+                        style="background: #3b0a45; color: white; padding: 12px 24px; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 16px;">
+                        View All Orders
+                      </a>
+                    </div>
+            
+                    <p style="font-size: 15px; color: #444;">— Anjori Arts System</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #f0eaf4; padding: 20px; text-align: center; font-size: 12px; color: #777;">
+                    © 2025 Anjori Arts • Made with ❤️ in India
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+            """.formatted(
+                order.getCustomOrderId(),                                 // Order ID
+                "Teddy",                                 // Replace this with actual artist name if available
+                order.getFirstName(), order.getLastName(),     // Customer name
+                order.getEmail(),                              // Customer email
+                order.getCountryCode(), order.getPhoneNo(),    // Phone
+                order.getArtType(),                            // Art Type
+                order.getBudget(),                             // Budget
+                order.getPreferredSize(),                      // Size
+                order.getNoOfCopies(),                         // Copies
+                order.isSuggestOptions()
+                        ? "Artist to suggest"
+                        : order.getSurface() + " + " + order.getMedium(), // Surface + Medium
+                order.getAdditionalNotes() == null || order.getAdditionalNotes().isBlank()
+                        ? "None"
+                        : order.getAdditionalNotes(),              // Notes
+                order.getImageCount()                                      // Image count
+        );
+        return htmlContent;
+    }
+
 }

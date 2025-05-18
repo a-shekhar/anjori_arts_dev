@@ -99,14 +99,17 @@ public class CustomOrderServiceImpl implements CustomOrderService{
                         .firstName(entity.getFirstName())
                         .lastName(entity.getLastName())
                         .email(entity.getEmail())
+                        .countryCode(entity.getCountryCode())
                         .phoneNo(entity.getPhoneNo())
                         .artType(entity.getArtType())
+                        .suggestOptions(entity.isSuggestOptions())
                         .surface(entity.getSurface())
                         .medium(entity.getMedium())
                         .budget(entity.getBudget())
                         .preferredSize(entity.getPreferredSize())
                         .noOfCopies(entity.getNoOfCopies())
                         .additionalNotes(entity.getAdditionalNotes())
+                        .imageCount(entity.getImages().size())
                         .build();
     }
 }

@@ -25,4 +25,6 @@ public class CustomOrderResponseDTO {
     private String noOfCopies;
     private String additionalNotes;
     private List<String> imagesUrls;
+    private boolean suggestOptions;
+    private int imageCount;
 }
