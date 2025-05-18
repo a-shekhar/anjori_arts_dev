@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ArtTypeDropdown from "../components/dropdowns/ArtTypeDropdown";
 import BudgetRangeDropdown from "../components/dropdowns/BudgetRangeDropdown";
 import SurfaceDropdown from "../components/dropdowns/SurfaceDropdown";
@@ -28,75 +28,99 @@ export default function CustomOrderPage() {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [status, setStatus] = useState({ loading: false });
+  const [imagePreviews, setImagePreviews] = useState([]);
+
+  useEffect(() => {
+    if (formData.referenceImages && formData.referenceImages.length > 0) {
+      const previews = formData.referenceImages.map((file) => ({
+        file,
+        url: URL.createObjectURL(file)
+      }));
+      setImagePreviews(previews);
+
+      return () => previews.forEach((p) => URL.revokeObjectURL(p.url));
+    } else {
+      setImagePreviews([]);
+    }
+  }, [formData.referenceImages]);
+
+  const handleRemoveImage = (indexToRemove) => {
+    const updatedFiles = Array.from(formData.referenceImages).filter(
+      (_, index) => index !== indexToRemove
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      referenceImages: updatedFiles
+    }));
+    setTouched((prev) => ({ ...prev, referenceImages: true }));
+  };
 
   const handleChange = (e) => {
     const { name, value, files, type, checked } = e.target;
-    const updatedValue = type === "checkbox" ? checked : name === "referenceImages" ? files : value;
+
+    if (name === "suggestOptions" && checked) {
+      setFormData((prev) => ({
+        ...prev,
+        suggestOptions: true,
+        surface: "",
+        medium: ""
+      }));
+      setTouched((prev) => ({ ...prev, suggestOptions: true }));
+      return;
+    }
+
+    if (name === "referenceImages") {
+      const existingFiles = formData.referenceImages || [];
+      const newFiles = Array.from(files);
+      const uniqueFiles = newFiles.filter(
+        (newFile) =>
+          !existingFiles.some(
+            (existing) =>
+              existing.name === newFile.name &&
+              existing.size === newFile.size &&
+              existing.lastModified === newFile.lastModified
+          )
+      );
+
+      setFormData((prev) => ({
+        ...prev,
+        referenceImages: [...existingFiles, ...uniqueFiles]
+      }));
+      setTouched((prev) => ({ ...prev, referenceImages: true }));
+      return;
+    }
+
+    const updatedValue = type === "checkbox" ? checked : value;
     setFormData((prev) => ({ ...prev, [name]: updatedValue }));
     setTouched((prev) => ({ ...prev, [name]: true }));
-  };
-
-  const validateField = (name, value) => {
-    // switch (name) {
-    //   case "firstName":
-    //   case "lastName":
-    //     return value.trim() === "" ? "This field is required" : "";
-    //   case "email":
-    //     if (!value.trim()) return "Email is required";
-    //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    //     return !emailRegex.test(value) ? "Invalid email format" : "";
-    //   case "phoneNo":
-    //     if (!value.trim()) return "";
-    //     const phoneRegex = /^[0-9]{10}$/;
-    //     return !phoneRegex.test(value) ? "Phone must be 10 digits" : "";
-    //   case "artType":
-    //   case "budget":
-    //     return value === "" ? "This field is required" : "";
-    //   case "noOfCopies":
-    //     return !value || parseInt(value) < 1 ? "Please select at least 1 copy" : "";
-    //   case "preferredSize":
-    //     return value.trim() === "" ? "Please specify the preferred size" : "";
-    //   default:
-    //     return "";
-    // }
-    return "";
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate form fields
     const newErrors = {};
     for (const field in formData) {
       const error = validateField(field, formData[field]);
       if (error) newErrors[field] = error;
     }
+    setErrors(newErrors);
 
-    // Mark all fields as touched
-    setTouched(
-      Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {})
-    );
+    setTouched(Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
 
-    // If errors exist, show them and stop
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       toast.error("Some details are missing or invalid. Please fix them before submitting.");
       return;
     }
 
-    // Show loading state
     setStatus({ loading: true });
     const loadingToastId = toast.loading("Submitting your custom order...");
 
     try {
       const { referenceImages, ...orderDetails } = formData;
-
-      // Build multipart form data
       const formPayload = new FormData();
-      formPayload.append(
-        "order",
-        new Blob([JSON.stringify(orderDetails)], { type: "application/json" })
-      );
+      formPayload.append("order", new Blob([JSON.stringify(orderDetails)], { type: "application/json" }));
 
       if (referenceImages && referenceImages.length > 0) {
         for (const file of referenceImages) {
@@ -114,7 +138,7 @@ export default function CustomOrderPage() {
       setStatus({ loading: false });
       toast.dismiss(loadingToastId);
 
-      if (!res.ok) {
+      if (!res.ok || !result.success) {
         throw new Error(result.message || "Submission failed");
       }
 
@@ -122,9 +146,34 @@ export default function CustomOrderPage() {
     } catch (err) {
       setStatus({ loading: false });
       toast.dismiss();
-
       const errorMsg = err.message || "Something went wrong while submitting your order.";
       toast.error(errorMsg);
+    }
+  };
+
+  const validateField = (name, value) => {
+     switch (name) {
+      case "firstName":
+        return value.trim() === "" ? "First Name is required" : "";
+      case "lastName":
+        return value.trim() === "" ? "Last Name is required" : "";
+      case "email":
+        if (!value.trim()) return "Email is required";
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return !emailRegex.test(value) ? "Invalid email format" : "";
+      case "phoneNo":
+        if (!value.trim()) return "";
+        const phoneRegex = /^[0-9]{10}$/;
+        return !phoneRegex.test(value) ? "Phone must be 10 digits" : "";
+      case "artType":
+      case "budget":
+        return value === "" ? "This field is required" : "";
+      case "noOfCopies":
+        return !value || parseInt(value) < 1 ? "Please select at least 1 copy" : "";
+      case "preferredSize":
+        return value.trim() === "" ? "Please specify the preferred size" : "";
+      default:
+        return "";
     }
   };
 
@@ -147,25 +196,69 @@ export default function CustomOrderPage() {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} className="input" />
-            <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} className="input" />
+            <div>
+              <input
+                name="firstName"
+                placeholder="First Name"
+                value={formData.firstName}
+                onChange={handleChange}
+                className="input"
+              />
+              {touched.firstName && errors.firstName && (
+                <p className="text-sm text-red-600">{errors.firstName}</p>
+              )}
+            </div>
+            <div>
+              <input
+                name="lastName"
+                placeholder="Last Name"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="input"
+              />
+              {touched.lastName && errors.lastName && (
+                <p className="text-sm text-red-600">{errors.lastName}</p>
+              )}
+            </div>
           </div>
 
-          <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} className="input" />
+          <div>
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              className="input"
+            />
+            {touched.email && errors.email && (
+              <p className="text-sm text-red-600">{errors.email}</p>
+            )}
+          </div>
 
           <div className="flex gap-2 w-full">
             <CountryCodeDropdown value={formData.countryCode} onChange={handleChange} />
-            <input
-              name="phoneNo"
-              type="tel"
-              placeholder="Phone (optional)"
-              value={formData.phoneNo}
-              onChange={handleChange}
-              className="input flex-1"
-            />
+            <div className="flex-1">
+              <input
+                name="phoneNo"
+                type="tel"
+                placeholder="Phone (optional)"
+                value={formData.phoneNo}
+                onChange={handleChange}
+                className="input w-full"
+              />
+              {touched.phoneNo && errors.phoneNo && (
+                <p className="text-sm text-red-600">{errors.phoneNo}</p>
+              )}
+            </div>
           </div>
 
-          <ArtTypeDropdown value={formData.artType} onChange={handleChange} />
+          <div>
+            <ArtTypeDropdown value={formData.artType} onChange={handleChange} />
+            {touched.artType && errors.artType && (
+              <p className="text-sm text-red-600">{errors.artType}</p>
+            )}
+          </div>
 
           <div className="flex items-start space-x-2">
             <input
@@ -182,19 +275,49 @@ export default function CustomOrderPage() {
             </label>
           </div>
 
-          {!formData.suggestOptions && <SurfaceDropdown value={formData.surface} onChange={handleChange} />}
-          {!formData.suggestOptions && <MediumDropdown value={formData.medium} onChange={handleChange} />}
-          <BudgetRangeDropdown value={formData.budget} onChange={handleChange} />
+          {!formData.suggestOptions && (
+            <>
+              <div>
+                <SurfaceDropdown value={formData.surface} onChange={handleChange} />
+                {touched.surface && errors.surface && (
+                  <p className="text-sm text-red-600">{errors.surface}</p>
+                )}
+              </div>
+              <div>
+                <MediumDropdown value={formData.medium} onChange={handleChange} />
+                {touched.medium && errors.medium && (
+                  <p className="text-sm text-red-600">{errors.medium}</p>
+                )}
+              </div>
+            </>
+          )}
 
-          <input
-            name="preferredSize"
-            placeholder="Preferred Size (e.g. 12x16 inches)"
-            value={formData.preferredSize}
-            onChange={handleChange}
-            className="input"
-          />
+          <div>
+            <BudgetRangeDropdown value={formData.budget} onChange={handleChange} />
+            {touched.budget && errors.budget && (
+              <p className="text-sm text-red-600">{errors.budget}</p>
+            )}
+          </div>
 
-          <NumberOfCopiesDropdown value={formData.noOfCopies} onChange={handleChange} name="noOfCopies" />
+          <div>
+            <input
+              name="preferredSize"
+              placeholder="Preferred Size (e.g. 12x16 inches)"
+              value={formData.preferredSize}
+              onChange={handleChange}
+              className="input"
+            />
+            {touched.preferredSize && errors.preferredSize && (
+              <p className="text-sm text-red-600">{errors.preferredSize}</p>
+            )}
+          </div>
+
+          <div>
+            <NumberOfCopiesDropdown value={formData.noOfCopies} onChange={handleChange} name="noOfCopies" />
+            {touched.noOfCopies && errors.noOfCopies && (
+              <p className="text-sm text-red-600">{errors.noOfCopies}</p>
+            )}
+          </div>
 
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-700">Upload Images</label>
@@ -218,16 +341,45 @@ export default function CustomOrderPage() {
             {formData.referenceImages.length > 0 && (
               <p className="text-xs text-green-600">{formData.referenceImages.length} file(s) selected</p>
             )}
+            {touched.referenceImages && errors.referenceImages && (
+              <p className="text-sm text-red-600">{errors.referenceImages}</p>
+            )}
+
+            {imagePreviews.length > 0 && (
+              <div className="flex flex-wrap gap-3 mt-2">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={preview.url}
+                      alt={`preview-${index}`}
+                      className="w-20 h-20 object-cover rounded border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <textarea
-            name="additionalNotes"
-            rows="3"
-            placeholder="Additional Notes"
-            className="input"
-            value={formData.additionalNotes}
-            onChange={handleChange}
-          />
+          <div>
+            <textarea
+              name="additionalNotes"
+              rows="3"
+              placeholder="Additional Notes"
+              className="input"
+              value={formData.additionalNotes}
+              onChange={handleChange}
+            />
+            {touched.additionalNotes && errors.additionalNotes && (
+              <p className="text-sm text-red-600">{errors.additionalNotes}</p>
+            )}
+          </div>
 
           <button
             type="submit"
@@ -238,11 +390,11 @@ export default function CustomOrderPage() {
           </button>
 
           <p className="text-xs text-gray-500 text-center mt-2 italic">
-            Want to view your order history and track orders?{" "}
+            Want to edit this order, view your order history and track orders?{" "}
             <a href="/login" className="font-medium text-violet-600 hover:underline">Login or Sign Up</a> for a more professional experience.
           </p>
-
         </form>
+
       </div>
     </div>
   );

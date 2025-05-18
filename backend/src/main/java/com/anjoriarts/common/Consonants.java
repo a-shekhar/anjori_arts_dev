@@ -8,7 +8,14 @@ public class Consonants {
     public static final int EXPIRATION_TIME_IN_MINUTES = 10;
     public static final int RESEND_TIME_IN_MINUTES = 1;
     public static final String INTERNAL_SERVER_ERROR = "Internal Server Error..";
+    // cloudinary path
+    public static final String ARTWORKS_PATH = "Anjori/arts/%s/artworks/%s"; //first s is env, 2nd s is slug
+    public static final String CUSTOM_ORDERS_PATH = "Anjori/arts/%s/custom-orders/%s"; //first s is env, 2nd s is custom order id
+    public static final String USER_PROFILE_IMAGES_PATH = "Anjori/arts/%s/users/%s"; //first s is env, 2nd s is user id
+
+
     public static final String USER_ROLE = "ROLE_USER";
     public static final String ADMIN_ROLE = "ROLE_ADMIN";
     public static final String ORDER_INITIAL_STATE = "Pending";
+
 }

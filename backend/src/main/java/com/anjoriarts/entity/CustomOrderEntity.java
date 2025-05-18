@@ -7,6 +7,8 @@ import lombok.*;
 import java.math.BigInteger;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "custom_orders")
@@ -76,6 +78,9 @@ public class CustomOrderEntity {
 
     @Column(name = "created_at")
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
+
+    @OneToMany(mappedBy = "customOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CustomOrderImagesEntity> images = new ArrayList<>();
 
 
 }

@@ -32,9 +32,9 @@ public class CustomOrderController {
                 dto.setMedium(null);
             }
 
-            CustomOrderResponseDTO savedCustomOrder= this.customOrderService.saveCustomOrder(dto);
+          CustomOrderResponseDTO savedCustomOrder= this.customOrderService.saveCustomOrder(dto, images);
 
-            if(savedCustomOrder.getCustomOrderId() == null){
+          if(savedCustomOrder.getCustomOrderId() == null){
                 return ResponseEntity.ok().body(CommonResponse.failure("Custom Order creation failed. Please try again..", null));
             }
             return ResponseEntity.ok().body(CommonResponse.success("Custom order created.", null));
