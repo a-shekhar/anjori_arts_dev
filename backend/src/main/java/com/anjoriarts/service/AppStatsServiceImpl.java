@@ -48,7 +48,7 @@ public class AppStatsServiceImpl implements AppStatsService{
 
     @Override
     public String getLatestNews(){
-        String key = env + ":latest-news";
+        String key = "anjori-" + env + ":latest-news";
        return redisTemplate.opsForValue().get(key);
     }
 
