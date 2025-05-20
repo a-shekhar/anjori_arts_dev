@@ -1,8 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLoading } from "../context/LoadingContext";
+import Lottie from "lottie-react";
 
 const ProgressBar = () => {
   const { uploadProgress, setUploadProgress } = useLoading();
+  const [animationData, setAnimationData] = useState(null);
+
+  useEffect(() => {
+    fetch("/assets/progress-bar.json")
+      .then((res) => res.json())
+      .then(setAnimationData)
+      .catch((err) => console.error("Failed to load Lottie:", err));
+  }, []);
 
   useEffect(() => {
     if (uploadProgress >= 100) {
@@ -13,14 +22,17 @@ const ProgressBar = () => {
     }
   }, [uploadProgress]);
 
-  if (uploadProgress <= 0 || uploadProgress >= 100) return null;
+  if (uploadProgress <= 0 || uploadProgress >= 100 || !animationData) return null;
 
   return (
-    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] w-[40vw] max-w-md h-4 bg-gray-200 rounded-full shadow-md overflow-hidden pointer-events-none">
-      <div
-        className="h-full rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 animate-progress"
-        style={{ width: `${uploadProgress}%` }}
-      />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-black/20 pointer-events-none">
+      <div className="w-40 h-40 md:w-56 md:h-56">
+        <Lottie animationData={animationData} loop autoplay className="w-full h-full" />
+      </div>
+      {/* Optional: Uploading text below animation */}
+      <div className="absolute bottom-[30%] text-white text-sm md:text-base font-medium animate-pulse">
+        Working on your request...
+      </div>
     </div>
   );
 };
