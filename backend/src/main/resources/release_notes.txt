@@ -21,3 +21,5 @@ FROM arts.artworks
 WHERE image_url IS NOT NULL;
 
 ALTER TABLE arts.artworks DROP image_url;
+ALTER TABLE arts.artworks
+ALTER COLUMN price TYPE Decimal(10,2);

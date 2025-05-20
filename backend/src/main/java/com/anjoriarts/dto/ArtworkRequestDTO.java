@@ -1,16 +1,15 @@
 package com.anjoriarts.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @NoArgsConstructor
-@Getter
-@Setter
+@AllArgsConstructor
+@Data
+@Builder
 @ToString
 public class ArtworkRequestDTO {
     private Long id;
@@ -18,7 +17,7 @@ public class ArtworkRequestDTO {
     private String medium;
     private String surface;
     private String size;
-    private Double price;
+    private BigDecimal price;
     private String tags;
     private  boolean featured;
     private String description;
@@ -28,19 +27,4 @@ public class ArtworkRequestDTO {
     private List<MultipartFile> imageFiles;
     private String altText;
     private boolean main;
-
-    public ArtworkRequestDTO(String title, String size, String medium, String surface,
-                             Double price, String tags, boolean featured, List<MultipartFile> imageFiles, String description, String availability, String artistNote) {
-        this.title = title;
-        this.size = size;
-        this.medium = medium;
-        this.surface = surface;
-        this.price = price;
-        this.tags = tags;
-        this.imageFiles = imageFiles;
-        this.featured = featured;
-        this.description = description;
-        this.availability = availability;
-        this.artistNote = artistNote;
-    }
 }

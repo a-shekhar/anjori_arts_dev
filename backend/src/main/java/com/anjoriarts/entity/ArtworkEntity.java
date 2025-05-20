@@ -2,6 +2,8 @@ package com.anjoriarts.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -31,7 +33,7 @@ public class ArtworkEntity {
     private String surface;
 
     @Column(name = "price")
-    private Double price;
+    private BigDecimal price;
 
     @Column(name = "slug")
     private String slug;

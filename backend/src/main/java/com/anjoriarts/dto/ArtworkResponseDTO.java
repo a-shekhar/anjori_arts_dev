@@ -1,6 +1,8 @@
 package com.anjoriarts.dto;
 
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 @NoArgsConstructor
@@ -15,7 +17,7 @@ public class ArtworkResponseDTO {
     private String medium;
     private String surface;
     private String size;
-    private Double price;
+    private BigDecimal price;
     private List<String> tags;
     private String description;
     private String availability;

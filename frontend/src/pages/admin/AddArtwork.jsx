@@ -79,7 +79,8 @@ export default function AddArtwork() {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (e) => {
           const percent = Math.round((e.loaded * 100) / e.total);
-          setUploadProgress(percent); // ✅ Update global progress bar
+          console.log("Upload %:", percent); // 👈 Add this for debugging
+          setUploadProgress(50); // ✅ Update global progress bar
         }
       });
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ParticlesBackground from "../components/ParticlesBackground";
 import axios from "axios";
 import { showMessage } from "../utils/toast";
-import HeroLoader from "../components/HeroLoader";
+import HeroLoader from "../components/Loader/HeroLoader";
 import ArtworkCard from "../components/ArtworkCard";
 import ArtworkModal from "../components/ArtworkModal";
 import NewsTicker from "../components/NewsTicker";

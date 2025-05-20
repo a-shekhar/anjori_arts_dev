@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -102,9 +103,19 @@ public class ArtworksController {
         String errorMessage = validateData(title, size, medium, surface, price, imageFiles);
 
         if(errorMessage.isEmpty()) {
-            ArtworkRequestDTO dto = new ArtworkRequestDTO(title, size, medium, surface,
-                    Double.valueOf(price), tags, featured, imageFiles, description,
-                    availability, artistNote);
+            ArtworkRequestDTO dto = ArtworkRequestDTO.builder()
+                    .title(title)
+                    .size(size)
+                    .medium(medium)
+                    .surface(surface)
+                    .price(new BigDecimal(price))
+                    .tags(tags)
+                    .featured(featured)
+                    .imageFiles(imageFiles)
+                    .description(description)
+                    .availability(availability)
+                    .artistNote(artistNote)
+                    .build();
             dto = artworksService.saveArtwork(dto);
             if(dto.getId() == null){
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(CommonResponse.failure("Upload failed. Please try again.", null));
