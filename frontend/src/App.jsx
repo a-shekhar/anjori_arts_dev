@@ -2,11 +2,11 @@ import React from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import Navbar from "./components/Navbar";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import NotFound from "./components/NotFound";
+import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+
 import Home from "./pages/Home";
 import Admin from "./layout/Admin";
 import AddArtwork from "./pages/admin/AddArtwork";
@@ -19,43 +19,44 @@ import SignupPage from "./pages/Signup";
 import ProfilePage from "./pages/Profile";
 import ForgotPasswordPage from "./pages/ForgotPassword";
 import ResetPasswordPage from "./pages/ResetPassword";
-import PageLoader from "./components/Loader/PageLoader"; // 👈 Artistic loader
-import { LoadingProvider } from "./components/context/LoadingContext"; // 👈 Context provider
+import NotFound from "./components/NotFound";
+
+import PageLoader from "./components/Loader/PageLoader";         // 🎨 Full-page loader
+import ProgressBar from "./components/Loader/ProgressBar";       // 📶 Top progress bar
+import AutoHideLoader from "./components/Loader/AutoHideLoader"; // 🧼 Auto-reset on route change
+import { LoadingProvider } from "./components/context/LoadingContext"; // 🌐 Global loading state
 
 function App() {
   return (
     <LoadingProvider>
       <Router>
-        <PageLoader /> {/* 👈 Loader displays above everything */}
-
+        <AutoHideLoader />
+        <PageLoader />
+        <ProgressBar />
         <Navbar />
 
         <Routes>
-          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/custom-order" element={<CustomOrderPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/about-us" element={<AboutPage />} />
 
-          {/* Admin Routes with Layout */}
+          {/* Admin Routes */}
           <Route path="/admin" element={<Admin />}>
             <Route index element={<AdminHome />} />
             <Route path="artworks/add" element={<AddArtwork />} />
-            <Route path="artworks/manage" element={<NotFound />} /> {/* Placeholder */}
+            <Route path="artworks/manage" element={<NotFound />} />
           </Route>
 
-          {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
 
         <Footer />
-
-        {/* Toasts */}
         <ToastContainer position="top-right" autoClose={3000} />
       </Router>
     </LoadingProvider>

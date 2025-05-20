@@ -11,7 +11,7 @@ const PageLoader = () => {
       .then((res) => res.json())
       .then(setAnimationData)
       .catch((err) => {
-        console.error("Failed to load animation:", err);
+        console.error("Failed to load PageLoader animation:", err);
       });
   }, []);
 

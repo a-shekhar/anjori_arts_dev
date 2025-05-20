@@ -1,10 +1,11 @@
 import React, { useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { useLoading } from "../../components/context/LoadingContext"; // Adjust path if needed
+import axios from "axios";
+import { useLoading } from "../../components/context/LoadingContext";
 
 export default function AddArtwork() {
   const fileInputRef = useRef(null);
-  const { showLoader, hideLoader } = useLoading();
+  const { setUploadProgress } = useLoading(); // ✅ Only progress bar, no showLoader
 
   const [formData, setFormData] = useState({
     title: "",
@@ -55,7 +56,6 @@ export default function AddArtwork() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    showLoader();
 
     const form = new FormData();
     form.append("title", formData.title);
@@ -74,15 +74,18 @@ export default function AddArtwork() {
     });
 
     try {
-      const response = await fetch("/api/admin/artworks/add", {
-        method: "POST",
-        credentials: 'include',
-        body: form,
+      const response = await axios.post("/api/admin/artworks/add", form, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (e) => {
+          const percent = Math.round((e.loaded * 100) / e.total);
+          setUploadProgress(percent); // ✅ Update global progress bar
+        }
       });
 
-      const result = await response.json();
+      const result = response.data;
 
-      if (response.ok) {
+      if (response.status === 200) {
         toast.success(result.message || "Artwork added successfully!");
         formData.images.forEach(({ preview }) => URL.revokeObjectURL(preview));
         setFormData({
@@ -98,18 +101,15 @@ export default function AddArtwork() {
           availability: "Available",
           artistNote: "",
         });
-
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
+        if (fileInputRef.current) fileInputRef.current.value = "";
       } else {
         toast.error(result.message || "Failed to add artwork.");
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Upload error:", error);
       toast.error("Internal Server Error");
     } finally {
-      hideLoader();
+      setUploadProgress(0); // ✅ Always reset
     }
   };
 
@@ -232,7 +232,6 @@ export default function AddArtwork() {
           />
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 w-full sm:w-auto transition"
