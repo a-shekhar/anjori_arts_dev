@@ -7,3 +7,17 @@ UPDATE arts.users SET role = 'ROLE_ADMIN' WHERE email = 'rajadityasingh31@gmail.
 
 ----- 0.6
 Add script for custom order
+
+----- 0.7
+Add script for artwork images
+INSERT INTO arts.artwork_images (artwork_id, image_url, alt_text, display_order, is_main)
+SELECT
+    id AS artwork_id,
+    image_url,
+    slug AS alt_text,         -- using slug as alt text (optional)
+    0 AS display_order,
+    TRUE AS is_main           -- or FALSE if you want to set it manually later
+FROM arts.artworks
+WHERE image_url IS NOT NULL;
+
+ALTER TABLE arts.artworks DROP image_url;

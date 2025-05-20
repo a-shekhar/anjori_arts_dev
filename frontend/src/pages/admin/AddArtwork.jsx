@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react";
 import { toast } from "react-toastify";
-
+import { useLoading } from "../../components/context/LoadingContext"; // Adjust path if needed
 
 export default function AddArtwork() {
   const fileInputRef = useRef(null);
+  const { showLoader, hideLoader } = useLoading();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -13,13 +14,11 @@ export default function AddArtwork() {
     surface: "",
     tags: "",
     featured: false,
-    images: [], // { file, preview }
+    images: [],
     description: "",
     availability: "Available",
     artistNote: "",
-    });
-
-  const [loading, setLoading] = useState(false);
+  });
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -40,13 +39,13 @@ export default function AddArtwork() {
 
     setFormData((prev) => ({
       ...prev,
-      images: [...prev.images, ...filesWithPreview], // ✅ Append
+      images: [...prev.images, ...filesWithPreview],
     }));
   };
 
   const removeImage = (indexToRemove) => {
     setFormData((prev) => {
-      URL.revokeObjectURL(prev.images[indexToRemove].preview); // ✅ Free memory
+      URL.revokeObjectURL(prev.images[indexToRemove].preview);
       return {
         ...prev,
         images: prev.images.filter((_, i) => i !== indexToRemove),
@@ -56,7 +55,7 @@ export default function AddArtwork() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    showLoader();
 
     const form = new FormData();
     form.append("title", formData.title);
@@ -64,7 +63,7 @@ export default function AddArtwork() {
     form.append("price", formData.price);
     form.append("medium", formData.medium);
     form.append("surface", formData.surface);
-    form.append("tags", formData.tags)
+    form.append("tags", formData.tags);
     form.append("featured", formData.featured);
     form.append("description", formData.description);
     form.append("availability", formData.availability);
@@ -75,8 +74,9 @@ export default function AddArtwork() {
     });
 
     try {
-      const response = await fetch('/api/artworks/add', {
+      const response = await fetch("/api/admin/artworks/add", {
         method: "POST",
+        credentials: 'include',
         body: form,
       });
 
@@ -84,9 +84,7 @@ export default function AddArtwork() {
 
       if (response.ok) {
         toast.success(result.message || "Artwork added successfully!");
-        // Clear previews from memory
         formData.images.forEach(({ preview }) => URL.revokeObjectURL(preview));
-        // Reset form
         setFormData({
           title: "",
           size: "",
@@ -100,6 +98,7 @@ export default function AddArtwork() {
           availability: "Available",
           artistNote: "",
         });
+
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
@@ -110,7 +109,7 @@ export default function AddArtwork() {
       console.error("Error submitting form:", error);
       toast.error("Internal Server Error");
     } finally {
-      setLoading(false);
+      hideLoader();
     }
   };
 
@@ -124,8 +123,7 @@ export default function AddArtwork() {
           { name: "price", label: "Price (₹)", type: "number", placeholder: "Enter price" },
           { name: "medium", label: "Medium", type: "text", placeholder: "e.g. Oil, Acrylic" },
           { name: "surface", label: "Surface", type: "text", placeholder: "e.g. Canvas, Wood" },
-          { name: "tags", label: "Tags", type: "text", placeholder: "e.g. Nature, Mythological (Optional, Seperated By comma)" },
-
+          { name: "tags", label: "Tags", type: "text", placeholder: "e.g. Nature, Mythological" },
         ].map(({ name, label, type, placeholder }) => (
           <div key={name} className="flex items-center justify-between gap-4">
             <label className="w-32 font-medium">{label}</label>
@@ -155,7 +153,6 @@ export default function AddArtwork() {
             />
           </div>
 
-          {/* Preview with Remove Button */}
           {formData.images.length > 0 && (
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {formData.images.map(({ file, preview }, index) => (
@@ -166,7 +163,6 @@ export default function AddArtwork() {
                     className="h-20 w-20 object-cover rounded shadow"
                   />
                   <span className="mt-1 truncate w-20">{file.name}</span>
-
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
@@ -194,7 +190,7 @@ export default function AddArtwork() {
           </label>
         </div>
 
-        {/* Artist Note, Description, Availability - Insert here */}
+        {/* Description & Notes */}
         <div className="flex flex-col">
           <label htmlFor="description" className="font-medium mb-1">Description</label>
           <textarea
@@ -203,7 +199,7 @@ export default function AddArtwork() {
             rows="4"
             placeholder="Short description about the artwork"
             className="w-full border rounded px-3 py-2 text-sm"
-            value={formData.description || ""}
+            value={formData.description}
             onChange={handleChange}
           />
         </div>
@@ -214,7 +210,7 @@ export default function AddArtwork() {
             id="availability"
             name="availability"
             className="w-full border rounded px-3 py-2 text-sm"
-            value={formData.availability || "Available"}
+            value={formData.availability}
             onChange={handleChange}
           >
             <option value="Available">Available</option>
@@ -231,7 +227,7 @@ export default function AddArtwork() {
             rows="3"
             placeholder="Add a personal note about the piece"
             className="w-full border rounded px-3 py-2 text-sm"
-            value={formData.artistNote || ""}
+            value={formData.artistNote}
             onChange={handleChange}
           />
         </div>
@@ -239,32 +235,9 @@ export default function AddArtwork() {
         {/* Submit Button */}
         <button
           type="submit"
-          className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 w-full sm:w-auto flex items-center justify-center gap-2 disabled:opacity-60"
-          disabled={loading}
+          className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 w-full sm:w-auto transition"
         >
-          {loading && (
-            <svg
-              className="w-4 h-4 animate-spin text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              ></path>
-            </svg>
-          )}
-          {loading ? "Adding..." : "Add Artwork"}
+          Add Artwork
         </button>
       </form>
     </div>

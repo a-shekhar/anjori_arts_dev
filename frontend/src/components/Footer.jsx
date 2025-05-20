@@ -82,15 +82,15 @@ const Footer = () => {
           <p>
             Phone:{" "}
             <a
-              href="tel:+919876543210"
+              href="tel:+918051960916"
               className="text-blue-400 hover:underline"
             >
-              +91 98765 43210
+              +91 80519 60916
             </a>
           </p>
 
           <p>
-               Want to know us? : {" "}
+                {" "}
                <a href="/about-us" className="text-blue-400 hover:underline">
                     About Us
                   </a>

@@ -10,7 +10,6 @@ CREATE TABLE arts.artworks (
     available BOOLEAN DEFAULT true,
     featured BOOLEAN DEFAULT false,
     tags TEXT, -- comma-separated tags (e.g., "nature,green,oil")
-    image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -20,7 +19,7 @@ ALTER TABLE arts.artworks ADD COLUMN description TEXT, ADD COLUMN artist_note TE
 
 CREATE TABLE arts.artwork_images (
     id SERIAL PRIMARY KEY,
-    artwork_id INTEGER NOT NULL REFERENCES arts.artworks(id) ON DELETE CASCADE,
+    artwork_id SERIAL NOT NULL REFERENCES arts.artworks(id) ON DELETE CASCADE,
     image_url TEXT NOT NULL,
     alt_text TEXT,
     display_order INTEGER DEFAULT 0,

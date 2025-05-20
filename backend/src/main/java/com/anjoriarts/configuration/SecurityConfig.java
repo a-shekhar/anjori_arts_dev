@@ -44,7 +44,7 @@ public class SecurityConfig {
         return http.csrf(csrf -> csrf.disable())
                 .cors(cors -> {})
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/**").hasRole("ADMIN")  // must be first
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")  // must be first
                         .requestMatchers("/api/user/**").authenticated() // // ✅ Only logged-in users can access profile endpoints
                         .anyRequest().permitAll()                       // Public access elsewhere
                 )

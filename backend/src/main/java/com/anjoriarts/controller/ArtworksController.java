@@ -85,7 +85,7 @@ public class ArtworksController {
         }
     }
 
-    @PostMapping("/artworks/add")
+    @PostMapping("/admin/artworks/add")
     public ResponseEntity<?> addArtWork(@RequestParam("title") String title,
                                         @RequestParam("size") String size,
                                         @RequestParam("medium") String medium,

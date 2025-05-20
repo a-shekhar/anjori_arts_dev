@@ -14,7 +14,9 @@ public class CommonUtil {
 
         ZonedDateTime localDateTime = utcDateTime.withZoneSameInstant(ZoneId.of(Consonants.ZONE_ID));
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a (z)");
+        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a (z)");
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy");
 
         return localDateTime.format(formatter);
     }

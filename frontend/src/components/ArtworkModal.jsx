@@ -1,17 +1,24 @@
-import React, { useEffect } from "react";
-import ImageZoomModal from "../components/ImageZoomModal"; // Adjust path as needed
-
+import React, { useEffect, useState } from "react";
+import ImageZoomModal from "../components/ImageZoomModal"; // Adjust path if needed
 
 const ArtworkModal = ({ artwork, onClose }) => {
-  if (!artwork) return null;
+  const [activeImage, setActiveImage] = useState(null);
 
-  // 🔒 Lock scroll when modal opens
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "auto";
     };
   }, []);
+
+  useEffect(() => {
+    if (artwork?.images?.length) {
+      const main = artwork.images.find(img => img.main);
+      setActiveImage(main || artwork.images[0]);
+    }
+  }, [artwork]);
+
+  if (!artwork || !activeImage) return null;
 
   const {
     title,
@@ -20,11 +27,11 @@ const ArtworkModal = ({ artwork, onClose }) => {
     surface,
     price,
     tags,
-    imageUrl,
     description,
     availability,
     createdAt,
     artistNote,
+    images,
   } = artwork;
 
   return (
@@ -38,29 +45,49 @@ const ArtworkModal = ({ artwork, onClose }) => {
           &times;
         </button>
 
-        {/* Image */}
-        {/* Zoomable Image using custom modal */}
+        {/* Main Image */}
         <div className="flex justify-center items-center bg-gray-100 rounded-lg p-4 mb-4">
           <ImageZoomModal
-            src={imageUrl}
-            alt={title}
+            src={activeImage.imageUrl}
+            alt={activeImage.altText || title}
             className="max-h-[300px] cursor-zoom-in object-contain"
           />
         </div>
 
+        {/* Thumbnail Row */}
+        {images?.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto mb-4 px-1">
+            {images.map((img, idx) => (
+              <img
+                key={idx}
+                src={img.imageUrl}
+                alt={img.altText}
+                className={`w-16 h-16 object-cover rounded border-2 ${
+                  img.imageUrl === activeImage.imageUrl ? "border-violet-600" : "border-transparent"
+                } cursor-pointer`}
+                onClick={() => setActiveImage(img)}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Details */}
         <h2 className="text-xl font-semibold mb-1">{title}</h2>
-        <p className="text-sm text-gray-600 mb-1">{size} • {medium} on {surface}</p>
+        <p className="text-sm text-gray-600 mb-1">
+          {size} • {medium} on {surface}
+        </p>
         <p className="text-blue-700 font-bold text-base mb-2">₹{price}</p>
 
-        {/* Optional Fields */}
         {description && <p className="text-sm text-gray-700 mb-2">{description}</p>}
-        {createdAt && <p className="text-xs text-gray-500 mb-1">🗓️ Created At: {createdAt}</p>}
+        {createdAt && (
+          <p className="text-xs text-gray-500 mb-1">🗓️ Created At: {createdAt}</p>
+        )}
         {availability && (
-          <p className={`text-xs mb-2 font-medium ${
-            availability === "Available" ? "text-green-600" : "text-red-600"
-          }`}>
+          <p
+            className={`text-xs mb-2 font-medium ${
+              availability === "Available" ? "text-green-600" : "text-red-600"
+            }`}
+          >
             {availability}
           </p>
         )}
