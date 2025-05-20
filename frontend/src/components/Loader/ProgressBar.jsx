@@ -1,20 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useLoading } from "../context/LoadingContext";
-import Lottie from "lottie-react";
 
 const ProgressBar = () => {
   const { uploadProgress, setUploadProgress } = useLoading();
-  const [animationData, setAnimationData] = useState(null);
 
-  // Load the Lottie JSON
-  useEffect(() => {
-    fetch("/assets/progress-bar.json")
-      .then((res) => res.json())
-      .then(setAnimationData)
-      .catch((err) => console.error("Failed to load progress animation:", err));
-  }, []);
-
-  // Auto-reset after reaching 100%
   useEffect(() => {
     if (uploadProgress >= 100) {
       const timeout = setTimeout(() => {
@@ -24,19 +13,14 @@ const ProgressBar = () => {
     }
   }, [uploadProgress]);
 
-  // ✅ EARLY RETURN: Prevent empty white box
-  if (
-    uploadProgress <= 0 ||
-    uploadProgress >= 100 ||
-    !animationData
-  ) return null;
+  if (uploadProgress <= 0 || uploadProgress >= 100) return null;
 
-  // ✅ Final visible progress bar
   return (
-    <div className="fixed top-[80px] left-1/2 transform -translate-x-1/2 z-[9999] bg-white/70 backdrop-blur-md border border-gray-300 rounded-lg shadow-lg px-4 py-2 w-[25%] flex items-center justify-center pointer-events-none">
-      <div className="w-full h-6">
-        <Lottie animationData={animationData} loop autoplay />
-      </div>
+    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] w-[40vw] max-w-md h-4 bg-gray-200 rounded-full shadow-md overflow-hidden pointer-events-none">
+      <div
+        className="h-full rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 animate-progress"
+        style={{ width: `${uploadProgress}%` }}
+      />
     </div>
   );
 };
