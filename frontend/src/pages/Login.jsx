@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../components/AuthContext';
+import { useAuth } from '../components/context/AuthContext';
 import PaintbrushLoader from '../components/PaintbrushLoader';
 
 export default function LoginPage() {
@@ -14,7 +14,7 @@ export default function LoginPage() {
   // ✅ Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/profile', { replace: true });
+      navigate('/', { replace: true });
     }
   }, [user, navigate]);
 

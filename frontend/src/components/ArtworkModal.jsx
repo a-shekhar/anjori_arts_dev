@@ -23,7 +23,7 @@ const ArtworkModal = ({ artwork, onClose }) => {
   if (!artwork || !activeImage) return null;
 
   const handleRequestNow = () => {
-    navigate("/order-summary", { state: { artworkId: artwork.id } });
+    navigate("/order-summary",  { state: { artwork } });
   };
 
   const {

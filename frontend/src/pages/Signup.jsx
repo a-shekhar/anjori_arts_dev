@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link , useNavigate } from 'react-router-dom';
 import OtpModal from '../components/OtpModal';
-import { useAuth } from '../components/AuthContext';
+import { useAuth } from '../components/context/AuthContext';
 import PaintbrushLoader from '../components/PaintbrushLoader';
 import CountryCodeDropdown from "../components/dropdowns/CountryCodeDropdown";
 

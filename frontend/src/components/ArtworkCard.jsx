@@ -8,7 +8,7 @@ const ArtworkCard = ({ artwork, onClick }) => {
   const navigate = useNavigate();
 
   const handleRequestNow = () => {
-    navigate("/order-summary", { state: { artworkId: artwork.id } });
+    navigate("/order-summary",  { state: { artwork } });
   };
 
   return (

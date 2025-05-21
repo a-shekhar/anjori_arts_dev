@@ -2,20 +2,32 @@ import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { showMessage } from '../../utils/toast';
 import CountryCodeDropdown from '../../components/dropdowns/CountryCodeDropdown';
-import { useLoading } from '../../components/context/LoadingContext'; // ✅ added
+import { useLoading } from '../../components/context/LoadingContext';
+import { useAuth } from '../../components/context/AuthContext'; // ✅ get user context
 
 const OrderSummaryPage = () => {
   const location = useLocation();
-  const { artworkId } = location.state || {};
-  const { setUploadProgress } = useLoading(); // ✅ Only progress bar
+  const { artwork } = location.state || {};
+  const { setUploadProgress } = useLoading();
+  const { user } = useAuth(); // ✅ get logged-in user
+  const isGuest = !user;
 
+  // main artwork image
+  const [mainImage] = useState(() => {
+    if (artwork?.images?.length) {
+      return artwork.images.find(img => img.main) || artwork.images[0];
+    }
+    return null;
+  });
+
+  // prefill form if user exists
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    countryCode: '+91',
-    phoneNo: '',
-    email: '',
-    artworkId: artworkId,
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    countryCode: user?.countryCode || '+91',
+    phoneNo: user?.phoneNo || '',
+    email: user?.email || '',
+    artworkId: artwork?.id || null,
   });
 
   const handleChange = (e) => {
@@ -32,7 +44,7 @@ const OrderSummaryPage = () => {
     }
 
     try {
-      setUploadProgress(10); // Start progress
+      setUploadProgress(10);
 
       const response = await fetch('/api/order/confirm-now', {
         method: 'POST',
@@ -42,12 +54,19 @@ const OrderSummaryPage = () => {
       });
 
       setUploadProgress(70);
-
       const result = await response.json();
       setUploadProgress(90);
 
       if (response.ok && result.success) {
         showMessage('success', result.message || 'Request submitted successfully!');
+        setFormData({
+          firstName: user?.firstName || '',
+          lastName: user?.lastName || '',
+          countryCode: user?.countryCode || '+91',
+          phoneNo: user?.phoneNo || '',
+          email: user?.email || '',
+          artworkId: artwork?.id || null,
+        });
       } else {
         showMessage('error', result.message || 'Request could not proceed.');
       }
@@ -55,12 +74,13 @@ const OrderSummaryPage = () => {
       showMessage('error', 'Could not submit request.');
     } finally {
       setUploadProgress(100);
-      setTimeout(() => setUploadProgress(0), 400); // Reset after short delay
+      setTimeout(() => setUploadProgress(0), 400);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row items-start justify-center px-4 md:px-16 py-12 bg-gray-50 max-w-[1200px] mx-auto gap-10">
+      {/* LEFT ILLUSTRATION */}
       <div className="hidden md:flex md:w-1/2 justify-center">
         <img
           src="/images/order-summary-1.png"
@@ -69,8 +89,24 @@ const OrderSummaryPage = () => {
         />
       </div>
 
+      {/* FORM */}
       <div className="w-full md:w-1/2 flex justify-center">
         <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-lg">
+          {/* Artwork preview */}
+          {artwork && (
+            <div className="mb-6 text-center">
+              <p className="text-sm text-gray-500">You're requesting:</p>
+              <h2 className="text-lg font-semibold text-purple-600">{artwork.title}</h2>
+              {mainImage && (
+                <img
+                  src={mainImage.imageUrl}
+                  alt={artwork.title}
+                  className="mt-2 max-h-52 mx-auto rounded-md shadow"
+                />
+              )}
+            </div>
+          )}
+
           <h1 className="text-2xl font-bold text-purple-600 mb-2 text-center">Request Artwork</h1>
           <p className="text-sm text-gray-500 text-center mb-6">
             Let us know how to contact you — we’ll handle the rest!
@@ -125,6 +161,18 @@ const OrderSummaryPage = () => {
             >
               Confirm Now
             </button>
+
+            {isGuest && (
+              <p className="text-xs text-gray-500 text-center mt-2 italic">
+                Want to autofill the form, view your order history and track orders?{" "}
+                <a href="/login" className="font-medium text-violet-600 hover:underline">
+                  Login or Sign Up
+                </a>{" "}
+                for a more professional experience.
+              </p>
+            )}
+
+
           </form>
         </div>
       </div>

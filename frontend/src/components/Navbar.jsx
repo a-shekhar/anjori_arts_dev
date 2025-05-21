@@ -3,7 +3,7 @@ import { Menu, X, Home, ShoppingBag, Brush, Info, User, ShieldCheck } from "luci
 import ImageZoomModal from "./ImageZoomModal";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileDropdown from './ProfileDropdown';
-import { useAuth } from "../components/AuthContext";
+import { useAuth } from "../components/context/AuthContext";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

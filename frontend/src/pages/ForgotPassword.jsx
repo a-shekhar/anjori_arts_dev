@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { useAuth } from '../components/AuthContext';
+import { useAuth } from '../components/context/AuthContext';
 import PaintbrushLoader from '../components/PaintbrushLoader';
 import { useNavigate } from "react-router-dom";
 
