@@ -25,6 +25,7 @@ import PageLoader from "./components/Loader/PageLoader";         // 🎨 Full-pa
 import ProgressBar from "./components/Loader/ProgressBar";       // 📶 Top progress bar
 import AutoHideLoader from "./components/Loader/AutoHideLoader"; // 🧼 Auto-reset on route change
 import { LoadingProvider } from "./components/context/LoadingContext"; // 🌐 Global loading state
+import OrderSummaryPage from "./pages/payment/OrderSummary"
 
 function App() {
   return (
@@ -45,6 +46,9 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/about-us" element={<AboutPage />} />
+
+          {/* Order related pages */}
+          <Route path="/order-summary" element={<OrderSummaryPage />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<Admin />}>

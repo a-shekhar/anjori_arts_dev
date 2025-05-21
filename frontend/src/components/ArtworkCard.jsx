@@ -1,16 +1,21 @@
 import React from "react";
-import { BsStack } from "react-icons/bs"; // Instagram-style stack icon
+import { useNavigate } from "react-router-dom";
+import { BsStack } from "react-icons/bs";
 
 const ArtworkCard = ({ artwork, onClick }) => {
   const mainImage = artwork.images?.find(img => img.main) || artwork.images?.[0];
   const hasMultipleImages = artwork.images?.length > 1;
+  const navigate = useNavigate();
+
+  const handleRequestNow = () => {
+    navigate("/order-summary", { state: { artworkId: artwork.id } });
+  };
 
   return (
     <div
       className="bg-white rounded-xl shadow hover:shadow-lg transition cursor-pointer flex flex-col"
       onClick={onClick}
     >
-      {/* Artwork Image */}
       <div className="relative">
         {mainImage?.imageUrl ? (
           <img
@@ -24,7 +29,6 @@ const ArtworkCard = ({ artwork, onClick }) => {
           </div>
         )}
 
-        {/* Bottom-right multiple image icon */}
         {hasMultipleImages && (
           <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white rounded-full p-1">
             <BsStack size={16} />
@@ -32,7 +36,6 @@ const ArtworkCard = ({ artwork, onClick }) => {
         )}
       </div>
 
-      {/* Artwork Info */}
       <div className="p-4 flex flex-col flex-grow">
         <h3 className="text-lg font-semibold mb-1">{artwork.title}</h3>
         <p className="text-sm text-gray-600 mb-1">
@@ -50,6 +53,7 @@ const ArtworkCard = ({ artwork, onClick }) => {
         </div>
 
         <button
+          onClick={handleRequestNow}
           className="mt-auto bg-purple-500 text-white text-sm py-2 rounded hover:bg-purple-600 transition flex items-center justify-center gap-2"
         >
           🎨 Request Now
