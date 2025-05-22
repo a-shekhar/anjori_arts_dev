@@ -38,12 +38,12 @@ public class CustomOrderController {
           CustomOrderResponseDTO savedCustomOrder= this.customOrderService.saveCustomOrder(dto, images);
 
           if(savedCustomOrder.getCustomOrderId() == null){
-                return ResponseEntity.ok().body(CommonResponse.failure("Custom Order creation failed. Please try again..", null));
+                return ResponseEntity.ok().body(CommonResponse.failure("Custom Order creation failed. Please try again..", savedCustomOrder));
             }
             // add emails to both artist and users
-            this.emailService.sendCustomOrderArtistConfirmation(savedCustomOrder);
-            this.emailService.sendCustomOrderUserConfirmation(savedCustomOrder);
-            return ResponseEntity.ok().body(CommonResponse.success("Custom order created.", null));
+           this.emailService.sendCustomOrderArtistConfirmation(savedCustomOrder);
+           this.emailService.sendCustomOrderUserConfirmation(savedCustomOrder);
+            return ResponseEntity.ok().body(CommonResponse.success("Custom order created.", savedCustomOrder));
         } catch (Exception e) {
             logger.error(e.getMessage());
             return ResponseEntity.ok().body(CommonResponse.failure(Consonants.INTERNAL_SERVER_ERROR, null));

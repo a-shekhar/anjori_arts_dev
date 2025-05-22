@@ -25,4 +25,5 @@ public class CustomOrderRequestDTO {
     private String noOfCopies;
     private String additionalNotes;
     private boolean suggestOptions;
+    private Long userId;
 }

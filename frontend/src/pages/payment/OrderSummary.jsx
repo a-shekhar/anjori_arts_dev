@@ -63,7 +63,7 @@ const OrderSummaryPage = () => {
       setUploadProgress(90);
 
       const orderId = result.data?.id;
-      console.log("hell", orderId);
+
 
       if (response.ok && result.success && orderId) {
         navigate('/order-confirmed', { state: { orderId } });

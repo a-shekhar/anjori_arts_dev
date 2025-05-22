@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../components/context/AuthContext"; // ✅ get logged-in user
+import { useLoading } from "../components/context/LoadingContext"; // ✅ progress bar context
 import ArtTypeDropdown from "../components/dropdowns/ArtTypeDropdown";
 import BudgetRangeDropdown from "../components/dropdowns/BudgetRangeDropdown";
 import SurfaceDropdown from "../components/dropdowns/SurfaceDropdown";
@@ -6,14 +8,20 @@ import MediumDropdown from "../components/dropdowns/MediumDropdown";
 import NumberOfCopiesDropdown from "../components/dropdowns/NumberOfCopiesDropdown";
 import CountryCodeDropdown from "../components/dropdowns/CountryCodeDropdown";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom"; // ✅ Required for navigation
+
 
 export default function CustomOrderPage() {
+  const { user } = useAuth();
+  const { setUploadProgress } = useLoading(); // ✅ init progress bar
+  const isGuest = !user;
+
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    countryCode: "+91",
-    phoneNo: "",
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    countryCode: user?.countryCode || "+91",
+    phoneNo: String(user?.phoneNo || ""),
     artType: "",
     surface: "",
     medium: "",
@@ -22,13 +30,15 @@ export default function CustomOrderPage() {
     noOfCopies: "",
     additionalNotes: "",
     suggestOptions: false,
-    referenceImages: []
+    referenceImages: [],
+    userId: user?.userId || null,
   });
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [status, setStatus] = useState({ loading: false });
   const [imagePreviews, setImagePreviews] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (formData.referenceImages && formData.referenceImages.length > 0) {
@@ -105,16 +115,15 @@ export default function CustomOrderPage() {
       if (error) newErrors[field] = error;
     }
     setErrors(newErrors);
-
     setTouched(Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
       toast.error("Some details are missing or invalid. Please fix them before submitting.");
       return;
     }
 
     setStatus({ loading: true });
+    setUploadProgress(10); // ✅ start progress
     const loadingToastId = toast.loading("Submitting your custom order...");
 
     try {
@@ -128,31 +137,41 @@ export default function CustomOrderPage() {
         }
       }
 
+      setUploadProgress(30); // ✅ after preparing form
+
       const res = await fetch("/api/custom-order", {
         method: "POST",
         body: formPayload,
       });
 
+      setUploadProgress(70); // ✅ after response
       const result = await res.json();
+      const orderId = result.data?.customOrderId;
+      console.log("hhggg", orderId)
+      setUploadProgress(90);
 
       setStatus({ loading: false });
       toast.dismiss(loadingToastId);
 
-      if (!res.ok || !result.success) {
-        throw new Error(result.message || "Submission failed");
+      if (res.ok && result.success && orderId) {
+          navigate('/order-confirmed', { state: { orderId } });
+      } else {
+          toast.error(result.message || 'Request could not proceed.');
       }
 
-      toast.success(result.message || "Your custom order has been submitted!");
+      //toast.success(result.message || "Your custom order has been submitted!");
     } catch (err) {
       setStatus({ loading: false });
       toast.dismiss();
-      const errorMsg = err.message || "Something went wrong while submitting your order.";
-      toast.error(errorMsg);
+      toast.error(err.message || "Something went wrong while submitting your order.");
+    } finally {
+      setUploadProgress(100); // ✅ complete
+      setTimeout(() => setUploadProgress(0), 500); // ✅ reset
     }
   };
 
   const validateField = (name, value) => {
-     switch (name) {
+    switch (name) {
       case "firstName":
         return value.trim() === "" ? "First Name is required" : "";
       case "lastName":
@@ -389,12 +408,16 @@ export default function CustomOrderPage() {
             {status.loading ? "Submitting..." : "Submit Custom Order"}
           </button>
 
-          <p className="text-xs text-gray-500 text-center mt-2 italic">
-            Want to edit this order, view your order history and track orders?{" "}
-            <a href="/login" className="font-medium text-violet-600 hover:underline">Login or Sign Up</a> for a more professional experience.
-          </p>
+          {isGuest && (
+            <p className="text-xs text-gray-500 text-center mt-2 italic">
+              Want to edit this order, view your order history and track orders?{" "}
+              <a href="/login" className="font-medium text-violet-600 hover:underline">
+                Login or Sign Up
+              </a>{" "}
+              for a more professional experience.
+            </p>
+          )}
         </form>
-
       </div>
     </div>
   );

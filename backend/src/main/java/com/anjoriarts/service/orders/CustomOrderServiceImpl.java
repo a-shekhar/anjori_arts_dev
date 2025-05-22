@@ -5,12 +5,15 @@ import com.anjoriarts.dto.CustomOrderRequestDTO;
 import com.anjoriarts.dto.CustomOrderResponseDTO;
 import com.anjoriarts.entity.CustomOrderEntity;
 import com.anjoriarts.entity.CustomOrderImagesEntity;
+import com.anjoriarts.entity.UserEntity;
+import com.anjoriarts.repository.UserRepository;
 import com.anjoriarts.service.CloudinaryService;
 import com.anjoriarts.service.CloudinaryServiceImpl;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +21,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomOrderServiceImpl implements CustomOrderService{
@@ -26,11 +30,15 @@ public class CustomOrderServiceImpl implements CustomOrderService{
 
     private final CustomOrderRepository customOrderRepository;
     private final CloudinaryService cloudinaryService;
+    private final UserRepository userRepository;
 
 
-    public CustomOrderServiceImpl(CustomOrderRepository customOrderRepository, CloudinaryService cloudinaryService){
+    public CustomOrderServiceImpl(CustomOrderRepository customOrderRepository,
+                                  CloudinaryService cloudinaryService,
+                                  UserRepository userRepository){
         this.customOrderRepository = customOrderRepository;
         this.cloudinaryService = cloudinaryService;
+        this.userRepository = userRepository;
     }
 
     @Value("${spring.application.env}")
@@ -40,10 +48,21 @@ public class CustomOrderServiceImpl implements CustomOrderService{
     @Transactional
     public CustomOrderResponseDTO saveCustomOrder(CustomOrderRequestDTO dto, List<MultipartFile> images) {
         try {
-            logger.error("Saving custom order...");
+            logger.info("Saving custom order...");
+
+            // fetch the user
+            UserEntity user = null;
+            if(dto.getUserId() != null){
+                Optional<UserEntity> optUser = this.userRepository.findByUserId(dto.getUserId());
+                if(optUser.isEmpty()){
+                    throw new UsernameNotFoundException("User with Id " + dto.getUserId() + " not found..");
+                }
+                user = optUser.get();
+            }
 
             CustomOrderEntity customOrder =
                     CustomOrderEntity.builder()
+                            .user(user)
                             .firstName(dto.getFirstName())
                             .lastName(dto.getLastName())
                             .email(dto.getEmail())
@@ -109,7 +128,7 @@ public class CustomOrderServiceImpl implements CustomOrderService{
                         .preferredSize(entity.getPreferredSize())
                         .noOfCopies(entity.getNoOfCopies())
                         .additionalNotes(entity.getAdditionalNotes())
-                        .imageCount(entity.getImages().size())
+                        .imageCount(entity.getImages() != null ? entity.getImages().size() : 0)
                         .build();
     }
 }

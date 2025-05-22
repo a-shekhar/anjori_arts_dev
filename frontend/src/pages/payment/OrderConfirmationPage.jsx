@@ -11,7 +11,7 @@ export default function OrderConfirmedPage({ orderId }) {
           Order Confirmed!
         </h2>
         <p className="text-gray-600 mb-1">
-          Thank you for your request. We've received your custom order.
+          Thank you for your request. We've received your order.
         </p>
         <p className="text-sm text-gray-500">
           Order ID: <span className="font-medium text-gray-800">#{orderId}</span>
