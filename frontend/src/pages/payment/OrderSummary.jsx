@@ -4,6 +4,7 @@ import { showMessage } from '../../utils/toast';
 import CountryCodeDropdown from '../../components/dropdowns/CountryCodeDropdown';
 import { useLoading } from '../../components/context/LoadingContext';
 import { useAuth } from '../../components/context/AuthContext'; // ✅ get user context
+import { useNavigate } from "react-router-dom"
 
 const OrderSummaryPage = () => {
   const location = useLocation();
@@ -11,6 +12,8 @@ const OrderSummaryPage = () => {
   const { setUploadProgress } = useLoading();
   const { user } = useAuth(); // ✅ get logged-in user
   const isGuest = !user;
+  const navigate = useNavigate();
+
 
   // main artwork image
   const [mainImage] = useState(() => {
@@ -25,7 +28,7 @@ const OrderSummaryPage = () => {
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     countryCode: user?.countryCode || '+91',
-    phoneNo: user?.phoneNo || '',
+    phoneNo: String(user?.phoneNo || ''),
     email: user?.email || '',
     artworkId: artwork?.id || null,
   });
@@ -57,19 +60,15 @@ const OrderSummaryPage = () => {
       const result = await response.json();
       setUploadProgress(90);
 
-      if (response.ok && result.success) {
-        showMessage('success', result.message || 'Request submitted successfully!');
-        setFormData({
-          firstName: user?.firstName || '',
-          lastName: user?.lastName || '',
-          countryCode: user?.countryCode || '+91',
-          phoneNo: user?.phoneNo || '',
-          email: user?.email || '',
-          artworkId: artwork?.id || null,
-        });
+      const orderId = result.data?.id;
+      console.log("hell", orderId);
+
+      if (response.ok && result.success && orderId) {
+        navigate('/order-confirmed', { state: { orderId } });
       } else {
         showMessage('error', result.message || 'Request could not proceed.');
       }
+
     } catch (err) {
       showMessage('error', 'Could not submit request.');
     } finally {

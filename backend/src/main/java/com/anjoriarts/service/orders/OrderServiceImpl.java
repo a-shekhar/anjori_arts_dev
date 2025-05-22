@@ -76,6 +76,7 @@ public class OrderServiceImpl implements OrderService{
                 .phoneNo(order.getPhoneNo())
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt())
+                .artworkTitle(artwork.getTitle())
                 .build();
     }
 }

@@ -2,6 +2,7 @@ package com.anjoriarts.service.email;
 
 import com.anjoriarts.common.Consonants;
 import com.anjoriarts.dto.CustomOrderResponseDTO;
+import com.anjoriarts.dto.OrderResponseDTO;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +75,175 @@ public class EmailServiceImpl implements EmailService{
         }
     }
 
+    @Override
+    @Async
+    public void sendOrderArtistConfirmation(OrderResponseDTO order){
+        try{
+            String subject = "🎉 Your Order Has Been Received – ID #" + order.getId() + " | " +
+                    Consonants.COMPANY_NAME;
+            String htmlContent = this.generateOrderArtistConfirmation(order);
+            this.sendEmail(Consonants.COMPANY_EMAIL_1, subject, htmlContent);
+        } catch (Exception e) {
+            logger.error("Email could not be sent", e);
+        }
+    }
+
+
+
+    @Override
+    @Async
+    public void sendOrderUserConfirmation(OrderResponseDTO order){
+        try{
+            String subject = "🎨 Thank you for your request!" + order.getId() + " | " +
+                    Consonants.COMPANY_NAME;
+            String htmlContent = this.generateOrderUserConfirmation(order);
+            this.sendEmail(order.getEmail(), subject, htmlContent);
+        } catch (Exception e) {
+            logger.error("Email could not be sent", e);
+        }
+    }
+
+    private String generateOrderUserConfirmation(OrderResponseDTO order) {
+        return  """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f9f4f0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <table width="100%%" style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <tr style="background: linear-gradient(to right, #cfd9df, #e2ebf0);">
+      <td style="padding: 30px; text-align: center;">
+        <h2 style="margin: 0; font-size: 24px; color: #3b0a45;">🎨 Thank You for Your Request</h2>
+        <p style="font-size: 14px; color: #6b4c5f;">Order ID: <strong>#%s</strong></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 30px;">
+        <p style="font-size: 16px; color: #333;">Dear %s,</p>
+
+        <p style="font-size: 16px; color: #555;">
+          We’ve received your artwork request on Anjori Arts and our team will get back to you soon.
+        </p>
+
+        <table style="width: 100%%; font-size: 15px; color: #444; margin: 20px 0;">
+          <tr><td><strong>Status:</strong></td><td>Pending</td></tr>
+          <tr><td><strong>Requested On:</strong></td><td>%s</td></tr>
+          <tr><td><strong>Artwork Title:</strong></td><td>%s</td></tr>
+        </table>
+
+        <p style="font-size: 14px; color: #555;">
+          We'll reach out soon to discuss next steps. In the meantime, feel free to explore more art at 
+          <a href="https://anjori-arts.vercel.app" target="_blank" style="color: #7c3aed;">AnjoriArts.com</a>.
+        </p>
+
+        <p style="font-size: 15px; color: #444; margin-top: 28px;">— Anjori Arts Team</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="background: #f0eaf4; padding: 20px; text-align: center; font-size: 12px; color: #777;">
+        © 2025 Anjori Arts • Made with ❤️ in India
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+""".formatted(
+                order.getId(),                 // Order ID
+                order.getFirstName(),              // Customer name
+                order.getCreatedAt().toString(),   // Date
+                order.getArtworkTitle()            // Title
+        );
+
+    }
+
+    private String generateOrderArtistConfirmation(OrderResponseDTO order) {
+        return  """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f9f4f0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <table width="100%%" style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <tr style="background: linear-gradient(to right, #d4c6ed, #f2e8ff);">
+      <td style="padding: 30px; text-align: center;">
+        <h2 style="margin: 0; font-size: 24px; color: #3b0a45;">🎨 New Artwork Request</h2>
+        <p style="font-size: 14px; color: #6b4c5f;">Order ID: <strong>#%s</strong></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 30px;">
+        <p style="font-size: 16px; color: #333;">Dear %s,</p>
+
+        <p style="font-size: 16px; color: #555;">
+          You’ve received a new request for one of your listed artworks on Anjori Arts.
+        </p>
+
+        <table style="width: 100%%; font-size: 15px; color: #444; margin: 20px 0;">
+          <tr><td><strong>Customer:</strong></td><td>%s %s</td></tr>
+          <tr><td><strong>Email:</strong></td><td>%s</td></tr>
+          <tr><td><strong>Phone:</strong></td><td>%s %s</td></tr>
+          <tr><td><strong>Artwork Title:</strong></td><td>%s</td></tr>
+          <tr><td><strong>Status:</strong></td><td>%s</td></tr>
+          <tr><td><strong>Requested On:</strong></td><td>%s</td></tr>
+        </table>
+
+        <p style="font-size: 14px; color: #555;">
+          You can now review or follow up with the customer from the admin panel.
+        </p>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="https://anjori-arts.vercel.app/admin/artwork-requests" target="_blank"
+            style="background: #3b0a45; color: white; padding: 12px 24px; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 16px;">
+            View Requests
+          </a>
+        </div>
+
+        <p style="font-size: 15px; color: #444;">— Anjori Arts System</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="background: #f0eaf4; padding: 20px; text-align: center; font-size: 12px; color: #777;">
+        © 2025 Anjori Arts • Made with ❤️ in India
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+""".formatted(
+                order.getId(),              // Order ID
+                "Love",                        // Artist/Admin name
+                order.getFirstName(),           // Customer first name
+                order.getLastName(),            // Customer last name
+                order.getEmail(),               // Email
+                order.getCountryCode(),         // Country code
+                order.getPhoneNo(),             // Phone number
+                order.getArtworkTitle(),        // Title
+                order.getStatus(),              // Status
+                order.getCreatedAt().toString() // Date
+        );
+
+    }
+
 
     private void sendEmail(String recipientEmail, String subject, String htmlContent){
         try{
@@ -92,6 +262,7 @@ public class EmailServiceImpl implements EmailService{
             logger.error("Email could not be sent", e);
         }
     }
+
 
 
     private String generateHtmlOtpVerificationEmailContent(String firstName, String term, String otp){

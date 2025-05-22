@@ -21,4 +21,5 @@ public class OrderResponseDTO {
     private Long userId;
     private String status;
     private ZonedDateTime createdAt;
+    private String artworkTitle;
 }

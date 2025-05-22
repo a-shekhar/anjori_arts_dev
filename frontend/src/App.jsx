@@ -26,6 +26,8 @@ import ProgressBar from "./components/Loader/ProgressBar";       // 📶 Top pro
 import AutoHideLoader from "./components/Loader/AutoHideLoader"; // 🧼 Auto-reset on route change
 import { LoadingProvider } from "./components/context/LoadingContext"; // 🌐 Global loading state
 import OrderSummaryPage from "./pages/payment/OrderSummary"
+import OrderConfirmedPageWrapper from './pages/payment/OrderConfirmedPageWrapper';
+
 
 function App() {
   return (
@@ -49,6 +51,9 @@ function App() {
 
           {/* Order related pages */}
           <Route path="/order-summary" element={<OrderSummaryPage />} />
+          <Route path="/order-confirmed" element={<OrderConfirmedPageWrapper />} />
+
+
 
           {/* Admin Routes */}
           <Route path="/admin" element={<Admin />}>
