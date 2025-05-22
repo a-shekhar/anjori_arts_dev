@@ -15,6 +15,7 @@ const OrderSummaryPage = () => {
   const navigate = useNavigate();
 
 
+
   // main artwork image
   const [mainImage] = useState(() => {
     if (artwork?.images?.length) {
@@ -31,6 +32,7 @@ const OrderSummaryPage = () => {
     phoneNo: String(user?.phoneNo || ''),
     email: user?.email || '',
     artworkId: artwork?.id || null,
+    userId: user?.userId || null
   });
 
   const handleChange = (e) => {
