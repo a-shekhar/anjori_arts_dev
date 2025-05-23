@@ -9,8 +9,6 @@ import Footer from "./components/Footer";
 
 import Home from "./pages/Home";
 import Admin from "./layout/Admin";
-import AddArtwork from "./pages/admin/AddArtwork";
-import AdminHome from "./pages/admin/AdminHome";
 import ShopPage from "./pages/Shop";
 import CustomOrderPage from "./pages/CustomOrder";
 import AboutPage from "./pages/About";
@@ -27,6 +25,13 @@ import AutoHideLoader from "./components/Loader/AutoHideLoader"; // 🧼 Auto-re
 import { LoadingProvider } from "./components/context/LoadingContext"; // 🌐 Global loading state
 import OrderSummaryPage from "./pages/payment/OrderSummary"
 import OrderConfirmedPageWrapper from './pages/payment/OrderConfirmedPageWrapper';
+
+// admin pages
+import AdminHome from "./pages/admin/AdminHome";
+import AddArtwork from "./pages/admin/AddArtwork";
+import ManageArtworksPage from "./pages/admin/ManageArtworks";
+import ManageCustomOrdersPage from "./pages/admin/ManageCustomOrders";
+import ManageOrdersPage from "./pages/admin/ManageOrders";
 
 
 function App() {
@@ -59,7 +64,9 @@ function App() {
           <Route path="/admin" element={<Admin />}>
             <Route index element={<AdminHome />} />
             <Route path="artworks/add" element={<AddArtwork />} />
-            <Route path="artworks/manage" element={<NotFound />} />
+            <Route path="artworks/manage" element={<ManageArtworksPage />} />
+            <Route path="custom-orders" element={<ManageCustomOrdersPage />} />
+             <Route path="orders" element={<ManageOrdersPage />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
