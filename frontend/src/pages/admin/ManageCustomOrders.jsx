@@ -1,199 +1,251 @@
-import React, { useState } from 'react';
-import { ChevronDownIcon, ChevronRightIcon, SearchIcon } from 'lucide-react';
-import OrderStatusDropdown from '../../components/dropdowns/OrderStatusDropdown';
-import ImageThumbnailList from '../../components/dropdowns/ImageThumbnailList';
+import { useState } from "react";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Textarea } from "../../components/ui/textarea";
 
-const dummyOrders = [
+const searchOptions = ["Order ID", "Name", "Email", "Phone", "Status"];
+const statusOptions = ["New", "Reviewed", "Quoted", "In Progress", "Fulfilled", "Cancelled"];
+
+const mockCustomOrders = [
   {
-    id: 1,
-    first_name: 'John',
-    last_name: 'Doe',
-    email: 'john@example.com',
-    country_code: '+91',
-    phone_no: 9876543210,
-    art_type: 'Portrait',
-    surface: 'Canvas',
-    medium: 'Oil',
-    budget: '₹5000',
-    preferred_size: '12x16',
-    no_of_copies: '1',
-    additional_notes: 'Please use bright colors.',
-    suggest_options: true,
-    quoted_price: 5500.0,
-    agreed_price: 5300.0,
-    status: 'PENDING',
-    created_at: '2025-05-10T12:00:00Z',
-    imageUrls: [
-      'https://via.placeholder.com/100x100?text=Image+1',
-      'https://via.placeholder.com/100x100?text=Image+2',
+    id: "CUS-1001",
+    userId: "U123",
+    name: "Riya Mehra",
+    phone: "9876543210",
+    email: "riya@example.com",
+    description: "Painting of a Rajasthani village.",
+    preferences: "Warm tones, 24x36, oil on canvas",
+    status: "New",
+    placedAt: "2025-05-24",
+    artType: "Portrait",
+    medium: "Oil",
+    surface: "Canvas",
+    size: "12x16",
+    budget: "₹5000",
+    copies: 1,
+    suggestOptions: "Yes",
+    userNote: "Please use bright colors.",
+    quotedPrice: "5500",
+    agreedPrice: "5300",
+    adminNote: "",
+    images: [
+      { id: 1, label: "Order image 1", url: "https://placehold.co/100x100" },
+      { id: 2, label: "Order image 2", url: "https://placehold.co/100x100" },
     ],
+  },
+  {
+    id: "CUS-1002",
+    userId: "U456",
+    name: "Aman Singh",
+    phone: "9876500000",
+    email: "aman@example.com",
+    description: "Radha Krishna painting for pooja room.",
+    preferences: "Bright colors, gold frame, 18x24",
+    status: "Reviewed",
+    placedAt: "2025-05-22",
+    artType: "Devotional",
+    medium: "Acrylic",
+    surface: "Canvas",
+    size: "18x24",
+    budget: "₹6000",
+    copies: 1,
+    suggestOptions: "No",
+    userNote: "Frame it nicely.",
+    quotedPrice: "6500",
+    agreedPrice: "6000",
+    adminNote: "",
+    images: [{ id: 1, label: "Reference image", url: "https://placehold.co/100x100" }],
+  },
+  {
+    id: "CUS-1003",
+    userId: "U789",
+    name: "Neha Kapoor",
+    phone: "9123456789",
+    email: "neha@example.com",
+    description: "Custom Ganesh abstract art.",
+    preferences: "Modern style, red/white theme, 20x30",
+    status: "Quoted",
+    placedAt: "2025-05-20",
+    artType: "Abstract",
+    medium: "Oil",
+    surface: "Wood",
+    size: "20x30",
+    budget: "₹7000",
+    copies: 2,
+    suggestOptions: "Yes",
+    userNote: "Try different textures.",
+    quotedPrice: "7500",
+    agreedPrice: "7000",
+    adminNote: "",
+    images: [],
   },
 ];
 
 export default function ManageCustomOrdersPage() {
-  const [orders, setOrders] = useState(dummyOrders);
-  const [search, setSearch] = useState('');
-  const [expandedOrderId, setExpandedOrderId] = useState(null);
-  const [searchField, setSearchField] = useState('name');
+  const [expandedId, setExpandedId] = useState(null);
+  const [orders, setOrders] = useState(mockCustomOrders);
+  const [searchBy, setSearchBy] = useState("Order ID");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const handleStatusChange = (orderId, newStatus) => {
-    setOrders(prev =>
-      prev.map(order =>
-        order.id === orderId ? { ...order, status: newStatus } : order
+  const updateField = (id, field, value) => {
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === id ? { ...order, [field]: value } : order
       )
     );
   };
 
-  const handleQuotedPriceChange = (orderId, newPrice) => {
-    setOrders(prev =>
-      prev.map(order =>
-        order.id === orderId ? { ...order, quoted_price: newPrice } : order
-      )
-    );
-  };
-
-  const handleAgreedPriceChange = (orderId, newPrice) => {
-    setOrders(prev =>
-      prev.map(order =>
-        order.id === orderId ? { ...order, agreed_price: newPrice } : order
-      )
-    );
-  };
-
-  const filteredOrders = orders.filter(order => {
-    const fullName = `${order.first_name} ${order.last_name}`.toLowerCase();
-    if (searchField === 'name') return fullName.includes(search.toLowerCase());
-    if (searchField === 'email') return order.email.toLowerCase().includes(search.toLowerCase());
-    if (searchField === 'art_type') return order.art_type.toLowerCase().includes(search.toLowerCase());
+  const filteredOrders = orders.filter((order) => {
+    const term = searchTerm.toLowerCase();
+    if (searchBy === "Order ID") return order.id.toLowerCase().includes(term);
+    if (searchBy === "Name") return order.name.toLowerCase().includes(term);
+    if (searchBy === "Email") return order.email.toLowerCase().includes(term);
+    if (searchBy === "Phone") return order.phone.toLowerCase().includes(term);
+    if (searchBy === "Status") return order.status.toLowerCase().includes(term);
     return true;
   });
 
   return (
-    <div className="p-4 max-w-7xl mx-auto font-sans">
-      <h1 className="text-3xl font-bold mb-6 text-purple-700">🎨 Manage Custom Orders</h1>
-
-      <div className="mb-6 flex items-center gap-2 bg-purple-50 p-2 rounded-xl shadow-sm">
-        <select
-          value={searchField}
-          onChange={(e) => setSearchField(e.target.value)}
-          className="px-3 py-2 rounded border border-purple-300 text-purple-700 font-medium text-sm focus:outline-none"
-        >
-          <option value="name">Name</option>
-          <option value="email">Email</option>
-          <option value="art_type">Art Type</option>
-        </select>
-        <div className="flex items-center w-full">
-          <span className="text-gray-400 px-2">
-            <SearchIcon size={16} />
-          </span>
-          <input
-            type="text"
-            placeholder={`Search by ${searchField.replace('_', ' ')}...`}
-            className="w-full bg-transparent p-2 focus:outline-none text-sm"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+    <div className="p-4 md:p-6 space-y-6 font-sans">
+      {/* Header & Search */}
+      <div className="rounded-xl bg-white border border-gray-200 p-4 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
+        <h1 className="text-2xl font-bold text-gray-800 font-heading flex items-center gap-2">
+          🎨 Manage Custom Orders
+        </h1>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <select
+            className="border rounded-lg px-3 py-2 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+            value={searchBy}
+            onChange={(e) => setSearchBy(e.target.value)}
+          >
+            {searchOptions.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+          <Input
+            className="h-10 w-full sm:w-72"
+            placeholder={`Search by ${searchBy}`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
-        <div className="grid grid-cols-6 bg-purple-50 text-sm font-semibold text-purple-800 px-4 py-3 border-b">
-          <div></div>
-          <div>Order ID</div>
-          <div>Name</div>
-          <div>Email</div>
-          <div>Phone</div>
-          <div>Status</div>
-        </div>
-
-        {filteredOrders.map(order => {
-          const isExpanded = expandedOrderId === order.id;
-          return (
-            <div key={order.id} className="border-b">
-              <div
-                className="grid grid-cols-6 items-center px-4 py-3 hover:bg-gray-50 cursor-pointer"
-                onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
-              >
-                <div>{isExpanded ? <ChevronDownIcon size={18} /> : <ChevronRightIcon size={18} />}</div>
-                <div className="font-mono">#{order.id}</div>
-                <div>{order.first_name} {order.last_name}</div>
-                <div>{order.email}</div>
-                <div>{order.country_code} {order.phone_no}</div>
-                <div><span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">{order.status}</span></div>
-              </div>
-
-              {isExpanded && (
-                <div className="bg-white px-6 py-6 text-sm space-y-6">
-                  <div>
-                    <h3 className="text-purple-600 font-semibold mb-2">📦 Order Info</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div><label className="text-gray-600">Art Type</label><div>{order.art_type}</div></div>
-                      <div><label className="text-gray-600">Surface</label><div>{order.surface}</div></div>
-                      <div><label className="text-gray-600">Medium</label><div>{order.medium}</div></div>
-                      <div><label className="text-gray-600">Budget</label><div>{order.budget}</div></div>
-                      <div><label className="text-gray-600">Preferred Size</label><div>{order.preferred_size}</div></div>
-                      <div><label className="text-gray-600">No. of Copies</label><div>{order.no_of_copies}</div></div>
-                      <div><label className="text-gray-600">Suggest Options</label><div>{order.suggest_options ? 'Yes' : 'No'}</div></div>
-                    </div>
-                    {order.additional_notes && <div className="mt-3 italic text-gray-600">📝 {order.additional_notes}</div>}
-                  </div>
-
-                  <div>
-                    <h3 className="text-purple-600 font-semibold mb-2">🖼️ Uploaded Images</h3>
-                    <ImageThumbnailList images={order.imageUrls} />
-                  </div>
-
-                  <div>
-                    <h3 className="text-purple-600 font-semibold mb-2">🛠️ Admin Controls</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Quoted Price</label>
-                        <input
-                          type="number"
-                          className="w-full border px-3 py-2 rounded-lg"
-                          value={order.quoted_price}
-                          onChange={(e) => handleQuotedPriceChange(order.id, parseFloat(e.target.value))}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Agreed Price</label>
-                        <input
-                          type="number"
-                          className="w-full border px-3 py-2 rounded-lg"
-                          value={order.agreed_price}
-                          onChange={(e) => handleAgreedPriceChange(order.id, parseFloat(e.target.value))}
-                        />
-                      </div>
-                    </div>
-
-                    <label className="block text-sm font-medium mt-4 mb-1">Change Status</label>
-                    <OrderStatusDropdown
-                      currentStatus={order.status}
-                      onChange={(newStatus) => handleStatusChange(order.id, newStatus)}
-                    />
-
-                    <label className="block text-sm font-medium mt-4 mb-1">Admin Note</label>
-                    <textarea
-                      rows={3}
-                      className="w-full border p-3 rounded-lg text-sm"
-                      placeholder="Write a note to send to the user or keep as admin-only info..."
-                    />
-
-                    <div className="mt-4 flex gap-3">
-                      <button className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700">
-                        ✉️ Send Email
-                      </button>
-                      <button className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
-                        💾 Save Changes
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+      {/* Orders Grid */}
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {filteredOrders.map((order, index) => (
+          <div
+            key={order.id}
+            className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
+          >
+            {/* Card header */}
+            <div className="mb-4 border-b pb-2">
+              <h2 className="text-md font-bold text-amber-600">
+                Order #{index + 1} — <span className="text-gray-700">{order.id}</span>
+              </h2>
+              <p className="text-xs text-gray-500">Placed on: {order.placedAt}</p>
             </div>
-          );
-        })}
+
+            {/* Basic Info */}
+            <div className="space-y-1 text-sm text-gray-700">
+              <p className="font-semibold">{order.name}</p>
+              <p className="text-sm">{order.phone}</p>
+              <p className="text-xs text-gray-500">{order.email}</p>
+              <p className="text-xs">User ID: {order.userId}</p>
+              <p className="text-sm">
+                <span className="font-medium text-gray-700">Status:</span> {order.status}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-3 mt-4">
+              <Button
+                variant="outline"
+                className="text-sm"
+                onClick={() =>
+                  setExpandedId((prev) => (prev === order.id ? null : order.id))
+                }
+              >
+                {expandedId === order.id ? "Hide" : "View"}
+              </Button>
+              <Button className="text-sm bg-teal-600 hover:bg-teal-700 text-white">
+                Save
+              </Button>
+            </div>
+
+            {/* Expanded Fields */}
+            {expandedId === order.id && (
+              <div className="mt-4 border-t pt-4 space-y-4 text-sm text-gray-700">
+                <section>
+                  <h3 className="text-sm font-semibold text-amber-600 mb-2">👤 Buyer Info</h3>
+                  <label>Name</label>
+                  <Input value={order.name} onChange={(e) => updateField(order.id, "name", e.target.value)} />
+                  <label>Phone</label>
+                  <Input value={order.phone} onChange={(e) => updateField(order.id, "phone", e.target.value)} />
+                  <label>Email</label>
+                  <Input value={order.email} onChange={(e) => updateField(order.id, "email", e.target.value)} />
+                </section>
+
+                <section>
+                  <h3 className="text-sm font-semibold text-amber-600 mb-2">📦 Order Info</h3>
+                  <label>Art Type</label>
+                  <Input value={order.artType} onChange={(e) => updateField(order.id, "artType", e.target.value)} />
+                  <label>Medium</label>
+                  <Input value={order.medium} onChange={(e) => updateField(order.id, "medium", e.target.value)} />
+                  <label>Surface</label>
+                  <Input value={order.surface} onChange={(e) => updateField(order.id, "surface", e.target.value)} />
+                  <label>Preferred Size</label>
+                  <Input value={order.size} onChange={(e) => updateField(order.id, "size", e.target.value)} />
+                  <label>Budget</label>
+                  <Input value={order.budget} onChange={(e) => updateField(order.id, "budget", e.target.value)} />
+                  <label>No. of Copies</label>
+                  <Input value={order.copies} onChange={(e) => updateField(order.id, "copies", e.target.value)} />
+                  <label>Suggest Options (Yes/No)</label>
+                  <Input value={order.suggestOptions} onChange={(e) => updateField(order.id, "suggestOptions", e.target.value)} />
+                  <label>User Note</label>
+                  <Textarea value={order.userNote} onChange={(e) => updateField(order.id, "userNote", e.target.value)} />
+                </section>
+
+                <section>
+                  <h3 className="text-sm font-semibold text-amber-600 mb-2">🖼 Uploaded Images</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {order.images.map((img) => (
+                      <div key={img.id} className="flex flex-col items-center border p-2 rounded">
+                        <img src={img.url} alt={img.label} className="w-24 h-24 object-cover rounded" />
+                        <p className="text-xs text-gray-600 mt-1">{img.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="text-sm font-semibold text-amber-600 mb-2">🛠 Admin Controls</h3>
+                  <label>Quoted Price</label>
+                  <Input value={order.quotedPrice} onChange={(e) => updateField(order.id, "quotedPrice", e.target.value)} />
+                  <label>Agreed Price</label>
+                  <Input value={order.agreedPrice} onChange={(e) => updateField(order.id, "agreedPrice", e.target.value)} />
+                  <label>Status</label>
+                  <select
+                    value={order.status}
+                    onChange={(e) => updateField(order.id, "status", e.target.value)}
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  >
+                    {statusOptions.map((status) => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
+                  </select>
+                  <label>Admin Note</label>
+                  <Textarea value={order.adminNote} onChange={(e) => updateField(order.id, "adminNote", e.target.value)} />
+                </section>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
+
+      {filteredOrders.length === 0 && (
+        <p className="text-center text-gray-500 italic mt-12">No matching custom orders found.</p>
+      )}
     </div>
   );
 }
