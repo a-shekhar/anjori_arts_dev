@@ -6,86 +6,42 @@ import { Textarea } from "../../components/ui/textarea";
 const searchOptions = ["Order ID", "Name", "Email", "Phone", "Status"];
 const statusOptions = ["New", "Reviewed", "Quoted", "In Progress", "Fulfilled", "Cancelled"];
 
-const mockCustomOrders = [
-  {
-    id: "CUS-1001",
-    userId: "U123",
-    name: "Riya Mehra",
-    phone: "9876543210",
-    email: "riya@example.com",
-    description: "Painting of a Rajasthani village.",
-    preferences: "Warm tones, 24x36, oil on canvas",
-    status: "New",
-    placedAt: "2025-05-24",
-    artType: "Portrait",
-    medium: "Oil",
-    surface: "Canvas",
-    size: "12x16",
-    budget: "₹5000",
-    copies: 1,
-    suggestOptions: "Yes",
-    userNote: "Please use bright colors.",
-    quotedPrice: "5500",
-    agreedPrice: "5300",
-    adminNote: "",
-    images: [
-      { id: 1, label: "Order image 1", url: "https://placehold.co/100x100" },
-      { id: 2, label: "Order image 2", url: "https://placehold.co/100x100" },
-    ],
-  },
-  {
-    id: "CUS-1002",
-    userId: "U456",
-    name: "Aman Singh",
-    phone: "9876500000",
-    email: "aman@example.com",
-    description: "Radha Krishna painting for pooja room.",
-    preferences: "Bright colors, gold frame, 18x24",
-    status: "Reviewed",
-    placedAt: "2025-05-22",
-    artType: "Devotional",
-    medium: "Acrylic",
-    surface: "Canvas",
-    size: "18x24",
-    budget: "₹6000",
-    copies: 1,
-    suggestOptions: "No",
-    userNote: "Frame it nicely.",
-    quotedPrice: "6500",
-    agreedPrice: "6000",
-    adminNote: "",
-    images: [{ id: 1, label: "Reference image", url: "https://placehold.co/100x100" }],
-  },
-  {
-    id: "CUS-1003",
-    userId: "U789",
-    name: "Neha Kapoor",
-    phone: "9123456789",
-    email: "neha@example.com",
-    description: "Custom Ganesh abstract art.",
-    preferences: "Modern style, red/white theme, 20x30",
-    status: "Quoted",
-    placedAt: "2025-05-20",
-    artType: "Abstract",
-    medium: "Oil",
-    surface: "Wood",
-    size: "20x30",
-    budget: "₹7000",
-    copies: 2,
-    suggestOptions: "Yes",
-    userNote: "Try different textures.",
-    quotedPrice: "7500",
-    agreedPrice: "7000",
-    adminNote: "",
-    images: [],
-  },
-];
+const mockCustomOrders = Array.from({ length: 14 }).map((_, i) => ({
+  id: `CUS-${1000 + i + 1}`,
+  userId: `U${100 + i}`,
+  name: `User ${i + 1}`,
+  phone: `98765000${i}`,
+  email: `user${i + 1}@example.com`,
+  description: `Custom artwork request #${i + 1}`,
+  preferences: `Preferences for order #${i + 1}`,
+  status: statusOptions[i % statusOptions.length],
+  placedAt: `2025-05-${(i % 28 + 1).toString().padStart(2, "0")}`,
+  artType: ["Portrait", "Abstract", "Devotional", "Nature"][i % 4],
+  medium: ["Oil", "Acrylic", "Watercolor"][i % 3],
+  surface: ["Canvas", "Wood", "Paper"][i % 3],
+  size: `${12 + i}x${16 + i}`,
+  budget: `₹${5000 + i * 100}`,
+  copies: (i % 3) + 1,
+  suggestOptions: i % 2 === 0 ? "Yes" : "No",
+  userNote: `Note from User ${i + 1}`,
+  quotedPrice: `${5500 + i * 120}`,
+  agreedPrice: `${5400 + i * 100}`,
+  adminNote: "",
+  images: i % 2 === 0
+    ? [
+        { id: 1, label: "Image A", url: "https://placehold.co/100x100" },
+        { id: 2, label: "Image B", url: "https://placehold.co/100x100" },
+      ]
+    : [],
+}));
 
 export default function ManageCustomOrdersPage() {
   const [expandedId, setExpandedId] = useState(null);
   const [orders, setOrders] = useState(mockCustomOrders);
   const [searchBy, setSearchBy] = useState("Order ID");
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const perPage = 12;
 
   const updateField = (id, field, value) => {
     setOrders((prev) =>
@@ -105,6 +61,9 @@ export default function ManageCustomOrdersPage() {
     return true;
   });
 
+  const totalPages = Math.ceil(filteredOrders.length / perPage);
+  const paginatedOrders = filteredOrders.slice((page - 1) * perPage, page * perPage);
+
   return (
     <div className="p-4 md:p-6 space-y-6 font-sans">
       {/* Header & Search */}
@@ -116,7 +75,10 @@ export default function ManageCustomOrdersPage() {
           <select
             className="border rounded-lg px-3 py-2 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
             value={searchBy}
-            onChange={(e) => setSearchBy(e.target.value)}
+            onChange={(e) => {
+              setSearchBy(e.target.value);
+              setPage(1);
+            }}
           >
             {searchOptions.map((opt) => (
               <option key={opt} value={opt}>{opt}</option>
@@ -126,54 +88,44 @@ export default function ManageCustomOrdersPage() {
             className="h-10 w-full sm:w-72"
             placeholder={`Search by ${searchBy}`}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
       </div>
 
-      {/* Orders Grid */}
+      {/* Orders */}
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredOrders.map((order, index) => (
-          <div
-            key={order.id}
-            className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition"
-          >
-            {/* Card header */}
+        {paginatedOrders.map((order, index) => (
+          <div key={order.id} className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition">
             <div className="mb-4 border-b pb-2">
               <h2 className="text-md font-bold text-amber-600">
-                Order #{index + 1} — <span className="text-gray-700">{order.id}</span>
+                Order #{(page - 1) * perPage + index + 1} — <span className="text-gray-700">{order.id}</span>
               </h2>
               <p className="text-xs text-gray-500">Placed on: {order.placedAt}</p>
             </div>
 
-            {/* Basic Info */}
-            <div className="space-y-1 text-sm text-gray-700">
+            <div className="text-sm text-gray-700 space-y-1">
               <p className="font-semibold">{order.name}</p>
-              <p className="text-sm">{order.phone}</p>
-              <p className="text-xs text-gray-500">{order.email}</p>
+              <p>{order.phone}</p>
+              <p className="text-xs">{order.email}</p>
               <p className="text-xs">User ID: {order.userId}</p>
-              <p className="text-sm">
-                <span className="font-medium text-gray-700">Status:</span> {order.status}
-              </p>
+              <p><span className="font-medium">Status:</span> {order.status}</p>
             </div>
 
-            {/* Actions */}
             <div className="flex justify-end gap-3 mt-4">
               <Button
                 variant="outline"
                 className="text-sm"
-                onClick={() =>
-                  setExpandedId((prev) => (prev === order.id ? null : order.id))
-                }
+                onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
               >
                 {expandedId === order.id ? "Hide" : "View"}
               </Button>
-              <Button className="text-sm bg-teal-600 hover:bg-teal-700 text-white">
-                Save
-              </Button>
+              <Button className="text-sm bg-teal-600 hover:bg-teal-700 text-white">Save</Button>
             </div>
 
-            {/* Expanded Fields */}
             {expandedId === order.id && (
               <div className="mt-4 border-t pt-4 space-y-4 text-sm text-gray-700">
                 <section>
@@ -200,7 +152,7 @@ export default function ManageCustomOrdersPage() {
                   <Input value={order.budget} onChange={(e) => updateField(order.id, "budget", e.target.value)} />
                   <label>No. of Copies</label>
                   <Input value={order.copies} onChange={(e) => updateField(order.id, "copies", e.target.value)} />
-                  <label>Suggest Options (Yes/No)</label>
+                  <label>Suggest Options</label>
                   <Input value={order.suggestOptions} onChange={(e) => updateField(order.id, "suggestOptions", e.target.value)} />
                   <label>User Note</label>
                   <Textarea value={order.userNote} onChange={(e) => updateField(order.id, "userNote", e.target.value)} />
@@ -243,8 +195,37 @@ export default function ManageCustomOrdersPage() {
         ))}
       </div>
 
-      {filteredOrders.length === 0 && (
-        <p className="text-center text-gray-500 italic mt-12">No matching custom orders found.</p>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center flex-wrap items-center gap-2 mt-8 text-sm">
+          <Button
+            variant="outline"
+            onClick={() => setPage((p) => Math.max(p - 1, 1))}
+            disabled={page === 1}
+          >
+            Previous
+          </Button>
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i + 1)}
+              className={`px-3 py-1 rounded border text-sm ${
+                page === i + 1
+                  ? "bg-teal-600 text-white border-teal-600"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <Button
+            variant="outline"
+            onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+            disabled={page === totalPages}
+          >
+            Next
+          </Button>
+        </div>
       )}
     </div>
   );

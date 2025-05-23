@@ -72,7 +72,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
 
-        <Footer />
+        <Footer className="mt-auto" />
         <ToastContainer position="top-right" autoClose={3000} />
       </Router>
     </LoadingProvider>
