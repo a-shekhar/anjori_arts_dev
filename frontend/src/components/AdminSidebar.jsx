@@ -41,6 +41,8 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           </div>
 
           <nav className="space-y-2 text-sm">
+
+
             <Link
               to="/admin/dashboard"
               onClick={handleNavClick}
@@ -50,28 +52,6 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
             >
               <LayoutDashboard size={18} />
               Dashboard
-            </Link>
-
-            <Link
-              to="/admin/users"
-              onClick={handleNavClick}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100 ${
-                isActive("/admin/users") ? "bg-violet-100 text-violet-700 font-semibold" : ""
-              }`}
-            >
-              <Users size={18} />
-              Users
-            </Link>
-
-            <Link
-              to="/admin/orders"
-              onClick={handleNavClick}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100 ${
-                isActive("/admin/orders") ? "bg-violet-100 text-violet-700 font-semibold" : ""
-              }`}
-            >
-              <ShoppingCart size={18} />
-              Orders
             </Link>
 
             {/* Artworks Menu */}
@@ -123,6 +103,29 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
               <Mail size={18} />
               Custom Orders
             </Link>
+
+            <Link
+              to="/admin/orders"
+              onClick={handleNavClick}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100 ${
+                isActive("/admin/orders") ? "bg-violet-100 text-violet-700 font-semibold" : ""
+              }`}
+            >
+              <ShoppingCart size={18} />
+              Orders
+            </Link>
+
+            <Link
+              to="/admin/users"
+              onClick={handleNavClick}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100 ${
+                isActive("/admin/users") ? "bg-violet-100 text-violet-700 font-semibold" : ""
+              }`}
+            >
+              <Users size={18} />
+              Users
+            </Link>
+
 
             <Link
               to="/admin/settings"
