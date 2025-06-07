@@ -3,7 +3,7 @@ CREATE TABLE arts.artworks (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     size VARCHAR(20),
-    medium VARCHAR(20),
+    medium VARCHAR(100),
     surface VARCHAR(20),
     price DECIMAL(6, 2),
     slug VARCHAR(255) UNIQUE NOT NULL,

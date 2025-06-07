@@ -2,16 +2,20 @@ import React, { useRef, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useLoading } from "../../components/context/LoadingContext";
+import { mediumOptions } from "../../components/dropdowns/MediumDropdown";
+import MultiSelectDropdown from "../../components/dropdowns/MultiSelectDropdown";
+import SurfaceDropdown from "../../components/dropdowns/SurfaceDropdown";
+import AvailabilityDropdown from "../../components/dropdowns/AvailabilityDropdown";
 
 export default function AddArtwork() {
   const fileInputRef = useRef(null);
-  const { setUploadProgress } = useLoading(); // ✅ Only progress bar, no showLoader
+  const { setUploadProgress } = useLoading();
 
   const [formData, setFormData] = useState({
     title: "",
     size: "",
     price: "",
-    medium: "",
+    medium: [],
     surface: "",
     tags: "",
     featured: false,
@@ -61,17 +65,14 @@ export default function AddArtwork() {
     form.append("title", formData.title);
     form.append("size", formData.size);
     form.append("price", formData.price);
-    form.append("medium", formData.medium);
+    formData.medium.forEach((m) => form.append("medium", m));
     form.append("surface", formData.surface);
     form.append("tags", formData.tags);
     form.append("featured", formData.featured);
     form.append("description", formData.description);
     form.append("availability", formData.availability);
     form.append("artistNote", formData.artistNote);
-
-    formData.images.forEach(({ file }) => {
-      form.append("images", file);
-    });
+    formData.images.forEach(({ file }) => form.append("images", file));
 
     try {
       const response = await axios.post("/api/admin/artworks/add", form, {
@@ -79,8 +80,7 @@ export default function AddArtwork() {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (e) => {
           const percent = Math.round((e.loaded * 100) / e.total);
-          console.log("Upload %:", percent); // 👈 Add this for debugging
-          setUploadProgress(50); // ✅ Update global progress bar
+          setUploadProgress(50);
         }
       });
 
@@ -93,7 +93,7 @@ export default function AddArtwork() {
           title: "",
           size: "",
           price: "",
-          medium: "",
+          medium: [],
           surface: "",
           tags: "",
           featured: false,
@@ -110,7 +110,7 @@ export default function AddArtwork() {
       console.error("Upload error:", error);
       toast.error("Internal Server Error");
     } finally {
-      setUploadProgress(0); // ✅ Always reset
+      setUploadProgress(0);
     }
   };
 
@@ -118,26 +118,63 @@ export default function AddArtwork() {
     <div className="max-w-2xl mx-auto bg-white shadow rounded p-6 space-y-6">
       <h2 className="text-2xl font-bold">Add New Artwork</h2>
       <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-        {[
-          { name: "title", label: "Title", type: "text", placeholder: "Enter title" },
-          { name: "size", label: "Size", type: "text", placeholder: "e.g. 24x36" },
-          { name: "price", label: "Price (₹)", type: "number", placeholder: "Enter price" },
-          { name: "medium", label: "Medium", type: "text", placeholder: "e.g. Oil, Acrylic" },
-          { name: "surface", label: "Surface", type: "text", placeholder: "e.g. Canvas, Wood" },
-          { name: "tags", label: "Tags", type: "text", placeholder: "e.g. Nature, Mythological" },
-        ].map(({ name, label, type, placeholder }) => (
-          <div key={name} className="flex items-center justify-between gap-4">
-            <label className="w-32 font-medium">{label}</label>
-            <input
-              type={type}
-              name={name}
-              value={formData[name]}
-              onChange={handleChange}
-              placeholder={placeholder}
-              className="flex-1 border rounded p-1.5"
+        {/* Title, Size, Price, Tags */}
+        {["title", "size", "price", "tags"].map((name) => {
+          const label = name.charAt(0).toUpperCase() + name.slice(1);
+          const placeholder = `Enter ${label}`;
+          return (
+            <div key={name} className="flex items-center justify-between gap-4">
+              <label className="w-32 font-medium">{label}</label>
+              <input
+                type={name === "price" ? "number" : "text"}
+                name={name}
+                value={formData[name]}
+                onChange={handleChange}
+                placeholder={placeholder}
+                className="flex-1 border rounded p-1.5"
+              />
+            </div>
+          );
+        })}
+
+        {/* Surface */}
+        <div className="flex items-center justify-between gap-4">
+          <label className="w-32 font-medium">Surface</label>
+          <div className="flex-1">
+            <SurfaceDropdown
+              value={formData.surface}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, surface: e.target.value }))
+              }
             />
           </div>
-        ))}
+        </div>
+
+        {/* Medium */}
+        <div className="flex items-center justify-between gap-4">
+          <label className="w-32 font-medium">Medium</label>
+          <div className="flex-1">
+            <MultiSelectDropdown
+              name="medium"
+              options={mediumOptions}
+              selected={formData.medium}
+              onChange={(selected) =>
+                setFormData((prev) => ({ ...prev, medium: selected }))
+              }
+            />
+          </div>
+        </div>
+
+        {/* Availability */}
+        <div className="flex items-center justify-between gap-4">
+          <label className="w-32 font-medium">Availability</label>
+          <div className="flex-1">
+            <AvailabilityDropdown
+              value={formData.availability}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
 
         {/* File Upload */}
         <div>
@@ -178,7 +215,7 @@ export default function AddArtwork() {
           )}
         </div>
 
-        {/* Checkboxes */}
+        {/* Featured Checkbox */}
         <div className="flex gap-6 flex-wrap">
           <label className="flex items-center gap-2">
             <input
@@ -191,7 +228,7 @@ export default function AddArtwork() {
           </label>
         </div>
 
-        {/* Description & Notes */}
+        {/* Description */}
         <div className="flex flex-col">
           <label htmlFor="description" className="font-medium mb-1">Description</label>
           <textarea
@@ -205,21 +242,7 @@ export default function AddArtwork() {
           />
         </div>
 
-        <div className="flex flex-col">
-          <label htmlFor="availability" className="font-medium mb-1">Availability</label>
-          <select
-            id="availability"
-            name="availability"
-            className="w-full border rounded px-3 py-2 text-sm"
-            value={formData.availability}
-            onChange={handleChange}
-          >
-            <option value="Available">Available</option>
-            <option value="Sold">Sold</option>
-            <option value="Coming Soon">Coming Soon</option>
-          </select>
-        </div>
-
+        {/* Artist Note */}
         <div className="flex flex-col">
           <label htmlFor="artistNote" className="font-medium mb-1">Artist Note</label>
           <textarea

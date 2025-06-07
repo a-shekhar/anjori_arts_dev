@@ -1,6 +1,7 @@
 package com.anjoriarts.controller;
 
 import com.anjoriarts.common.CommonResponse;
+import com.anjoriarts.common.Consonants;
 import com.anjoriarts.dto.*;
 import com.anjoriarts.service.*;
 import com.anjoriarts.service.auth.AuthService;
@@ -43,11 +44,10 @@ public class AuthController {
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@RequestBody SignupDTO signupDTO){
         try {
-            String generatedOtp = otpService.generateOTP(signupDTO.getEmail());
+            String generatedOtp = otpService.generateOTP(signupDTO.getEmail(), Consonants.SIGNUP_TERM);
 
             if (generatedOtp.length() == 6) {
-                emailService.sendOTP(signupDTO.getEmail(), signupDTO.getFirstName(), "Signup", generatedOtp);
-                System.out.println("OTP is" + generatedOtp);
+                emailService.sendOTP(signupDTO.getEmail(), signupDTO.getFirstName(), Consonants.SIGNUP_TERM, generatedOtp);
                 return ResponseEntity.ok(CommonResponse.success("OTP Sent", generatedOtp));
             } else if (generatedOtp.startsWith("Please try again")) {
                 return ResponseEntity.ok(CommonResponse.success("Please Try again after sometime.", generatedOtp));
@@ -134,16 +134,16 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordDTO dto){
         try {
-            String generatedOtp = otpService.generateOTP(dto.getEmail());
+
+            String generatedOtp = otpService.generateOTP(dto.getEmail(), Consonants.FORGET_PASSWORD_TERM);
 
             if (generatedOtp.length() == 6) {
-                emailService.sendOTP(dto.getEmail(), "User", "Forgot Password", generatedOtp);
+                emailService.sendOTP(dto.getEmail(), "User", Consonants.FORGET_PASSWORD_TERM, generatedOtp);
                 return ResponseEntity.ok().body(CommonResponse.success("Reset Email OTP sent..", dto.getEmail()));
             } else if (generatedOtp.startsWith("Please try again")) {
                 return ResponseEntity.ok(CommonResponse.success("Please Try again after sometime.", generatedOtp));
-            } else {
-                return ResponseEntity.badRequest().body(CommonResponse.failure("Unknown OTP generation error", null));
             }
+            return ResponseEntity.badRequest().body(CommonResponse.failure("Invalid Credentials!!!", null));
         } catch (Exception e) {
             logger.error(e.getMessage());
             return ResponseEntity.ok().body(CommonResponse.failure("Reset password failed..", null));

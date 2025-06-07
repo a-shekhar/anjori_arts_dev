@@ -1,13 +1,21 @@
 import React from "react";
 
-export default function SurfaceDropdown({ value, onChange, name = "surface" }) {
+const surfaceOptions = ["Canvas", "Paper", "Wood", "Fabric", "Tote Bag"];
+
+export default function SurfaceDropdown({ value, onChange, name }) {
   return (
-    <select name={name} value={value} onChange={onChange} className="input">
+    <select
+      name={name || "surface"}
+      value={value}
+      onChange={onChange}
+      className="w-full border border-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+    >
       <option value="">Select Surface</option>
-      <option>Canvas</option>
-      <option>Paper</option>
-      <option>Wood</option>
-      <option>Fabric</option>
+      {[...surfaceOptions].sort().map((surface) => (
+        <option key={surface} value={surface}>
+          {surface}
+        </option>
+      ))}
     </select>
   );
 }

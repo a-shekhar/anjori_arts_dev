@@ -1,12 +1,15 @@
 package com.anjoriarts.service.email;
 
 import com.anjoriarts.common.Consonants;
+import com.anjoriarts.entity.UserEntity;
+import com.anjoriarts.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,8 +18,19 @@ public class OtpServiceImpl implements OtpService{
 
      // thread safe map
     private final Map<String, OTPEntry> otpStore = new ConcurrentHashMap<>();
+    private final UserRepository userRepository;
 
-    public String generateOTP(String email){
+    public OtpServiceImpl(UserRepository userRepository){
+        this.userRepository = userRepository;
+    }
+
+    public String generateOTP(String email, String term){
+        if(!term.equalsIgnoreCase("Signup")){
+            Optional<UserEntity> user = userRepository.findByEmail(email);
+            if(user.isEmpty()){
+                return "";
+            }
+        }
         ZonedDateTime timeNow = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
         ZonedDateTime expiresAt = ZonedDateTime.now().plusMinutes(Consonants.EXPIRATION_TIME_IN_MINUTES);
         String generatedOtp = String.valueOf(new Random().nextInt(100000, 999999));
@@ -32,7 +46,7 @@ public class OtpServiceImpl implements OtpService{
                 otpStore.put(email, new OTPEntry(String.valueOf(generatedOtp), timeNow, expiresAt));
             }
         }
-        System.out.println("Generated otp is " + generatedOtp);
+
         return generatedOtp;
     }
 

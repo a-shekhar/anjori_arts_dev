@@ -25,3 +25,6 @@ ALTER TABLE arts.artworks
 ALTER COLUMN price TYPE Decimal(10,2);
 
 Add script for order
+
+----- 0.75
+ALTER TABLE arts.artworks ALTER COLUMN medium TYPE VARCHAR(100);

@@ -27,4 +27,8 @@ public class Consonants {
     // order
     public static final String ORDER_INITIAL_STATE = "Pending";
 
+    // general term
+    public static final String FORGET_PASSWORD_TERM = "Forgot Password";
+    public static final String SIGNUP_TERM = "Signup";
+
 }

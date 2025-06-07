@@ -25,9 +25,11 @@ public class ArtworksController {
 
     Logger logger = LoggerFactory.getLogger(getClass().getName());
     private final ArtworksService artworksService;
+    private final CommonController commonController;
 
-    public ArtworksController(ArtworksService artworksService){
+    public ArtworksController(ArtworksService artworksService, CommonController commonController){
         this.artworksService = artworksService;
+        this.commonController = commonController;
     }
 
     @GetMapping(value = "/artworks/featured", produces = "application/json")
@@ -89,7 +91,7 @@ public class ArtworksController {
     @PostMapping("/admin/artworks/add")
     public ResponseEntity<?> addArtWork(@RequestParam("title") String title,
                                         @RequestParam("size") String size,
-                                        @RequestParam("medium") String medium,
+                                        @RequestParam("medium")  List<String> mediums,
                                         @RequestParam("surface") String surface,
                                         @RequestParam("price") String price,
                                         @RequestParam("tags") String tags,
@@ -100,6 +102,7 @@ public class ArtworksController {
                                         @RequestParam("artistNote") String artistNote
     ){
         logger.info("Adding the given artwork...");
+        String medium = commonController.normalizeString(mediums);
         String errorMessage = validateData(title, size, medium, surface, price, imageFiles);
 
         if(errorMessage.isEmpty()) {
