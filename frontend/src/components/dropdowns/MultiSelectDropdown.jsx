@@ -29,9 +29,9 @@ export default function MultiSelectDropdown({
 
   return (
     <div className="w-full relative" ref={dropdownRef}>
-      {/* Display selected values */}
+      {/* Display area that matches input field */}
       <div
-        className="border border-black rounded-md px-3 py-2 bg-white cursor-pointer min-h-[2.5rem] text-sm"
+        className="w-full border border-black text-sm px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white cursor-pointer min-h-[2.5rem]"
         onClick={() => setIsOpen(!isOpen)}
       >
         {selected.length === 0 ? (
