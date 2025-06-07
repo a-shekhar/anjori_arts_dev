@@ -17,25 +17,18 @@ export default function MediumDropdown({ value = [], onChange, name }) {
   };
 
   return (
-    <div className="w-full relative">
-      <select
-        name={name || "medium"}
-        multiple
-        value={value}
-        onChange={handleChange}
-        className="w-full border border-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 h-40"
-      >
-        {value.length === 0 && (
-          <option disabled hidden value="">
-            -- Select Medium --
-          </option>
-        )}
-        {[...mediumOptions].sort().map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </div>
+    <select
+      name={name || "medium"}
+      multiple
+      value={value}
+      onChange={handleChange}
+      className="w-full border border-black rounded px-3 py-[0.6rem] text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 h-40"
+    >
+      {[...mediumOptions].sort().map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
   );
 }

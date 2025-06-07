@@ -13,8 +13,9 @@ export default function AvailabilityDropdown({ value, onChange, name }) {
       name={name || "availability"}
       value={value}
       onChange={onChange}
-      className="w-full border border-black rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+      className="w-full border border-black rounded px-3 py-[0.6rem] text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
     >
+      <option value="">Select Availability</option>
       {[...availabilityOptions].sort().map((option) => (
         <option key={option} value={option}>
           {option}

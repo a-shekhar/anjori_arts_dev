@@ -1,12 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
-export default function MultiSelectDropdown({
-  name,
-  options = [],
-  selected = [],
-  onChange,
-  placeholder = "Select Options"
-}) {
+export default function MultiSelectDropdown({ name, options = [], selected = [], onChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef();
 
@@ -15,6 +9,11 @@ export default function MultiSelectDropdown({
       ? selected.filter((o) => o !== option)
       : [...selected, option];
     onChange(updated);
+  };
+
+  const clearAll = () => {
+    onChange([]);
+    setIsOpen(false);
   };
 
   useEffect(() => {
@@ -28,45 +27,58 @@ export default function MultiSelectDropdown({
   }, []);
 
   return (
-    <div className="w-full relative" ref={dropdownRef}>
-      {/* Display area that matches input field */}
+    <div className="relative w-full" ref={dropdownRef}>
+      {/* Main button */}
       <div
-        className="w-full border border-black text-sm px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white cursor-pointer min-h-[2.5rem]"
-        onClick={() => setIsOpen(!isOpen)}
+        className="border border-black rounded-md px-3 py-2 text-sm bg-white min-h-[2.5rem] w-full flex items-center justify-between flex-wrap cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500"
+        onClick={() => setIsOpen((prev) => !prev)}
       >
-        {selected.length === 0 ? (
-          <span className="text-gray-400">-- {placeholder} --</span>
-        ) : (
-          <div className="flex flex-wrap gap-1">
+        {selected.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
             {selected.map((item) => (
               <span
                 key={item}
-                className="text-sm bg-orange-100 text-orange-800 px-2 py-1 rounded-full"
+                className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full"
               >
                 {item}
               </span>
             ))}
           </div>
+        ) : (
+          <span className="text-sm text-gray-400">-- Select Options --</span>
         )}
       </div>
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-full max-h-56 overflow-auto border border-gray-300 rounded-md shadow bg-white text-sm">
+        <div className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto border border-gray-300 bg-white rounded-md shadow text-sm">
           {[...options].sort().map((option) => (
             <label
               key={option}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-orange-50 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-orange-50 active:bg-orange-100 focus-visible:bg-orange-100"
             >
               <input
                 type="checkbox"
-                className="accent-orange-500"
                 checked={selected.includes(option)}
                 onChange={() => toggleOption(option)}
+                className="accent-orange-500 w-4 h-4"
               />
-              {option}
+              <span>{option}</span>
             </label>
           ))}
+
+          {/* Clear All */}
+          {selected.length > 0 && (
+            <div className="border-t px-3 py-2 text-right bg-white">
+              <button
+                type="button"
+                onClick={clearAll}
+                className="text-xs text-red-600 hover:underline focus:outline-none"
+              >
+                Clear All
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
