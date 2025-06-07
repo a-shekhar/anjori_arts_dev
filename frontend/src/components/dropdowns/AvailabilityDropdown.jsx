@@ -5,7 +5,7 @@ const availabilityOptions = [
   "Ready for Request",
   "Sold",
   "Archived",
-]; // You can add/edit freely
+];
 
 export default function AvailabilityDropdown({ value, onChange, name }) {
   return (

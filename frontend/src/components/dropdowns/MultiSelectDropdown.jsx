@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 
-export default function MultiSelectDropdown({ name, options = [], selected = [], onChange }) {
+export default function MultiSelectDropdown({
+  name,
+  options = [],
+  selected = [],
+  onChange,
+  placeholder = "Select Options"
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef();
 
@@ -23,38 +29,40 @@ export default function MultiSelectDropdown({ name, options = [], selected = [],
 
   return (
     <div className="w-full relative" ref={dropdownRef}>
+      {/* Display selected values */}
       <div
-        className="border border-black rounded-md px-3 py-2 cursor-pointer min-h-[2.5rem] bg-white"
-        onClick={() => setIsOpen((prev) => !prev)}
+        className="border border-black rounded-md px-3 py-2 bg-white cursor-pointer min-h-[2.5rem] text-sm"
+        onClick={() => setIsOpen(!isOpen)}
       >
-        {selected.length > 0 ? (
+        {selected.length === 0 ? (
+          <span className="text-gray-400">-- {placeholder} --</span>
+        ) : (
           <div className="flex flex-wrap gap-1">
             {selected.map((item) => (
               <span
                 key={item}
-                className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full"
+                className="text-sm bg-orange-100 text-orange-800 px-2 py-1 rounded-full"
               >
                 {item}
               </span>
             ))}
           </div>
-        ) : (
-          <span className="text-sm text-gray-400">-- Select Options --</span> // ✅ Clean placeholder
         )}
       </div>
 
+      {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-full border border-gray-300 rounded-md shadow bg-white max-h-56 overflow-auto">
+        <div className="absolute z-10 mt-1 w-full max-h-56 overflow-auto border border-gray-300 rounded-md shadow bg-white text-sm">
           {[...options].sort().map((option) => (
             <label
               key={option}
-              className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-orange-50 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2 hover:bg-orange-50 cursor-pointer"
             >
               <input
                 type="checkbox"
+                className="accent-orange-500"
                 checked={selected.includes(option)}
                 onChange={() => toggleOption(option)}
-                className="accent-orange-500"
               />
               {option}
             </label>

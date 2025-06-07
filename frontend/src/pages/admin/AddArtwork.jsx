@@ -118,6 +118,7 @@ export default function AddArtwork() {
     <div className="max-w-2xl mx-auto bg-white shadow rounded p-6 space-y-6">
       <h2 className="text-2xl font-bold">Add New Artwork</h2>
       <form onSubmit={handleSubmit} className="space-y-4 text-sm">
+
         {/* Title, Size, Price, Tags */}
         {["title", "size", "price", "tags"].map((name) => {
           const label = name.charAt(0).toUpperCase() + name.slice(1);
@@ -150,7 +151,7 @@ export default function AddArtwork() {
           </div>
         </div>
 
-        {/* Medium */}
+        {/* Medium (custom dropdown with pills + checkboxes) */}
         <div className="flex items-center justify-between gap-4">
           <label className="w-32 font-medium">Medium</label>
           <div className="flex-1">
@@ -161,6 +162,7 @@ export default function AddArtwork() {
               onChange={(selected) =>
                 setFormData((prev) => ({ ...prev, medium: selected }))
               }
+              placeholder="Select Medium"
             />
           </div>
         </div>

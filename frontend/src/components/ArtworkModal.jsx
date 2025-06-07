@@ -87,7 +87,7 @@ const ArtworkModal = ({ artwork, onClose }) => {
         {availability && (
           <p
             className={`text-xs mb-2 font-medium ${
-              availability === "Available" ? "text-green-600" : "text-red-600"
+              availability === "Available" ||  availability === "Ready for Request" ? "text-green-600" : "text-red-600"
             }`}
           >
             {availability}

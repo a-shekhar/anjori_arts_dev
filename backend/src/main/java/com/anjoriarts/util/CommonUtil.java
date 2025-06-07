@@ -5,10 +5,11 @@ import com.anjoriarts.common.Consonants;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class CommonUtil {
 
-    //Convert to "2025-05-11T11:27:36.088251Z"; to  11 May 2025, 04:57 PM (IST)
     public static String formatToLocal(String utcTimestamp) {
         ZonedDateTime utcDateTime = ZonedDateTime.parse(utcTimestamp);
 
@@ -19,6 +20,14 @@ public class CommonUtil {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy");
 
         return localDateTime.format(formatter);
+    }
+
+    public static String normalizeString(List<String> mediums) {
+        return mediums.stream()
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .sorted()
+                .collect(Collectors.joining(", "));
     }
 
 }

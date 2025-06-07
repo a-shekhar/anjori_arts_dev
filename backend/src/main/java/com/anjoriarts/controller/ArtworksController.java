@@ -5,6 +5,7 @@ import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;
 import com.anjoriarts.dto.ArtworkPageResponse;
 import com.anjoriarts.service.artworks.ArtworksService;
+import com.anjoriarts.util.CommonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -25,11 +26,9 @@ public class ArtworksController {
 
     Logger logger = LoggerFactory.getLogger(getClass().getName());
     private final ArtworksService artworksService;
-    private final CommonController commonController;
 
-    public ArtworksController(ArtworksService artworksService, CommonController commonController){
+    public ArtworksController(ArtworksService artworksService){
         this.artworksService = artworksService;
-        this.commonController = commonController;
     }
 
     @GetMapping(value = "/artworks/featured", produces = "application/json")
@@ -102,7 +101,7 @@ public class ArtworksController {
                                         @RequestParam("artistNote") String artistNote
     ){
         logger.info("Adding the given artwork...");
-        String medium = commonController.normalizeString(mediums);
+        String medium = CommonUtil.normalizeString(mediums);
         String errorMessage = validateData(title, size, medium, surface, price, imageFiles);
 
         if(errorMessage.isEmpty()) {
