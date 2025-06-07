@@ -1,6 +1,6 @@
 import React from "react";
 
-const surfaceOptions = ["Canvas", "Paper", "Wood", "Fabric"];
+const surfaceOptions = ["Canvas", "Paper", "Wood", "Fabric", "Tote Bag"];
 
 export default function SurfaceDropdown({ value, onChange, name }) {
   return (

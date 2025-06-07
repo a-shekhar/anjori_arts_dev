@@ -15,4 +15,6 @@ public interface ArtworkRepository extends JpaRepository<ArtworkEntity, Long> {
     Page<ArtworkEntity> findByFeaturedTrueOrderByCreatedAtDesc(Pageable pageable);
 
     Optional<ArtworkEntity> findById(Long id);
+
+    Page<ArtworkEntity> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 }

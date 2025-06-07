@@ -4,6 +4,7 @@ import com.anjoriarts.common.CommonResponse;
 import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;
 import com.anjoriarts.dto.ArtworkPageResponse;
+import com.anjoriarts.dto.ArtworkSearchRequest;
 import com.anjoriarts.service.artworks.ArtworksService;
 import com.anjoriarts.util.CommonUtil;
 import org.slf4j.Logger;
@@ -161,5 +162,24 @@ public class ArtworksController {
             return  errorMsg;
         }
         return errorMsg;
+    }
+
+    @PostMapping("/artworks/search")
+    public ResponseEntity<?> searchArtworks(@RequestBody ArtworkSearchRequest request,
+                                            @RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "9") int size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<ArtworkResponseDTO> resultPage = artworksService.searchArtworks(request, pageable);
+
+        ArtworkPageResponse response = new ArtworkPageResponse(
+                resultPage.getContent(),
+                resultPage.getTotalPages(),
+                resultPage.getTotalElements(),
+                resultPage.getNumber(),
+                resultPage.getSize(),
+                resultPage.isFirst(),
+                resultPage.isLast()
+        );
+        return ResponseEntity.ok().body(CommonResponse.success("Artworks fetched", response));
     }
 }

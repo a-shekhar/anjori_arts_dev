@@ -4,6 +4,7 @@ import com.anjoriarts.common.Consonants;
 import com.anjoriarts.dto.ArtworkImagesDTO;
 import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;
+import com.anjoriarts.dto.ArtworkSearchRequest;
 import com.anjoriarts.entity.ArtworkEntity;
 import com.anjoriarts.entity.ArtworkImagesEntity;
 import com.anjoriarts.repository.ArtworkRepository;
@@ -17,7 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -120,9 +120,18 @@ public class ArtworksServiceImpl implements ArtworksService{
     @Override
     public Page<ArtworkResponseDTO> getAllArtworks(Pageable pageable) {
         Page<ArtworkEntity> page = artworkRepository.findAll(pageable);
-
         // Convert each entity to DTO using map
         return page.map(this::convertToResponseDto);
+    }
+
+    @Override
+    public Page<ArtworkResponseDTO> searchArtworks(ArtworkSearchRequest request, Pageable pageable) {
+        Page<ArtworkEntity> page = null;
+        if(request.getSearchBy().equalsIgnoreCase("Title")) {
+            page = artworkRepository.findByTitleContainingIgnoreCase(request.getSearchTerm(), pageable);
+        }
+        // Convert each entity to DTO using map
+        return page != null ? page.map(this::convertToResponseDto) : null;
     }
 
     private ArtworkResponseDTO convertToResponseDto(ArtworkEntity entity) {
@@ -161,8 +170,6 @@ public class ArtworksServiceImpl implements ArtworksService{
                 .createdAt(CommonUtil.formatToLocal(entity.getCreatedAt().toString()))
                 .images(imagesDTO)
                 .build();
-
-
     }
 
 }
