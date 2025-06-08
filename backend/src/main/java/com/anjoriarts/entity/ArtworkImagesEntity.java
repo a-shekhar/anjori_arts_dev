@@ -21,12 +21,6 @@ public class ArtworkImagesEntity {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "alt_text")
-    private String altText;
-
     @Column(name = "display_order")
     private int displayOrder;
-
-    @Column(name = "is_main")
-    private boolean main;
 }

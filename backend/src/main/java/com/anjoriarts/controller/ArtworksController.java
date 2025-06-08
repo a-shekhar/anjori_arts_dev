@@ -118,6 +118,7 @@ public class ArtworksController {
                     .description(description)
                     .availability(availability)
                     .artistNote(artistNote)
+                    .mediums(mediums)
                     .build();
             dto = artworksService.saveArtwork(dto);
             if(dto.getId() == null){

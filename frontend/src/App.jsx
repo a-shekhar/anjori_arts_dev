@@ -30,8 +30,10 @@ import OrderConfirmedPageWrapper from './pages/payment/OrderConfirmedPageWrapper
 import AdminHome from "./pages/admin/AdminHome";
 import AddArtwork from "./pages/admin/AddArtwork";
 import ManageArtworksPage from "./pages/admin/ManageArtworks";
+import ArtworkDetailPage from "./pages/admin/ArtworkDetailPage";
 import ManageCustomOrdersPage from "./pages/admin/ManageCustomOrders";
 import ManageOrdersPage from "./pages/admin/ManageOrders";
+
 
 
 function App() {
@@ -65,6 +67,7 @@ function App() {
             <Route index element={<AdminHome />} />
             <Route path="artworks/add" element={<AddArtwork />} />
             <Route path="artworks/manage" element={<ManageArtworksPage />} />
+            <Route path="/admin/artworks/:id" element={<ArtworkDetailPage />} />
             <Route path="custom-orders" element={<ManageCustomOrdersPage />} />
              <Route path="orders" element={<ManageOrdersPage />} />
           </Route>

@@ -40,7 +40,7 @@ export default function ArtworkDetailPage() {
     <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">🖼️ Artwork Detail - #{id}</h1>
-        <Button variant="ghost" onClick={() => navigate("/admin/artworks")}>← Back</Button>
+        <Button variant="ghost" onClick={() => navigate("/admin/artworks/manage")}>← Back</Button>
       </div>
 
       <Card className="shadow-sm border">

@@ -1,4 +1,4 @@
-// ✅ ManageArtworksPage.jsx (with backend pagination + styled purple View button + improved image layout)
+// ✅ ManageArtworksPage.jsx (pass full artwork data to View via state)
 import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -84,8 +84,8 @@ export default function ManageArtworksPage() {
               </div>
               <div className="mt-auto pt-4">
                 <Button
-                  onClick={() => navigate(`/admin/artworks/${art.id}`)}
-                  className="w-full bg-indigo-600 hover:bg-purple-700 text-white font-medium"
+                  onClick={() => navigate(`/admin/artworks/${art.id}`, { state: { artwork: art } })}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
                 >
                   View
                 </Button>

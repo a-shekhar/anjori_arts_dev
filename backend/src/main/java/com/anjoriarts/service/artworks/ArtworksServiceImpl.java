@@ -5,9 +5,11 @@ import com.anjoriarts.dto.ArtworkImagesDTO;
 import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;
 import com.anjoriarts.dto.ArtworkSearchRequest;
-import com.anjoriarts.entity.ArtworkEntity;
-import com.anjoriarts.entity.ArtworkImagesEntity;
+import com.anjoriarts.entity.*;
 import com.anjoriarts.repository.ArtworkRepository;
+import com.anjoriarts.repository.AvailabilityRepository;
+import com.anjoriarts.repository.MediumRepository;
+import com.anjoriarts.repository.SurfaceRepository;
 import com.anjoriarts.service.CloudinaryServiceImpl;
 import com.anjoriarts.util.CommonUtil;
 import jakarta.transaction.Transactional;
@@ -23,18 +25,30 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ArtworksServiceImpl implements ArtworksService{
 
     Logger logger = LoggerFactory.getLogger(getClass().getName());
 
+
     private final ArtworkRepository artworkRepository;
+    private final SurfaceRepository surfaceRepo;
+    private final MediumRepository mediumRepo;
+    private final AvailabilityRepository availabilityRepo;
     private final CloudinaryServiceImpl cloudinaryService;
 
 
-    public ArtworksServiceImpl(ArtworkRepository artworkRepository, CloudinaryServiceImpl cloudinaryService){
+    public ArtworksServiceImpl(ArtworkRepository artworkRepository,
+                               SurfaceRepository surfaceRepo,
+                               MediumRepository mediumRepo,
+                               AvailabilityRepository availabilityRepo,
+                               CloudinaryServiceImpl cloudinaryService){
         this.artworkRepository = artworkRepository;
+        this.surfaceRepo = surfaceRepo;
+        this.mediumRepo = mediumRepo;
+        this.availabilityRepo = availabilityRepo;
         this.cloudinaryService = cloudinaryService;
     }
 
@@ -46,24 +60,44 @@ public class ArtworksServiceImpl implements ArtworksService{
     public ArtworkRequestDTO saveArtwork(ArtworkRequestDTO dto){
         try {
             ZonedDateTime istNow = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
-            System.out.println("IST Time: " + istNow);
 
             String slug = this.generateSlug(dto.getTitle());
+            Optional<SurfaceEntity> surfaceOpt = this.surfaceRepo.findByCode(dto.getSurface());
+            SurfaceEntity surface = null;
+            if(surfaceOpt.isPresent()){
+                surface = surfaceOpt.get();
+            }
+
+            Optional<AvailabilityEntity> availabilityOpt = this.availabilityRepo.findByCode(dto.getAvailability());
+            AvailabilityEntity availability = null;
+            if(availabilityOpt.isPresent()){
+                availability = availabilityOpt.get();
+            }
+
+            List<MediumEntity> mediumEntities = new ArrayList<>();
+            for(String medium : dto.getMediums()){
+                Optional<MediumEntity> mediumOpt = this.mediumRepo.findByCode(medium);
+                MediumEntity mediumEnt = null;
+                if(mediumOpt.isPresent()){
+                    mediumEnt = mediumOpt.get();
+                }
+                mediumEntities.add(mediumEnt);
+            }
 
             ArtworkEntity artwork =  ArtworkEntity.builder()
                     .title(dto.getTitle())
                     .size(dto.getSize())
-                    .medium(dto.getMedium())
-                    .surface(dto.getSurface())
                     .price(dto.getPrice())
+                    .tags(dto.getTags())
+                    .surface(surface)
+                    .medium(mediumEntities)
+                    .availability(availability)
                     .slug(slug)
                     .featured(dto.isFeatured())
-                    .tags(dto.getTags())
                     .description(dto.getDescription())
-                    .availability(dto.getAvailability())
                     .artistNote(dto.getArtistNote())
                     .createdAt(istNow)
-                     .build();
+                    .build();
 
 
             // Support for multiple images
@@ -78,8 +112,6 @@ public class ArtworksServiceImpl implements ArtworksService{
                     ArtworkImagesEntity imagesEntity = ArtworkImagesEntity.builder()
                             .artwork(artwork)
                             .imageUrl(imageUrl)
-                            .altText(dto.getAltText())
-                            .main(dto.isMain())
                             .displayOrder(displayOrder++)
                             .build();
                     imagesEntities.add(imagesEntity);
@@ -146,9 +178,9 @@ public class ArtworksServiceImpl implements ArtworksService{
                     .id(image.getId())
                     .artworkId(entity.getId())
                     .imageUrl(image.getImageUrl())
-                    .altText(image.getAltText())
+                    //.altText(image.getAltText())
                     .displayOrder(image.getDisplayOrder())
-                    .main(image.isMain())
+                   // .main(image.isMain())
                     .build();
 
             imagesDTO.add(imageDTO);
@@ -159,13 +191,17 @@ public class ArtworksServiceImpl implements ArtworksService{
                 .id(entity.getId())
                 .title(entity.getTitle())
                 .slug(entity.getSlug())
-                .medium(entity.getMedium())
-                .surface(entity.getSurface())
+                .medium(CommonUtil.normalizeString(entity.getMedium().stream()
+                        .map(MediumEntity::getName)
+                        .toList()))
+//                .surface(entity.getSurface().stream()
+//                        .map(MediumEntity::getName)
+//                        .toList())
                 .size(entity.getSize())
                 .price(entity.getPrice())
                 .tags(allTags)
                 .description(entity.getDescription())
-                .availability(entity.getAvailability())
+//                .availability(entity.getAvailability())
                 .artistNote(entity.getArtistNote())
                 .createdAt(CommonUtil.formatToLocal(entity.getCreatedAt().toString()))
                 .images(imagesDTO)

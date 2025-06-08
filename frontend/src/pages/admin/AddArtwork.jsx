@@ -1,11 +1,11 @@
-import React, { useRef, useState } from "react";
-import { toast } from "react-toastify";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { useLoading } from "../../components/context/LoadingContext";
-import { mediumOptions } from "../../components/dropdowns/MediumDropdown";
-import MultiSelectDropdown from "../../components/dropdowns/MultiSelectDropdown";
+
 import SurfaceDropdown from "../../components/dropdowns/SurfaceDropdown";
 import AvailabilityDropdown from "../../components/dropdowns/AvailabilityDropdown";
+import MediumDropdown from "../../components/dropdowns/MediumDropdown";
 
 export default function AddArtwork() {
   const fileInputRef = useRef(null);
@@ -21,7 +21,7 @@ export default function AddArtwork() {
     featured: false,
     images: [],
     description: "",
-    availability: "Available",
+    availability: "AV",
     artistNote: "",
   });
 
@@ -37,31 +37,31 @@ export default function AddArtwork() {
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
-    const filesWithPreview = files.map((file) => ({
+    const withPreview = files.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
     }));
 
     setFormData((prev) => ({
       ...prev,
-      images: [...prev.images, ...filesWithPreview],
+      images: [...prev.images, ...withPreview],
     }));
   };
 
-  const removeImage = (indexToRemove) => {
+  const removeImage = (index) => {
     setFormData((prev) => {
-      URL.revokeObjectURL(prev.images[indexToRemove].preview);
+      URL.revokeObjectURL(prev.images[index].preview);
       return {
         ...prev,
-        images: prev.images.filter((_, i) => i !== indexToRemove),
+        images: prev.images.filter((_, i) => i !== index),
       };
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const form = new FormData();
+
     form.append("title", formData.title);
     form.append("size", formData.size);
     form.append("price", formData.price);
@@ -75,19 +75,17 @@ export default function AddArtwork() {
     formData.images.forEach(({ file }) => form.append("images", file));
 
     try {
-      const response = await axios.post("/api/admin/artworks/add", form, {
+      const res = await axios.post("/api/admin/artworks/add", form, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (e) => {
           const percent = Math.round((e.loaded * 100) / e.total);
-          setUploadProgress(50);
-        }
+          setUploadProgress(percent);
+        },
       });
 
-      const result = response.data;
-
-      if (response.status === 200) {
-        toast.success(result.message || "Artwork added successfully!");
+      if (res.status === 200) {
+        toast.success(res.data.message || "Artwork added successfully!");
         formData.images.forEach(({ preview }) => URL.revokeObjectURL(preview));
         setFormData({
           title: "",
@@ -99,15 +97,15 @@ export default function AddArtwork() {
           featured: false,
           images: [],
           description: "",
-          availability: "Available",
+          availability: "AVAIL",
           artistNote: "",
         });
         if (fileInputRef.current) fileInputRef.current.value = "";
       } else {
-        toast.error(result.message || "Failed to add artwork.");
+        toast.error(res.data.message || "Failed to add artwork.");
       }
-    } catch (error) {
-      console.error("Upload error:", error);
+    } catch (err) {
+      console.error("Upload error:", err);
       toast.error("Internal Server Error");
     } finally {
       setUploadProgress(0);
@@ -117,12 +115,10 @@ export default function AddArtwork() {
   return (
     <div className="max-w-2xl mx-auto bg-white shadow rounded p-6 space-y-6">
       <h2 className="text-2xl font-bold">Add New Artwork</h2>
-      <form onSubmit={handleSubmit} className="space-y-4 text-sm">
 
-        {/* Title, Size, Price, Tags */}
+      <form onSubmit={handleSubmit} className="space-y-4 text-sm">
         {["title", "size", "price", "tags"].map((name) => {
           const label = name.charAt(0).toUpperCase() + name.slice(1);
-          const placeholder = `Enter ${label}`;
           return (
             <div key={name} className="flex items-center justify-between gap-4">
               <label className="w-32 font-medium">{label}</label>
@@ -131,14 +127,13 @@ export default function AddArtwork() {
                 name={name}
                 value={formData[name]}
                 onChange={handleChange}
-                placeholder={placeholder}
+                placeholder={`Enter ${label}`}
                 className="flex-1 border rounded p-1.5"
               />
             </div>
           );
         })}
 
-        {/* Surface */}
         <div className="flex items-center justify-between gap-4">
           <label className="w-32 font-medium">Surface</label>
           <div className="flex-1">
@@ -151,23 +146,18 @@ export default function AddArtwork() {
           </div>
         </div>
 
-        {/* Medium (custom dropdown with pills + checkboxes) */}
         <div className="flex items-center justify-between gap-4">
           <label className="w-32 font-medium">Medium</label>
           <div className="flex-1">
-            <MultiSelectDropdown
-              name="medium"
-              options={mediumOptions}
-              selected={formData.medium}
+            <MediumDropdown
+              value={formData.medium}
               onChange={(selected) =>
                 setFormData((prev) => ({ ...prev, medium: selected }))
               }
-              placeholder="Select Medium"
             />
           </div>
         </div>
 
-        {/* Availability */}
         <div className="flex items-center justify-between gap-4">
           <label className="w-32 font-medium">Availability</label>
           <div className="flex-1">
@@ -178,7 +168,6 @@ export default function AddArtwork() {
           </div>
         </div>
 
-        {/* File Upload */}
         <div>
           <label className="block font-medium mb-1">Upload Images</label>
           <div className="border rounded p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gray-50">
@@ -196,13 +185,13 @@ export default function AddArtwork() {
           {formData.images.length > 0 && (
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {formData.images.map(({ file, preview }, index) => (
-                <div key={index} className="relative flex flex-col items-center text-center text-xs">
+                <div key={index} className="relative text-xs text-center">
                   <img
                     src={preview}
                     alt={`preview-${index}`}
                     className="h-20 w-20 object-cover rounded shadow"
                   />
-                  <span className="mt-1 truncate w-20">{file.name}</span>
+                  <span className="mt-1 truncate block">{file.name}</span>
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
@@ -217,20 +206,16 @@ export default function AddArtwork() {
           )}
         </div>
 
-        {/* Featured Checkbox */}
-        <div className="flex gap-6 flex-wrap">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="featured"
-              checked={formData.featured}
-              onChange={handleChange}
-            />
-            <span>Featured Artwork</span>
-          </label>
-        </div>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="featured"
+            checked={formData.featured}
+            onChange={handleChange}
+          />
+          Featured Artwork
+        </label>
 
-        {/* Description */}
         <div className="flex flex-col">
           <label htmlFor="description" className="font-medium mb-1">Description</label>
           <textarea
@@ -244,7 +229,6 @@ export default function AddArtwork() {
           />
         </div>
 
-        {/* Artist Note */}
         <div className="flex flex-col">
           <label htmlFor="artistNote" className="font-medium mb-1">Artist Note</label>
           <textarea

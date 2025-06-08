@@ -25,6 +25,5 @@ public class ArtworkRequestDTO {
     private String createdAt;
     private String artistNote;
     private List<MultipartFile> imageFiles;
-    private String altText;
-    private boolean main;
+    private List<String> mediums;
 }

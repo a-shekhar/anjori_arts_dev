@@ -2,9 +2,9 @@ package com.anjoriarts.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -26,11 +26,17 @@ public class ArtworkEntity {
     @Column(name = "size")
     private String size;
 
-    @Column(name = "medium")
-    private String medium;
+    @ManyToMany
+    @JoinTable(
+            name = "artwork_medium",
+            joinColumns = @JoinColumn(name = "artwork_id"),
+            inverseJoinColumns = @JoinColumn(name = "medium_code")
+    )
+    private List<MediumEntity> medium = new ArrayList<>();
 
-    @Column(name = "surface")
-    private String surface;
+    @ManyToOne
+    @JoinColumn(name = "surface_code", referencedColumnName = "code")
+    private SurfaceEntity surface;
 
     @Column(name = "price")
     private BigDecimal price;
@@ -40,11 +46,14 @@ public class ArtworkEntity {
 
     @Column(name = "featured")
     private boolean featured;
+
     @Column(name = "tags")
     private String tags;
 
-    @Column(name = "availability")
-    private String availability;
+
+    @ManyToOne
+    @JoinColumn(name = "availability_code", referencedColumnName = "code")
+    private AvailabilityEntity availability;
 
     @Column(name = "description")
     private String description;

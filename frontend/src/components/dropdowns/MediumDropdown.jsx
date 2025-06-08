@@ -1,34 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import MultiSelectDropdown from "./MultiSelectDropdown";
 
-export const mediumOptions = [
-  "Acrylic",
-  "Charcoal",
-  "Fabric",
-  "Ink",
-  "Oil",
-  "Watercolor",
-  "Mixed Media",
-];
+export default function MediumDropdown({ value = [], onChange, name = "medium" }) {
+  const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export default function MediumDropdown({ value = [], onChange, name }) {
-  const handleChange = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
-    onChange(selectedOptions);
-  };
+  useEffect(() => {
+    fetch("/api/mediums")
+      .then((res) => {
+        if (!res.ok) throw new Error("Request failed");
+        return res.json();
+      })
+      .then((res) => {
+        if (res.success && Array.isArray(res.data)) {
+          const formatted = res.data
+            .map((m) => ({
+              value: m.code,
+              label: m.name,
+            }))
+            .sort((a, b) => a.label.localeCompare(b.label));
+          const withEmptyOption = [{ value: "", label: "No Choice" }, ...formatted]; // 👈
+          setOptions(withEmptyOption);
+        } else {
+          console.error("Unexpected response format:", res);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch mediums", err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <select
-      name={name || "medium"}
-      multiple
-      value={value}
-      onChange={handleChange}
-      className="w-full border border-black rounded px-3 py-[0.6rem] text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 h-40"
-    >
-      {[...mediumOptions].sort().map((option) => (
-        <option key={option} value={option}>
-          {option}
-        </option>
-      ))}
-    </select>
+    <MultiSelectDropdown
+      name={name}
+      options={options}
+      selected={value}
+      onChange={onChange}
+      placeholder={loading ? "Loading..." : "-- Select Medium --"}
+    />
   );
 }
