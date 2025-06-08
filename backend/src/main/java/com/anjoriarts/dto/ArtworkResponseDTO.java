@@ -14,13 +14,13 @@ public class ArtworkResponseDTO {
     private Long id;
     private String title;
     private String slug;
-    private String medium;
-    private String surface;
+    private List<MediumDTO> mediums;
+    private SurfaceDTO surface;
     private String size;
     private BigDecimal price;
     private List<String> tags;
     private String description;
-    private String availability;
+    private AvailabilityDTO availability;
     private String createdAt;
     private String artistNote;
     private List<ArtworkImagesDTO> images;

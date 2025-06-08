@@ -1,10 +1,7 @@
 package com.anjoriarts.service.artworks;
 
 import com.anjoriarts.common.Consonants;
-import com.anjoriarts.dto.ArtworkImagesDTO;
-import com.anjoriarts.dto.ArtworkRequestDTO;
-import com.anjoriarts.dto.ArtworkResponseDTO;
-import com.anjoriarts.dto.ArtworkSearchRequest;
+import com.anjoriarts.dto.*;
 import com.anjoriarts.entity.*;
 import com.anjoriarts.repository.ArtworkRepository;
 import com.anjoriarts.repository.AvailabilityRepository;
@@ -142,7 +139,9 @@ public class ArtworksServiceImpl implements ArtworksService{
         return slug;
     }
 
+
     @Override
+    @Transactional
     public Page<ArtworkResponseDTO> getFeaturedArtworks(Pageable pageable) {
         Page<ArtworkEntity> entities = artworkRepository.findByFeaturedTrueOrderByCreatedAtDesc(pageable);
         return entities.map(this::convertToResponseDto);
@@ -150,6 +149,7 @@ public class ArtworksServiceImpl implements ArtworksService{
 
 
     @Override
+    @Transactional
     public Page<ArtworkResponseDTO> getAllArtworks(Pageable pageable) {
         Page<ArtworkEntity> page = artworkRepository.findAll(pageable);
         // Convert each entity to DTO using map
@@ -157,6 +157,7 @@ public class ArtworksServiceImpl implements ArtworksService{
     }
 
     @Override
+    @Transactional
     public Page<ArtworkResponseDTO> searchArtworks(ArtworkSearchRequest request, Pageable pageable) {
         Page<ArtworkEntity> page = null;
         if(request.getSearchBy().equalsIgnoreCase("Title")) {
@@ -178,30 +179,34 @@ public class ArtworksServiceImpl implements ArtworksService{
                     .id(image.getId())
                     .artworkId(entity.getId())
                     .imageUrl(image.getImageUrl())
-                    //.altText(image.getAltText())
                     .displayOrder(image.getDisplayOrder())
-                   // .main(image.isMain())
                     .build();
 
             imagesDTO.add(imageDTO);
         }
 
 
+        MediumDTO mediumDTO = new MediumDTO();
+        List<MediumDTO> mediumDTOs = new ArrayList<>();
+        for(MediumEntity medium : entity.getMedium()){
+            mediumDTO = MediumDTO.builder().code(medium.getCode())
+                    .name(medium.getName()).build();
+            mediumDTOs.add(mediumDTO);
+        }
+
         return ArtworkResponseDTO.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
                 .slug(entity.getSlug())
-                .medium(CommonUtil.normalizeString(entity.getMedium().stream()
-                        .map(MediumEntity::getName)
-                        .toList()))
-//                .surface(entity.getSurface().stream()
-//                        .map(MediumEntity::getName)
-//                        .toList())
+                .mediums(mediumDTOs)
+                .surface(SurfaceDTO.builder().code(entity.getSurface().getCode())
+                        .name(entity.getSurface().getName()).build())
                 .size(entity.getSize())
                 .price(entity.getPrice())
                 .tags(allTags)
                 .description(entity.getDescription())
-//                .availability(entity.getAvailability())
+                .availability(AvailabilityDTO.builder().code(entity.getAvailability().getCode())
+                        .name(entity.getAvailability().getName()).build())
                 .artistNote(entity.getArtistNote())
                 .createdAt(CommonUtil.formatToLocal(entity.getCreatedAt().toString()))
                 .images(imagesDTO)

@@ -3,12 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { BsStack } from "react-icons/bs";
 
 const ArtworkCard = ({ artwork, onClick }) => {
-  const mainImage = artwork.images?.find(img => img.main) || artwork.images?.[0];
-  const hasMultipleImages = artwork.images?.length > 1;
   const navigate = useNavigate();
+  const mainImage =
+    artwork.images?.find((img) => img.isMain) || artwork.images?.[0];
+  const hasMultipleImages = artwork.images?.length > 1;
+
+  const sortedMediums = Array.isArray(artwork.mediums)
+    ? artwork.mediums
+        .map((m) => m.name)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b))
+        .join(", ")
+    : "N/A";
 
   const handleRequestNow = () => {
-    navigate("/order-summary",  { state: { artwork } });
+    navigate("/order-summary", { state: { artwork } });
   };
 
   return (
@@ -20,7 +29,7 @@ const ArtworkCard = ({ artwork, onClick }) => {
         {mainImage?.imageUrl ? (
           <img
             src={mainImage.imageUrl}
-            alt={mainImage.altText || artwork.title}
+            alt={artwork.title}
             className="w-full h-auto max-h-64 object-contain rounded-t-xl bg-white"
           />
         ) : (
@@ -39,9 +48,11 @@ const ArtworkCard = ({ artwork, onClick }) => {
       <div className="p-4 flex flex-col flex-grow">
         <h3 className="text-lg font-semibold mb-1">{artwork.title}</h3>
         <p className="text-sm text-gray-600 mb-1">
-          {artwork.size} • {artwork.medium} on {artwork.surface}
+          {artwork.size} • {sortedMediums} on {artwork.surface?.name || "N/A"}
         </p>
-        <p className="text-blue-700 font-bold text-base mb-2">₹{artwork.price}</p>
+        <p className="text-blue-700 font-bold text-base mb-2">
+          ₹{artwork.price}
+        </p>
 
         <div className="w-full text-left mb-2">
           <button

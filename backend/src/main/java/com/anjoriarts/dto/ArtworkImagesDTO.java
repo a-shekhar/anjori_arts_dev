@@ -13,7 +13,5 @@ public class ArtworkImagesDTO {
     private Long id;
     private Long artworkId;
     private String imageUrl;
-    private String altText;
     private int displayOrder;
-    private boolean main;
 }

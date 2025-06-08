@@ -15,7 +15,7 @@ const ArtworkModal = ({ artwork, onClose }) => {
 
   useEffect(() => {
     if (artwork?.images?.length) {
-      const main = artwork.images.find(img => img.main);
+      const main = artwork.images.find((img) => parseInt(img.displayOrder) === 0);
       setActiveImage(main || artwork.images[0]);
     }
   }, [artwork]);
@@ -23,20 +23,28 @@ const ArtworkModal = ({ artwork, onClose }) => {
   if (!artwork || !activeImage) return null;
 
   const handleRequestNow = () => {
-    navigate("/order-summary",  { state: { artwork } });
+    navigate("/order-summary", { state: { artwork } });
   };
+
+  const sortedMediums = Array.isArray(artwork.mediums)
+    ? artwork.mediums
+        .map((m) => m.name)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b))
+        .join(", ")
+    : "N/A";
 
   const {
     title,
     size,
-    medium,
-    surface,
+    surface = {},
     price,
     tags,
     description,
-    availability,
+    availability = {},
     createdAt,
     artistNote,
+    slug,
     images,
   } = artwork;
 
@@ -53,7 +61,7 @@ const ArtworkModal = ({ artwork, onClose }) => {
         <div className="flex justify-center items-center bg-gray-100 rounded-lg p-4 mb-4">
           <ImageZoomModal
             src={activeImage.imageUrl}
-            alt={activeImage.altText || title}
+            alt={slug}
             className="max-h-[300px] cursor-zoom-in object-contain"
           />
         </div>
@@ -64,9 +72,11 @@ const ArtworkModal = ({ artwork, onClose }) => {
               <img
                 key={idx}
                 src={img.imageUrl}
-                alt={img.altText}
+                alt={slug}
                 className={`w-16 h-16 object-cover rounded border-2 ${
-                  img.imageUrl === activeImage.imageUrl ? "border-violet-600" : "border-transparent"
+                  img.imageUrl === activeImage.imageUrl
+                    ? "border-violet-600"
+                    : "border-transparent"
                 } cursor-pointer`}
                 onClick={() => setActiveImage(img)}
               />
@@ -76,21 +86,27 @@ const ArtworkModal = ({ artwork, onClose }) => {
 
         <h2 className="text-xl font-semibold mb-1">{title}</h2>
         <p className="text-sm text-gray-600 mb-1">
-          {size} • {medium} on {surface}
+          {size} • {sortedMediums} on {surface.name || "N/A"}
         </p>
         <p className="text-blue-700 font-bold text-base mb-2">₹{price}</p>
 
-        {description && <p className="text-sm text-gray-700 mb-2">{description}</p>}
-        {createdAt && (
-          <p className="text-xs text-gray-500 mb-1">🗓️ Created At: {createdAt}</p>
+        {description && (
+          <p className="text-sm text-gray-700 mb-2">{description}</p>
         )}
-        {availability && (
+        {createdAt && (
+          <p className="text-xs text-gray-500 mb-1">
+            🗓️ Created At: {createdAt}
+          </p>
+        )}
+        {availability?.name && (
           <p
             className={`text-xs mb-2 font-medium ${
-              availability === "Available" ||  availability === "Ready for Request" ? "text-green-600" : "text-red-600"
+              availability.name === "Available" || availability.name === "Ready for Request"
+                ? "text-green-600"
+                : "text-red-600"
             }`}
           >
-            {availability}
+            {availability.name}
           </p>
         )}
         {tags?.length > 0 && (
