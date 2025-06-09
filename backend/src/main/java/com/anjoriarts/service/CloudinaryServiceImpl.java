@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Map;
 
 @Service
@@ -50,7 +51,7 @@ public class CloudinaryServiceImpl  implements CloudinaryService{
     }
 
     @Override
-    public boolean DeleteResources(String folderPath){
+    public boolean deleteResources(String folderPath){
         try{
             cloudinary.api().deleteResourcesByPrefix(folderPath, ObjectUtils.emptyMap());
             logger.info("Folder resources deleted...");
@@ -59,6 +60,25 @@ public class CloudinaryServiceImpl  implements CloudinaryService{
             logger.error("Error during deletion of cloudinary folder");
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean deleteImage(String imageUrl){
+        String publicId = this.extractPublicIdFromUrl(imageUrl);
+        try {
+            cloudinary.uploader().destroy(publicId, Map.of());
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete image: " + imageUrl, e);
+        }
+    }
+
+    // You must extract the publicId from the imageUrl
+    private String extractPublicIdFromUrl(String imageUrl) {
+        URI uri = URI.create(imageUrl);
+        String path = uri.getPath();
+        String trimmed = path.substring(path.indexOf("/upload/") + 8);
+        return trimmed.substring(trimmed.indexOf("/") + 1, trimmed.lastIndexOf("."));
     }
 
 }

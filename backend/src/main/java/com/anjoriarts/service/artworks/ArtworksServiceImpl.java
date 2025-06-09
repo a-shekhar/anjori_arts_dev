@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ArtworksServiceImpl implements ArtworksService{
@@ -54,7 +55,7 @@ public class ArtworksServiceImpl implements ArtworksService{
 
     @Override
     @Transactional
-    public ArtworkRequestDTO saveArtwork(ArtworkRequestDTO dto){
+    public ArtworkCreateRequestDTO saveArtwork(ArtworkCreateRequestDTO dto){
         try {
             ZonedDateTime istNow = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
 
@@ -65,9 +66,9 @@ public class ArtworksServiceImpl implements ArtworksService{
                     .size(dto.getSize())
                     .price(dto.getPrice())
                     .tags(dto.getTags())
-                    .surface(this.getSurface(dto))
-                    .medium(this.getMediumEntities(dto))
-                    .availability(this.getAvailability(dto))
+                    .surface(this.getSurface(dto.getSurface()))
+                    .medium(this.getMediumEntities(dto.getMediums()))
+                    .availability(this.getAvailability(dto.getAvailability()))
                     .slug(slug)
                     .featured(dto.isFeatured())
                     .description(dto.getDescription())
@@ -106,15 +107,21 @@ public class ArtworksServiceImpl implements ArtworksService{
 
     @Override
     @Transactional
-    public ArtworkRequestDTO updateArtwork(Long id, ArtworkRequestDTO dto){
+    public ArtworkUpdateRequestDTO updateArtwork(
+            Long id,
+            ArtworkUpdateRequestDTO dto,
+            List<MultipartFile> imageFiles,
+            List<ImageMetaDTO> imageMetas
+    ) {
         try {
             Optional<ArtworkEntity> artworkOpt = artworkRepository.findById(id);
-            if(artworkOpt.isEmpty()){
-                throw new RuntimeException("Artwork not found..");
+            if (artworkOpt.isEmpty()) {
+                throw new RuntimeException("Artwork not found.");
             }
+
             ArtworkEntity artwork = artworkOpt.get();
 
-            if(!artwork.getTitle().equalsIgnoreCase(dto.getTitle().trim())){
+            if (!artwork.getTitle().equalsIgnoreCase(dto.getTitle().trim())) {
                 artwork.setSlug(this.generateSlug(dto.getTitle()).trim());
             }
 
@@ -122,68 +129,82 @@ public class ArtworksServiceImpl implements ArtworksService{
             artwork.setSize(dto.getSize());
             artwork.setPrice(dto.getPrice());
             artwork.setTags(dto.getTags());
-            artwork.setMedium(this.getMediumEntities(dto));
-            artwork.setSurface(this.getSurface(dto));
-            artwork.setAvailability(this.getAvailability(dto));
+            artwork.setMedium(this.getMediumEntities(dto.getMediums()));
+            artwork.setSurface(this.getSurface(dto.getSurface()));
+            artwork.setAvailability(this.getAvailability(dto.getAvailability()));
             artwork.setFeatured(dto.isFeatured());
             artwork.setDescription(dto.getDescription());
             artwork.setArtistNote(dto.getArtistNote());
 
-            ZonedDateTime istNow = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
-            artwork.setUpdatedAt(istNow);
+            artwork.setUpdatedAt(ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID)));
 
             String folderPath = String.format(Consonants.ARTWORKS_PATH, env, artwork.getSlug());
 
-            // 🔄 Prepare updated image list
+            // 🔁 STEP 1: Delete removed images (not in dto.images)
+            List<Long> retainedIds = dto.getImages() != null
+                    ? dto.getImages().stream()
+                    .map(ArtworkImagesDTO::getId)
+                    .collect(Collectors.toList())
+                    : new ArrayList<>();
+
+            List<ArtworkImagesEntity> toDelete = artwork.getArtworkImages().stream()
+                    .filter(img -> !retainedIds.contains(img.getId()))
+                    .collect(Collectors.toList());
+
+            for (ArtworkImagesEntity img : toDelete) {
+                cloudinaryService.deleteImage(img.getImageUrl());
+            }
+
+            // 🔄 STEP 2: Build the updated image list
             List<ArtworkImagesEntity> updatedImages = new ArrayList<>();
 
-            // ✅ 1. Preserve existing image entries (with updated displayOrder from dto.getImages())
+            // ✅ 2A: Update existing images (from dto.getImages)
             if (dto.getImages() != null && !dto.getImages().isEmpty()) {
-                for (ArtworkImagesDTO img : dto.getImages()) {
+                for (ArtworkImagesDTO imgDto : dto.getImages()) {
                     ArtworkImagesEntity existing = artwork.getArtworkImages().stream()
-                            .filter(i -> i.getId().equals(img.getId()))
+                            .filter(i -> i.getId().equals(imgDto.getId()))
                             .findFirst()
                             .orElse(null);
 
                     if (existing != null) {
-                        existing.setDisplayOrder(img.getDisplayOrder());
+                        existing.setDisplayOrder(imgDto.getDisplayOrder());
                         updatedImages.add(existing);
                     }
                 }
             }
 
-            // ✅ 2. Upload new images (assign displayOrder based on index or custom logic)
-            if (dto.getImageFiles() != null && !dto.getImageFiles().isEmpty()) {
-                int nextDisplayOrder = updatedImages.stream()
-                        .map(ArtworkImagesEntity::getDisplayOrder)
-                        .max(Integer::compareTo)
-                        .orElse(-1) + 1;
-
-                for (MultipartFile file : dto.getImageFiles()) {
+            // ✅ 2B: Upload new images using matched displayOrder
+            if (imageFiles != null && ! imageFiles.isEmpty()) {
+                for (MultipartFile file : imageFiles) {
                     String imageUrl = cloudinaryService.upload(file, folderPath);
+
+                    ImageMetaDTO meta = imageMetas.stream()
+                            .filter(m -> m.getFileName().equals(file.getOriginalFilename()))
+                            .findFirst()
+                            .orElse(new ImageMetaDTO(file.getOriginalFilename(), 0)); // fallback
 
                     ArtworkImagesEntity newImage = ArtworkImagesEntity.builder()
                             .artwork(artwork)
                             .imageUrl(imageUrl)
-                            .displayOrder(nextDisplayOrder++)
+                            .displayOrder(meta.getDisplayOrder())
                             .build();
 
                     updatedImages.add(newImage);
                 }
             }
 
-            // 🔄 Set updated image list (preserved + new)
+            // 🔁 STEP 3: Apply image list
             artwork.getArtworkImages().clear();
-            artwork.getArtworkImages().addAll(updatedImages); // Add updated list to same reference
+            artwork.getArtworkImages().addAll(updatedImages);
 
-            // 💾 Save the updated artwork
+            // 💾 STEP 4: Save artwork
             ArtworkEntity savedArtwork = artworkRepository.save(artwork);
-
             dto.setId(savedArtwork.getId());
 
             return dto;
+
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error updating artwork: " + e.getMessage(), e);
         }
     }
 
@@ -276,12 +297,9 @@ public class ArtworksServiceImpl implements ArtworksService{
     }
 
 
-
-
-
-    private List<MediumEntity> getMediumEntities (ArtworkRequestDTO dto) {
+    private List<MediumEntity> getMediumEntities (List<String> mediums) {
         List<MediumEntity> mediumEntities = new ArrayList<>();
-        for (String medium : dto.getMediums()) {
+        for (String medium : mediums) {
             Optional<MediumEntity> mediumOpt = this.mediumRepo.findByCode(medium);
             MediumEntity mediumEnt = null;
             if (mediumOpt.isPresent()) {
@@ -292,8 +310,9 @@ public class ArtworksServiceImpl implements ArtworksService{
       return mediumEntities;
     }
 
-    private SurfaceEntity getSurface(ArtworkRequestDTO dto){
-        Optional<SurfaceEntity> surfaceOpt = this.surfaceRepo.findByCode(dto.getSurface());
+
+    private SurfaceEntity getSurface(String surfaceCode){
+        Optional<SurfaceEntity> surfaceOpt = this.surfaceRepo.findByCode(surfaceCode);
         SurfaceEntity surface = null;
         if(surfaceOpt.isPresent()){
             surface = surfaceOpt.get();
@@ -301,8 +320,8 @@ public class ArtworksServiceImpl implements ArtworksService{
         return surface;
     }
 
-    private AvailabilityEntity getAvailability(ArtworkRequestDTO dto){
-        Optional<AvailabilityEntity> availabilityOpt = this.availabilityRepo.findByCode(dto.getAvailability());
+    private AvailabilityEntity getAvailability(String availabilityCode){
+        Optional<AvailabilityEntity> availabilityOpt = this.availabilityRepo.findByCode(availabilityCode);
         AvailabilityEntity availability = null;
         if(availabilityOpt.isPresent()){
             availability = availabilityOpt.get();

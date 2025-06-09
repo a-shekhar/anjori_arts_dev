@@ -10,5 +10,7 @@ public interface CloudinaryService {
 
     String uploadImagesWithConfig(MultipartFile file, Map<String, Object> config);
 
-    boolean DeleteResources(String folderPath);
+    boolean deleteResources(String folderPath);
+
+    boolean deleteImage(String imageUrl);
 }

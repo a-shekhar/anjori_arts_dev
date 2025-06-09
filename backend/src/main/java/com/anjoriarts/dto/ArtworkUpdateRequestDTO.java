@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @Builder
 @ToString
-public class ArtworkRequestDTO {
+public class ArtworkUpdateRequestDTO {
     private Long id;
     private String title;
     private String surface;
@@ -23,7 +23,6 @@ public class ArtworkRequestDTO {
     private String availability;
     private String createdAt;
     private String artistNote;
-    private List<MultipartFile> imageFiles;
     private List<String> mediums;
     private List<ArtworkImagesDTO> images;
 }
