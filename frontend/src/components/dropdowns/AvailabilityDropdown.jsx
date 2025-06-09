@@ -17,14 +17,14 @@ export default function AvailabilityDropdown({ value, onChange, name = "availabi
               value: item.code,
               label: item.name,
             }))
-            .sort((a, b) => a.label.localeCompare(b.label)); // 🔁 Sorted alphabetically
+            .sort((a, b) => a.label.localeCompare(b.label)); // ✅ SORT
           setOptions(formatted);
         } else {
-          console.error("Invalid availability data structure:", res);
+          console.error("Invalid availability data:", res);
         }
       })
       .catch((err) => {
-        console.error("Error loading availability options:", err);
+        console.error("Availability fetch error:", err);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -32,11 +32,12 @@ export default function AvailabilityDropdown({ value, onChange, name = "availabi
   return (
     <select
       name={name}
-      value={value}
-      onChange={onChange}
+      value={value || ""}
+      onChange={(e) => onChange(e.target.value)}
       disabled={loading}
       className="w-full border border-black rounded px-3 py-[0.6rem] text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
     >
+      <option value="">{loading ? "Loading..." : "Select availability"}</option>
       {options.map((opt) => (
         <option key={opt.value} value={opt.value}>
           {opt.label}

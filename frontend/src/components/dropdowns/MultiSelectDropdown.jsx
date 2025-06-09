@@ -10,40 +10,24 @@ export default function MultiSelectDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef();
 
-  // Ensure selected is always an array
-  const selectedArray = Array.isArray(selected) ? selected : [selected || ""];
-
-  const isNoChoiceSelected = selectedArray.includes("");
+  const selectedArray = Array.isArray(selected) ? selected : [];
 
   const toggleOption = (value) => {
-    let updated = [];
+    const alreadySelected = selectedArray.some((s) => s.value === value.value);
+    let updated;
 
-    if (value === "") {
-      updated = selectedArray.includes("") ? [] : [""];
+    if (alreadySelected) {
+      updated = selectedArray.filter((s) => s.value !== value.value);
     } else {
-      updated = selectedArray.some((v) => matchValue(v, value))
-        ? selectedArray.filter((v) => !matchValue(v, value))
-        : [...selectedArray.filter((v) => v !== ""), value];
+      updated = [...selectedArray, value];
     }
 
-    onChange(updated);
+    onChange(updated); // send full [{ label, value }] array back
   };
 
   const clearAll = () => {
     onChange([]);
     setIsOpen(false);
-  };
-
-  const matchValue = (a, b) => {
-    const aVal = typeof a === "object" ? a.code || a.value : a;
-    const bVal = typeof b === "object" ? b.code || b.value : b;
-    return aVal === bVal;
-  };
-
-  const getLabel = (val) => {
-    const code = typeof val === "object" ? val.code || val.value : val;
-    const labelFromOptions = options.find((opt) => opt.value === code)?.label;
-    return labelFromOptions || val.name || val.label || code;
   };
 
   useEffect(() => {
@@ -69,7 +53,7 @@ export default function MultiSelectDropdown({
                 key={i}
                 className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full"
               >
-                {getLabel(val)}
+                {val.label}
               </span>
             ))}
           </div>
@@ -84,23 +68,17 @@ export default function MultiSelectDropdown({
             <div className="px-3 py-2 text-gray-400">No options available</div>
           ) : (
             options.map((opt, index) => {
-              const isDisabled = isNoChoiceSelected && opt.value !== "";
-              const isChecked = selectedArray.some((v) => matchValue(v, opt.value));
+              const isChecked = selectedArray.some((s) => s.value === opt.value);
 
               return (
                 <label
                   key={`${opt.value}-${index}`}
-                  className={`flex items-center gap-2 px-3 py-2 ${
-                    isDisabled
-                      ? "opacity-40 cursor-not-allowed"
-                      : "cursor-pointer hover:bg-orange-50 active:bg-orange-100"
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-orange-50 active:bg-orange-100`}
                 >
                   <input
                     type="checkbox"
                     checked={isChecked}
-                    disabled={isDisabled}
-                    onChange={() => toggleOption(opt.value)}
+                    onChange={() => toggleOption(opt)}
                     className="accent-orange-500 w-4 h-4"
                   />
                   <span>{opt.label}</span>

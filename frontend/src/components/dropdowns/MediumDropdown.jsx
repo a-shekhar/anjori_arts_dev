@@ -4,6 +4,7 @@ import MultiSelectDropdown from "./MultiSelectDropdown";
 export default function MediumDropdown({ value = [], onChange, name = "medium" }) {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState([]);
 
   useEffect(() => {
     fetch("/api/mediums")
@@ -18,25 +19,38 @@ export default function MediumDropdown({ value = [], onChange, name = "medium" }
               value: m.code,
               label: m.name,
             }))
-            .sort((a, b) => a.label.localeCompare(b.label));
-          const withEmptyOption = [{ value: "", label: "No Choice" }, ...formatted]; // 👈
-          setOptions(withEmptyOption);
+            .sort((a, b) => a.label.localeCompare(b.label)); // ✅ SORT
+          setOptions(formatted);
         } else {
-          console.error("Unexpected response format:", res);
+          console.error("Invalid medium data:", res);
         }
       })
       .catch((err) => {
-        console.error("Failed to fetch mediums", err);
+        console.error("Medium fetch error:", err);
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!loading && options.length) {
+      const mapped = value.map((code) =>
+        options.find((opt) => opt.value === code)
+      ).filter(Boolean);
+      setSelected(mapped);
+    }
+  }, [value, options, loading]);
+
+  const handleChange = (selectedItems) => {
+    setSelected(selectedItems);
+    onChange(selectedItems.map((item) => item.value)); // Return only codes
+  };
 
   return (
     <MultiSelectDropdown
       name={name}
       options={options}
-      selected={value}
-      onChange={onChange}
+      selected={selected}
+      onChange={handleChange}
       placeholder={loading ? "Loading..." : "-- Select Medium --"}
     />
   );

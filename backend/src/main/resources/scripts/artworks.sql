@@ -28,7 +28,8 @@ CREATE TABLE arts.artworks (
     availability_code varchar(20) NOT NULL REFERENCES arts.availability(code),
     featured BOOLEAN DEFAULT false,
     slug VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
 );
 
 

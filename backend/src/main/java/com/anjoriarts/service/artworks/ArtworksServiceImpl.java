@@ -59,43 +59,21 @@ public class ArtworksServiceImpl implements ArtworksService{
             ZonedDateTime istNow = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
 
             String slug = this.generateSlug(dto.getTitle());
-            Optional<SurfaceEntity> surfaceOpt = this.surfaceRepo.findByCode(dto.getSurface());
-            SurfaceEntity surface = null;
-            if(surfaceOpt.isPresent()){
-                surface = surfaceOpt.get();
-            }
-
-            Optional<AvailabilityEntity> availabilityOpt = this.availabilityRepo.findByCode(dto.getAvailability());
-            AvailabilityEntity availability = null;
-            if(availabilityOpt.isPresent()){
-                availability = availabilityOpt.get();
-            }
-
-            List<MediumEntity> mediumEntities = new ArrayList<>();
-            for(String medium : dto.getMediums()){
-                Optional<MediumEntity> mediumOpt = this.mediumRepo.findByCode(medium);
-                MediumEntity mediumEnt = null;
-                if(mediumOpt.isPresent()){
-                    mediumEnt = mediumOpt.get();
-                }
-                mediumEntities.add(mediumEnt);
-            }
 
             ArtworkEntity artwork =  ArtworkEntity.builder()
-                    .title(dto.getTitle())
+                    .title(dto.getTitle().trim())
                     .size(dto.getSize())
                     .price(dto.getPrice())
                     .tags(dto.getTags())
-                    .surface(surface)
-                    .medium(mediumEntities)
-                    .availability(availability)
+                    .surface(this.getSurface(dto))
+                    .medium(this.getMediumEntities(dto))
+                    .availability(this.getAvailability(dto))
                     .slug(slug)
                     .featured(dto.isFeatured())
                     .description(dto.getDescription())
                     .artistNote(dto.getArtistNote())
                     .createdAt(istNow)
                     .build();
-
 
             // Support for multiple images
             List<ArtworkImagesEntity> imagesEntities = new ArrayList<>();
@@ -123,6 +101,101 @@ public class ArtworksServiceImpl implements ArtworksService{
             throw e;
         }
         return dto;
+    }
+
+
+    @Override
+    @Transactional
+    public ArtworkRequestDTO updateArtwork(Long id, ArtworkRequestDTO dto){
+        try {
+            Optional<ArtworkEntity> artworkOpt = artworkRepository.findById(id);
+            if(artworkOpt.isEmpty()){
+                throw new RuntimeException("Artwork not found..");
+            }
+            ArtworkEntity artwork = artworkOpt.get();
+
+            if(!artwork.getTitle().equalsIgnoreCase(dto.getTitle().trim())){
+                artwork.setSlug(this.generateSlug(dto.getTitle()).trim());
+            }
+
+            artwork.setTitle(dto.getTitle().trim());
+            artwork.setSize(dto.getSize());
+            artwork.setPrice(dto.getPrice());
+            artwork.setTags(dto.getTags());
+            artwork.setMedium(this.getMediumEntities(dto));
+            artwork.setSurface(this.getSurface(dto));
+            artwork.setAvailability(this.getAvailability(dto));
+            artwork.setFeatured(dto.isFeatured());
+            artwork.setDescription(dto.getDescription());
+            artwork.setArtistNote(dto.getArtistNote());
+
+            ZonedDateTime istNow = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
+            artwork.setUpdatedAt(istNow);
+
+            String folderPath = String.format(Consonants.ARTWORKS_PATH, env, artwork.getSlug());
+
+            // 🔄 Prepare updated image list
+            List<ArtworkImagesEntity> updatedImages = new ArrayList<>();
+
+            // ✅ 1. Preserve existing image entries (with updated displayOrder from dto.getImages())
+            if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+                for (ArtworkImagesDTO img : dto.getImages()) {
+                    ArtworkImagesEntity existing = artwork.getArtworkImages().stream()
+                            .filter(i -> i.getId().equals(img.getId()))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (existing != null) {
+                        existing.setDisplayOrder(img.getDisplayOrder());
+                        updatedImages.add(existing);
+                    }
+                }
+            }
+
+            // ✅ 2. Upload new images (assign displayOrder based on index or custom logic)
+            if (dto.getImageFiles() != null && !dto.getImageFiles().isEmpty()) {
+                int nextDisplayOrder = updatedImages.stream()
+                        .map(ArtworkImagesEntity::getDisplayOrder)
+                        .max(Integer::compareTo)
+                        .orElse(-1) + 1;
+
+                for (MultipartFile file : dto.getImageFiles()) {
+                    String imageUrl = cloudinaryService.upload(file, folderPath);
+
+                    ArtworkImagesEntity newImage = ArtworkImagesEntity.builder()
+                            .artwork(artwork)
+                            .imageUrl(imageUrl)
+                            .displayOrder(nextDisplayOrder++)
+                            .build();
+
+                    updatedImages.add(newImage);
+                }
+            }
+
+            // 🔄 Set updated image list (preserved + new)
+            artwork.getArtworkImages().clear();
+            artwork.getArtworkImages().addAll(updatedImages); // Add updated list to same reference
+
+            // 💾 Save the updated artwork
+            ArtworkEntity savedArtwork = artworkRepository.save(artwork);
+
+            dto.setId(savedArtwork.getId());
+
+            return dto;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Page<ArtworkResponseDTO> searchArtworks(ArtworkSearchRequest request, Pageable pageable) {
+        Page<ArtworkEntity> page = null;
+        if(request.getSearchBy().equalsIgnoreCase("Title")) {
+            page = artworkRepository.findByTitleContainingIgnoreCase(request.getSearchTerm(), pageable);
+        }
+        // Convert each entity to DTO using map
+        return page != null ? page.map(this::convertToResponseDto) : null;
     }
 
     private String generateSlug(String title){
@@ -154,17 +227,6 @@ public class ArtworksServiceImpl implements ArtworksService{
         Page<ArtworkEntity> page = artworkRepository.findAll(pageable);
         // Convert each entity to DTO using map
         return page.map(this::convertToResponseDto);
-    }
-
-    @Override
-    @Transactional
-    public Page<ArtworkResponseDTO> searchArtworks(ArtworkSearchRequest request, Pageable pageable) {
-        Page<ArtworkEntity> page = null;
-        if(request.getSearchBy().equalsIgnoreCase("Title")) {
-            page = artworkRepository.findByTitleContainingIgnoreCase(request.getSearchTerm(), pageable);
-        }
-        // Convert each entity to DTO using map
-        return page != null ? page.map(this::convertToResponseDto) : null;
     }
 
     private ArtworkResponseDTO convertToResponseDto(ArtworkEntity entity) {
@@ -212,6 +274,42 @@ public class ArtworksServiceImpl implements ArtworksService{
                 .images(imagesDTO)
                 .build();
     }
+
+
+
+
+
+    private List<MediumEntity> getMediumEntities (ArtworkRequestDTO dto) {
+        List<MediumEntity> mediumEntities = new ArrayList<>();
+        for (String medium : dto.getMediums()) {
+            Optional<MediumEntity> mediumOpt = this.mediumRepo.findByCode(medium);
+            MediumEntity mediumEnt = null;
+            if (mediumOpt.isPresent()) {
+                mediumEnt = mediumOpt.get();
+            }
+            mediumEntities.add(mediumEnt);
+        }
+      return mediumEntities;
+    }
+
+    private SurfaceEntity getSurface(ArtworkRequestDTO dto){
+        Optional<SurfaceEntity> surfaceOpt = this.surfaceRepo.findByCode(dto.getSurface());
+        SurfaceEntity surface = null;
+        if(surfaceOpt.isPresent()){
+            surface = surfaceOpt.get();
+        }
+        return surface;
+    }
+
+    private AvailabilityEntity getAvailability(ArtworkRequestDTO dto){
+        Optional<AvailabilityEntity> availabilityOpt = this.availabilityRepo.findByCode(dto.getAvailability());
+        AvailabilityEntity availability = null;
+        if(availabilityOpt.isPresent()){
+            availability = availabilityOpt.get();
+        }
+        return availability;
+    }
+
 
 }
 

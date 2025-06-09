@@ -13,24 +13,80 @@ export default function ArtworkDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const passedArtwork = location.state?.artwork;
-  const [art, setArt] = useState(passedArtwork);
+
+  const [art, setArt] = useState(() => {
+    const data = passedArtwork || {};
+    return {
+      ...data,
+      surface: typeof data.surface === "object" ? data.surface.code : data.surface || "",
+      availability: typeof data.availability === "object" ? data.availability.code : data.availability || "",
+      mediums: Array.isArray(data.mediums)
+        ? data.mediums.map((m) => (typeof m === "object" ? m.code : m))
+        : [],
+    };
+  });
 
   useEffect(() => {
     sessionStorage.setItem("last-artwork-edit", JSON.stringify(passedArtwork));
   }, [passedArtwork]);
 
-  if (!art) return <p className="p-4 text-center">🌸 Oopsie! This artwork flew away...</p>;
-
   const handleChange = (field, value) => {
     setArt((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleDropdownChange = (field) => (selected) => {
-    setArt((prev) => ({
-      ...prev,
-      [field]: Array.isArray(selected) ? selected : selected,
-    }));
+  const handleSave = async () => {
+    try {
+      const cleanedArt = {
+        ...art,
+        tags: Array.isArray(art.tags) ? art.tags.join(", ") : (art.tags || ""),
+      };
+
+      const response = await fetch(`/api/admin/artworks/${art.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(cleanedArt),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast.success(result.message || "✅ Artwork updated successfully!");
+      } else {
+        toast.error(result.message || "❌ Failed to save artwork.");
+      }
+    } catch (err) {
+      console.error("Save failed:", err);
+      toast.error("🚨 Save failed: " + err.message);
+    }
   };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this artwork?")) return;
+
+    try {
+      const response = await fetch(`/api/admin/artworks/${art.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast.success(result.message || "🗑️ Artwork deleted.");
+        navigate("/admin/artworks/manage");
+      } else {
+        toast.error(result.message || "❌ Failed to delete artwork.");
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast.error("🚨 Delete failed: " + err.message);
+    }
+  };
+
+  if (!art) return <p className="p-4 text-center">🌸 Oopsie! This artwork flew away...</p>;
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6">
@@ -43,6 +99,8 @@ export default function ArtworkDetailPage() {
 
       <Card className="rounded-xl shadow border border-pink-100">
         <CardContent className="p-6 space-y-8">
+
+          {/* Metadata */}
           <section>
             <h3 className="text-xs font-bold text-rose-500 uppercase mb-2 tracking-wider">🧾 Metadata</h3>
             <div className="grid md:grid-cols-2 gap-4">
@@ -55,6 +113,7 @@ export default function ArtworkDetailPage() {
             </div>
           </section>
 
+          {/* Basic Info */}
           <section>
             <h3 className="text-xs font-bold text-rose-500 uppercase mb-2 tracking-wider">🖌️ Basic Info</h3>
             <div className="grid md:grid-cols-3 gap-4">
@@ -75,37 +134,30 @@ export default function ArtworkDetailPage() {
                 onChange={(e) => handleChange("price", e.target.value)}
               />
 
+              {/* Medium(s) */}
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-700">Medium(s)</label>
                 <MediumDropdown
                   value={art.mediums || []}
-                  onChange={handleDropdownChange("mediums")}
+                  onChange={(selectedCodes) => handleChange("mediums", selectedCodes)}
                 />
               </div>
 
+              {/* Surface */}
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-700">Surface</label>
                 <SurfaceDropdown
-                  value={art.surface?.code || ""}
-                  onChange={(selected) =>
-                    handleChange("surface", {
-                      code: selected?.value,
-                      name: selected?.label,
-                    })
-                  }
+                  value={art.surface || ""}
+                  onChange={(selectedCode) => handleChange("surface", selectedCode)}
                 />
               </div>
 
+              {/* Availability */}
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-700">Availability</label>
                 <AvailabilityDropdown
-                  value={art.availability?.code || ""}
-                  onChange={(selected) =>
-                    handleChange("availability", {
-                      code: selected?.value,
-                      name: selected?.label,
-                    })
-                  }
+                  value={art.availability || ""}
+                  onChange={(selectedCode) => handleChange("availability", selectedCode)}
                 />
               </div>
 
@@ -117,6 +169,7 @@ export default function ArtworkDetailPage() {
             </div>
           </section>
 
+          {/* Creative Info */}
           <section>
             <h3 className="text-xs font-bold text-rose-500 uppercase mb-2 tracking-wider">📝 Creative</h3>
             <div className="grid md:grid-cols-2 gap-4">
@@ -133,6 +186,7 @@ export default function ArtworkDetailPage() {
             </div>
           </section>
 
+          {/* Images */}
           <section>
             <h3 className="text-xs font-bold text-rose-500 uppercase mb-2 tracking-wider">🖼️ Images</h3>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -166,26 +220,33 @@ export default function ArtworkDetailPage() {
             </div>
           </section>
 
+          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
             <Button
               className="bg-red-400 hover:bg-red-500 text-white"
-              onClick={() => toast.error("💣 Delete action triggered (dummy for now)")}
+              onClick={handleDelete}
             >
               ❌ Delete
             </Button>
+
             <Button
               variant="outline"
-              onClick={() => toast.info("Cancelled. Nothing changed 😊")}
+              onClick={() => {
+                toast.info("Cancelled. No changes saved.");
+                navigate("/admin/artworks/manage");
+              }}
             >
               Cancel
             </Button>
+
             <Button
               className="bg-teal-600 hover:bg-teal-700 text-white"
-              onClick={() => toast.success("💾 Saved! You did amazing, admin!")}
+              onClick={handleSave}
             >
-              Save Changes
+              💾 Save Changes
             </Button>
           </div>
+
         </CardContent>
       </Card>
     </div>

@@ -10,9 +10,12 @@ public interface ArtworksService {
 
     ArtworkRequestDTO saveArtwork(ArtworkRequestDTO dto);
 
+    ArtworkRequestDTO updateArtwork(Long id, ArtworkRequestDTO dto);
+
+    Page<ArtworkResponseDTO> searchArtworks(ArtworkSearchRequest request, Pageable pageable);
+
     Page<ArtworkResponseDTO> getFeaturedArtworks(Pageable pageable);
 
     Page<ArtworkResponseDTO> getAllArtworks(Pageable pageable);
 
-    Page<ArtworkResponseDTO> searchArtworks(ArtworkSearchRequest request, Pageable pageable);
-}
+ }

@@ -1,6 +1,7 @@
 package com.anjoriarts.controller;
 
 import com.anjoriarts.common.CommonResponse;
+import com.anjoriarts.common.Consonants;
 import com.anjoriarts.dto.ArtworkRequestDTO;
 import com.anjoriarts.dto.ArtworkResponseDTO;
 import com.anjoriarts.dto.ArtworkPageResponse;
@@ -109,16 +110,16 @@ public class ArtworksController {
             ArtworkRequestDTO dto = ArtworkRequestDTO.builder()
                     .title(title)
                     .size(size)
-                    .medium(medium)
-                    .surface(surface)
+                    //.medium(medium)
+                    //.surface(surface)
                     .price(new BigDecimal(price))
-                    .tags(tags)
+                    //.tags(tags)
                     .featured(featured)
                     .imageFiles(imageFiles)
                     .description(description)
-                    .availability(availability)
+                    //.availability(availability)
                     .artistNote(artistNote)
-                    .mediums(mediums)
+                   // .mediums(mediums)
                     .build();
             dto = artworksService.saveArtwork(dto);
             if(dto.getId() == null){
@@ -183,4 +184,21 @@ public class ArtworksController {
         );
         return ResponseEntity.ok().body(CommonResponse.success("Artworks fetched", response));
     }
+
+    @PutMapping("/admin/artworks/{id}")
+    public ResponseEntity<?> updateArtwork(@PathVariable Long id, @RequestBody ArtworkRequestDTO dto) {
+        try {
+            ArtworkRequestDTO savedArtwork = artworksService.updateArtwork(id, dto);
+
+            if(savedArtwork.getId() ==  null){
+                return ResponseEntity.ok().body(CommonResponse.failure("Artwork save failed..", null));
+            }
+
+            return ResponseEntity.ok().body(CommonResponse.success("Artwork saved successfully", savedArtwork));
+        } catch (Exception e) {
+            logger.error("Error saving artwork", e);
+            return ResponseEntity.ok().body(CommonResponse.failure(Consonants.INTERNAL_SERVER_ERROR, null));
+        }
+    }
+
 }

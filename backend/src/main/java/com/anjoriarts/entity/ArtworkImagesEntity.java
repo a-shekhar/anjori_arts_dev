@@ -8,7 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @Data
 @Builder
-@ToString
 public class ArtworkImagesEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,6 +15,8 @@ public class ArtworkImagesEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "artwork_id", referencedColumnName = "id", nullable = false)
+    @ToString.Exclude  // ✅ correct — placed on field
+    @EqualsAndHashCode.Exclude
     private ArtworkEntity artwork;
 
     @Column(name = "image_url")

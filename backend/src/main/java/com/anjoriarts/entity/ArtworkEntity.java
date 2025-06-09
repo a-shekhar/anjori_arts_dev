@@ -66,4 +66,7 @@ public class ArtworkEntity {
 
     @OneToMany(mappedBy = "artwork", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ArtworkImagesEntity> artworkImages;
+
+    @Column(name = "updated_at")
+    private ZonedDateTime updatedAt;
 }

@@ -14,16 +14,16 @@ import java.util.List;
 public class ArtworkRequestDTO {
     private Long id;
     private String title;
-    private String medium;
     private String surface;
     private String size;
     private BigDecimal price;
     private String tags;
-    private  boolean featured;
+    private boolean featured;
     private String description;
     private String availability;
     private String createdAt;
     private String artistNote;
     private List<MultipartFile> imageFiles;
     private List<String> mediums;
+    private List<ArtworkImagesDTO> images;
 }
