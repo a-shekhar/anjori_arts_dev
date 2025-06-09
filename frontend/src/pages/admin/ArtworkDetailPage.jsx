@@ -11,7 +11,6 @@ import AvailabilityDropdown from "../../components/dropdowns/AvailabilityDropdow
 import MediumDropdown from "../../components/dropdowns/MediumDropdown";
 import ImageZoomModal from "../../components/ImageZoomModal";
 import CropModal from "../../components/CropModal";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 export default function ArtworkDetailPage() {
   const navigate = useNavigate();
@@ -49,28 +48,6 @@ export default function ArtworkDetailPage() {
     setNewImages((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const handleDeleteImage = async (imageId) => {
-    if (!window.confirm("Are you sure you want to delete this image?")) return;
-    try {
-      const response = await fetch(`/api/admin/artworks/${art.id}/images/${imageId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      const result = await response.json();
-      if (response.ok && result.success) {
-        toast.success(result.message || "Image deleted.");
-        const updatedImages = art.images.filter((img) => img.id !== imageId);
-        setArt((prev) => ({ ...prev, images: updatedImages }));
-        sessionStorage.setItem("last-artwork-edit", JSON.stringify({ ...art, images: updatedImages }));
-      } else {
-        toast.error(result.message || "Failed to delete image.");
-      }
-    } catch (err) {
-      console.error("Delete failed:", err);
-      toast.error("Delete failed: " + err.message);
-    }
-  };
-
   const handleCropSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -91,25 +68,14 @@ export default function ArtworkDetailPage() {
     setCropModal({ open: false, file: null, previewUrl: null });
   };
 
-  const handleReorder = (result) => {
-    if (!result.destination) return;
-    const combined = [...(art.images || []), ...newImages];
-    const [moved] = combined.splice(result.source.index, 1);
-    combined.splice(result.destination.index, 0, moved);
-    setArt((prev) => ({ ...prev, images: combined.filter((i) => !i.file) }));
-    setNewImages(combined.filter((i) => i.file));
-  };
-
   const handleSave = async () => {
     try {
       const formData = new FormData();
 
-      // 🧠 1. Prepare new image files and build metadata list
       const newImageMeta = [];
-
       for (const img of newImages) {
         if (img.file) {
-          formData.append("imageFiles", img.file); // file itself
+          formData.append("imageFiles", img.file);
           newImageMeta.push({
             fileName: img.file.name,
             displayOrder: parseInt(img.displayOrder || 0)
@@ -117,14 +83,12 @@ export default function ArtworkDetailPage() {
         }
       }
 
-      // 🧠 2. Prepare existing image metadata (id, url, displayOrder)
       const existingImages = (art.images || []).map((img) => ({
         id: img.id,
         imageUrl: img.imageUrl || img.image_url,
         displayOrder: parseInt(img.displayOrder || 0)
       }));
 
-      // 🧠 3. Build the artwork DTO
       const artworkDTO = {
         id: art.id,
         title: art.title,
@@ -140,11 +104,9 @@ export default function ArtworkDetailPage() {
         images: existingImages
       };
 
-      // 🧾 4. Append main parts to FormData
       formData.append("dto", new Blob([JSON.stringify(artworkDTO)], { type: "application/json" }));
       formData.append("imageFileMeta", new Blob([JSON.stringify(newImageMeta)], { type: "application/json" }));
 
-      // 🚀 5. Send to backend
       const response = await fetch(`/api/admin/artworks/${art.id}`, {
         method: "PUT",
         body: formData,
@@ -155,7 +117,7 @@ export default function ArtworkDetailPage() {
 
       if (response.ok && result.success) {
         toast.success("✅ Artwork updated!");
-        setNewImages([]); // clear uploaded
+        setNewImages([]);
         sessionStorage.setItem("last-artwork-edit", JSON.stringify(result.updatedArtwork || artworkDTO));
       } else {
         toast.error(result.message || "❌ Failed to update.");
@@ -165,8 +127,6 @@ export default function ArtworkDetailPage() {
       toast.error("🚨 Error: " + err.message);
     }
   };
-
-
 
   if (!art) return <p className="p-4 text-center">🌸 Oopsie! This artwork flew away...</p>;
 
@@ -212,76 +172,75 @@ export default function ArtworkDetailPage() {
             </div>
           </section>
 
-         <section>
-           <h3 className="text-xs font-bold text-rose-500 uppercase mb-3 tracking-wider">🖼️ Images</h3>
-           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-
-             {/* Existing Images */}
-             {combinedImages.map((img, index) => (
-               <div key={img.id} className="relative group rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                 <img
-                   src={img.previewUrl || img.imageUrl || img.image_url}
-                   alt={`img-${index}`}
-                   className="w-full h-40 object-cover cursor-zoom-in transition-transform duration-200 group-hover:scale-[1.02]"
-                   onClick={() => handleZoom(img.previewUrl || img.imageUrl || img.image_url)}
-                 />
-                 <div className="p-2 text-sm bg-white space-y-2">
-                   <Input
-                     label="Display Order"
-                     type="number"
-                     value={img.displayOrder ?? ""}
-                     onChange={(e) => {
-                       const val = e.target.value;
-                       if (img.file) {
-                         setNewImages((prev) =>
-                           prev.map((i) =>
-                             i.id === img.id ? { ...i, displayOrder: val } : i
-                           )
-                         );
-                       } else {
-                         setArt((prev) => ({
-                           ...prev,
-                           images: prev.images.map((i) =>
-                             i.id === img.id ? { ...i, displayOrder: val } : i
-                           ),
-                         }));
-                       }
-                     }}
-                   />
-                   <button
-                     type="button"
-                     className="w-full text-xs py-1 bg-rose-100 text-rose-600 rounded hover:bg-rose-200 transition"
-                     onClick={() =>
-                       img.file ? removeNewImage(img.id) : handleDeleteImage(img.id)
-                     }
-                   >
-                     Delete
-                   </button>
-                 </div>
-               </div>
-             ))}
-
-             {/* Upload Image Card */}
-             <label
-               title="Add Image"
-               className="flex items-center justify-center border-2 border-dashed border-rose-300 rounded-xl h-40 cursor-pointer hover:bg-rose-50 transition-all"
-             >
-               <span className="text-3xl text-rose-400 font-light">+</span>
-               <input
-                 type="file"
-                 accept="image/*"
-                 onChange={handleCropSelect}
-                 className="hidden"
-               />
-             </label>
-           </div>
-         </section>
-
+          <section>
+            <h3 className="text-xs font-bold text-rose-500 uppercase mb-3 tracking-wider">🖼️ Images</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {combinedImages.map((img, index) => (
+                <div key={img.id} className="relative group rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <img
+                    src={img.previewUrl || img.imageUrl || img.image_url}
+                    alt={`img-${index}`}
+                    className="w-full h-40 object-cover cursor-zoom-in transition-transform duration-200 group-hover:scale-[1.02]"
+                    onClick={() => handleZoom(img.previewUrl || img.imageUrl || img.image_url)}
+                  />
+                  <div className="p-2 text-sm bg-white space-y-2">
+                    <Input
+                      label="Display Order"
+                      type="number"
+                      value={img.displayOrder ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (img.file) {
+                          setNewImages((prev) =>
+                            prev.map((i) =>
+                              i.id === img.id ? { ...i, displayOrder: val } : i
+                            )
+                          );
+                        } else {
+                          setArt((prev) => ({
+                            ...prev,
+                            images: prev.images.map((i) =>
+                              i.id === img.id ? { ...i, displayOrder: val } : i
+                            ),
+                          }));
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="w-full text-xs py-1 bg-rose-100 text-rose-600 rounded hover:bg-rose-200 transition"
+                      onClick={() =>
+                        img.file
+                          ? removeNewImage(img.id)
+                          : setArt((prev) => ({
+                              ...prev,
+                              images: prev.images.filter((i) => i.id !== img.id),
+                            }))
+                      }
+                    >
+                      🗑️ Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+              <label
+                title="Add Image"
+                className="flex items-center justify-center border-2 border-dashed border-rose-300 rounded-xl h-40 cursor-pointer hover:bg-rose-50 transition-all"
+              >
+                <span className="text-3xl text-rose-400 font-light">+</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCropSelect}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </section>
 
           <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
-            <Button className="bg-pink-500 hover:bg-red-500 text-white" onClick={handleDeleteImage}>🗑️ Delete Artwork</Button>
-            <Button variant="outline" onClick={() => navigate("/admin/artworks/manage")}> ❌ Cancel</Button>
-            <Button className="bg-teal-600 hover:bg-teal-700 text-white" onClick={handleSave}> 💾 Save Changes</Button>
+            <Button variant="outline" onClick={() => navigate("/admin/artworks/manage")}>❌ Cancel</Button>
+            <Button className="bg-teal-600 hover:bg-teal-700 text-white" onClick={handleSave}>💾 Save Changes</Button>
           </div>
         </CardContent>
       </Card>
