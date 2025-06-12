@@ -201,6 +201,8 @@ public class ArtworksServiceImpl implements ArtworksService{
             ArtworkEntity savedArtwork = artworkRepository.save(artwork);
             dto.setId(savedArtwork.getId());
 
+            logger.info("Artwork updated successfully...");
+
             return dto;
 
         } catch (Exception e) {
@@ -329,7 +331,26 @@ public class ArtworksServiceImpl implements ArtworksService{
         return availability;
     }
 
+    @Override
+    @Transactional
+    public void deleteArtwork(Long artworkId){
+        try {
+            if (artworkId == null){
+                throw new RuntimeException("Artwork Id is invalid " + null);
+            }
 
+            Optional<ArtworkEntity> artworkOpt = artworkRepository.findById(artworkId);
+            if(artworkOpt.isEmpty()){
+                throw new RuntimeException("Artwork with id " + artworkId + " not found...");
+            }
+            artworkRepository.deleteById(artworkId);
+            String folderPath = String.format(Consonants.ARTWORKS_PATH, env, artworkOpt.get().getSlug());
+            cloudinaryService.deleteFolder(folderPath);
+            logger.info("Artwork deleted successfully...");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
 
 

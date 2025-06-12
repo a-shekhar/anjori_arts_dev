@@ -4,7 +4,6 @@ import com.anjoriarts.common.CommonResponse;
 import com.anjoriarts.common.Consonants;
 import com.anjoriarts.dto.*;
 import com.anjoriarts.service.artworks.ArtworksService;
-import com.anjoriarts.util.CommonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -174,6 +173,18 @@ public class ArtworksController {
         } catch (Exception e) {
             logger.error("Error saving artwork", e);
             return ResponseEntity.ok().body(CommonResponse.failure(Consonants.INTERNAL_SERVER_ERROR, null));
+        }
+    }
+
+
+    @DeleteMapping(value = "/admin/artworks/{id}")
+    public ResponseEntity<?> updateArtwork(@PathVariable(name = "id") Long artworkId){
+        try {
+            artworksService.deleteArtwork(artworkId);
+            return ResponseEntity.ok().body(CommonResponse.success("Artwork Deleted successfully...", null));
+        } catch (Exception e) {
+            logger.error("Error while deleting artwork with ID " + artworkId + "=>" + e.getMessage());
+            return ResponseEntity.ok().body(CommonResponse.success("Artwork deletion failed...", null));
         }
     }
 

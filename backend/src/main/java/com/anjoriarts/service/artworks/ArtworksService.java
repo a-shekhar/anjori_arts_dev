@@ -20,4 +20,6 @@ public interface ArtworksService {
 
     Page<ArtworkResponseDTO> getAllArtworks(Pageable pageable);
 
+    void deleteArtwork(Long id);
+
  }

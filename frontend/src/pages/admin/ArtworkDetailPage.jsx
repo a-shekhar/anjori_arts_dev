@@ -116,17 +116,49 @@ export default function ArtworkDetailPage() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        toast.success("✅ Artwork updated!");
+        toast.success(result.message || "✅ Artwork updated!");
         setNewImages([]);
         sessionStorage.setItem("last-artwork-edit", JSON.stringify(result.updatedArtwork || artworkDTO));
       } else {
         toast.error(result.message || "❌ Failed to update.");
       }
     } catch (err) {
-      console.error("Save failed:", err);
       toast.error("🚨 Error: " + err.message);
     }
   };
+
+  const handleDelete = async () => {
+    if (!art.id) {
+      console.error("No artwork ID provided.");
+      return;
+    }
+
+    const confirmDelete = window.confirm("Are you sure you want to delete this artwork?");
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(`/api/admin/artworks/${art.id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast.success(result.message || "✅ Artwork Deleted!");
+        sessionStorage.removeItem("last-artwork-edit");
+        navigate("/admin/artworks/manage");
+      } else {
+        toast.error(result.message || "Failed to delete artwork.");
+      }
+    } catch (error) {
+      toast.error("Server error while deleting artwork.");
+    }
+  };
+
 
   if (!art) return <p className="p-4 text-center">🌸 Oopsie! This artwork flew away...</p>;
 
@@ -239,6 +271,7 @@ export default function ArtworkDetailPage() {
           </section>
 
           <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
+            <Button className="bg-pink-500 hover:bg-red-500 text-white" onClick={handleDelete}>🗑️ Delete Artwork</Button>
             <Button variant="outline" onClick={() => navigate("/admin/artworks/manage")}>❌ Cancel</Button>
             <Button className="bg-teal-600 hover:bg-teal-700 text-white" onClick={handleSave}>💾 Save Changes</Button>
           </div>

@@ -51,10 +51,14 @@ public class CloudinaryServiceImpl  implements CloudinaryService{
     }
 
     @Override
-    public boolean deleteResources(String folderPath){
+    public boolean deleteFolder(String folderPath){
         try{
-            cloudinary.api().deleteResourcesByPrefix(folderPath, ObjectUtils.emptyMap());
-            logger.info("Folder resources deleted...");
+            // 1. Delete all resources inside the folder
+            cloudinary.api().deleteResourcesByPrefix(
+                    folderPath + "/", ObjectUtils.emptyMap());
+            // 2. Delete the empty folder
+            cloudinary.api().deleteFolder(folderPath, ObjectUtils.emptyMap());
+            logger.info("Folder " + folderPath + "Deleted...");
             return true;
         } catch (Exception e) {
             logger.error("Error during deletion of cloudinary folder");
