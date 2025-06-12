@@ -100,7 +100,7 @@ export default function ArtworkDetailPage() {
         description: art.description,
         artistNote: art.artistNote,
         mediums: art.mediums,
-        tags: Array.isArray(art.tags) ? art.tags.join(", ") : art.tags,
+        tags: Array.isArray(art.tags) ? art.tags.join(",") : art.tags,
         images: existingImages
       };
 
