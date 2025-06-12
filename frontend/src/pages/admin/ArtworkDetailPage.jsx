@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { v4 as uuid } from "uuid";
 import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
-import { Textarea } from "../../components/ui/textarea";
 import { Button } from "../../components/ui/button";
 import { toast } from "react-toastify";
 import SurfaceDropdown from "../../components/dropdowns/SurfaceDropdown";
@@ -11,6 +10,8 @@ import AvailabilityDropdown from "../../components/dropdowns/AvailabilityDropdow
 import MediumDropdown from "../../components/dropdowns/MediumDropdown";
 import ImageZoomModal from "../../components/ImageZoomModal";
 import CropModal from "../../components/CropModal";
+import ConfirmModal from "../../components/modals/ConfirmModal";
+import ProgressBar from "../../components/Loader/ProgressBar";
 
 export default function ArtworkDetailPage() {
   const navigate = useNavigate();
@@ -26,12 +27,19 @@ export default function ArtworkDetailPage() {
       mediums: Array.isArray(data.mediums)
         ? data.mediums.map((m) => (typeof m === "object" ? m.code : m))
         : [],
+      tags: Array.isArray(data.tags)
+        ? data.tags.map((t) => t.trim())
+        : typeof data.tags === "string"
+        ? data.tags.split(",").map((t) => t.trim())
+        : [],
     };
   });
 
   const [newImages, setNewImages] = useState([]);
   const [zoomImage, setZoomImage] = useState(null);
   const [cropModal, setCropModal] = useState({ open: false, file: null, previewUrl: null });
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     sessionStorage.setItem("last-artwork-edit", JSON.stringify(passedArtwork));
@@ -69,6 +77,9 @@ export default function ArtworkDetailPage() {
   };
 
   const handleSave = async () => {
+    const backup = sessionStorage.getItem("last-artwork-edit");
+    setUploadProgress(20);
+
     try {
       const formData = new FormData();
 
@@ -78,7 +89,7 @@ export default function ArtworkDetailPage() {
           formData.append("imageFiles", img.file);
           newImageMeta.push({
             fileName: img.file.name,
-            displayOrder: parseInt(img.displayOrder || 0)
+            displayOrder: parseInt(img.displayOrder || 0),
           });
         }
       }
@@ -86,7 +97,7 @@ export default function ArtworkDetailPage() {
       const existingImages = (art.images || []).map((img) => ({
         id: img.id,
         imageUrl: img.imageUrl || img.image_url,
-        displayOrder: parseInt(img.displayOrder || 0)
+        displayOrder: parseInt(img.displayOrder || 0),
       }));
 
       const artworkDTO = {
@@ -100,12 +111,18 @@ export default function ArtworkDetailPage() {
         description: art.description,
         artistNote: art.artistNote,
         mediums: art.mediums,
-        tags: Array.isArray(art.tags) ? art.tags.join(",") : art.tags,
-        images: existingImages
+        tags: Array.isArray(art.tags)
+          ? art.tags.map((t) => t.trim()).filter(Boolean).join(",")
+          : "",
+        images: existingImages,
       };
 
+      sessionStorage.setItem("last-artwork-edit", JSON.stringify(artworkDTO));
+      setNewImages([]);
       formData.append("dto", new Blob([JSON.stringify(artworkDTO)], { type: "application/json" }));
       formData.append("imageFileMeta", new Blob([JSON.stringify(newImageMeta)], { type: "application/json" }));
+
+      setUploadProgress(40);
 
       const response = await fetch(`/api/admin/artworks/${art.id}`, {
         method: "PUT",
@@ -115,70 +132,63 @@ export default function ArtworkDetailPage() {
 
       const result = await response.json();
 
-      if (response.ok && result.success) {
-        toast.success(result.message || "✅ Artwork updated!");
-        setNewImages([]);
-        sessionStorage.setItem("last-artwork-edit", JSON.stringify(result.updatedArtwork || artworkDTO));
+      if (!response.ok || !result.success) {
+        sessionStorage.setItem("last-artwork-edit", backup);
+        toast.error(result.message || "❌ Save failed. Changes reverted.");
       } else {
-        toast.error(result.message || "❌ Failed to update.");
+        toast.success(result.message || "✅ Artwork saved!");
       }
+
+      setUploadProgress(100);
     } catch (err) {
-      toast.error("🚨 Error: " + err.message);
+      sessionStorage.setItem("last-artwork-edit", backup);
+      toast.error("🚨 Save error. Changes reverted.");
+      setUploadProgress(0);
     }
   };
 
   const handleDelete = async () => {
-    if (!art.id) {
-      console.error("No artwork ID provided.");
-      return;
-    }
+    if (!art.id) return;
 
-    const confirmDelete = window.confirm("Are you sure you want to delete this artwork?");
-    if (!confirmDelete) return;
+    const backup = JSON.stringify(art);
+    sessionStorage.removeItem("last-artwork-edit");
+    toast.info("Deleting artwork...");
+    navigate("/admin/artworks/manage");
 
     try {
       const response = await fetch(`/api/admin/artworks/${art.id}`, {
         method: "DELETE",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
       const result = await response.json();
 
-      if (response.ok && result.success) {
-        toast.success(result.message || "✅ Artwork Deleted!");
-        sessionStorage.removeItem("last-artwork-edit");
-        navigate("/admin/artworks/manage");
+      if (!response.ok || !result.success) {
+        sessionStorage.setItem("last-artwork-edit", backup);
+        toast.error(result.message || "❌ Delete failed. Reverted.");
       } else {
-        toast.error(result.message || "Failed to delete artwork.");
+        toast.success(result.message || "✅ Artwork Deleted!");
       }
-    } catch (error) {
-      toast.error("Server error while deleting artwork.");
+    } catch (err) {
+      sessionStorage.setItem("last-artwork-edit", backup);
+      toast.error("🚨 Server error. Delete failed.");
     }
   };
 
-
   if (!art) return <p className="p-4 text-center">🌸 Oopsie! This artwork flew away...</p>;
 
-  const combinedImages = [...(art.images || []), ...newImages];
-
   return (
-    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-rose-600">🎨 Artwork Detail - #{art.id}</h1>
-        <Button variant="ghost" onClick={() => navigate("/admin/artworks/manage")}>← Go Back</Button>
-      </div>
+    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6 relative">
+      <ProgressBar uploadProgress={uploadProgress} setUploadProgress={setUploadProgress} />
 
       <Card className="rounded-xl shadow border border-pink-100">
         <CardContent className="p-6 space-y-8">
-
           <section>
             <h3 className="text-xs font-bold text-rose-500 uppercase mb-2 tracking-wider">🧾 Metadata</h3>
             <div className="grid md:grid-cols-2 gap-4">
               <Input label="Artwork ID" value={art.id} disabled />
-              <Input label="Slug" value={art.slug} onChange={(e) => handleChange("slug", e.target.value)} />
+              <Input label="Slug" value={art.slug} disabled />
             </div>
           </section>
 
@@ -187,7 +197,7 @@ export default function ArtworkDetailPage() {
             <div className="grid md:grid-cols-3 gap-4">
               <Input label="Title" value={art.title} onChange={(e) => handleChange("title", e.target.value)} />
               <Input label="Size" value={art.size} onChange={(e) => handleChange("size", e.target.value)} />
-              <Input label="Price (₹)" value={art.price} type="number" onChange={(e) => handleChange("price", e.target.value)} />
+              <Input label="Price (₹)" type="number" value={art.price} onChange={(e) => handleChange("price", e.target.value)} />
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-700">Medium(s)</label>
                 <MediumDropdown value={art.mediums || []} onChange={(val) => handleChange("mediums", val)} />
@@ -200,14 +210,18 @@ export default function ArtworkDetailPage() {
                 <label className="text-sm font-medium text-gray-700">Availability</label>
                 <AvailabilityDropdown value={art.availability || ""} onChange={(val) => handleChange("availability", val)} />
               </div>
-              <Input label="Tags" value={Array.isArray(art.tags) ? art.tags.join(", ") : art.tags} onChange={(e) => handleChange("tags", e.target.value)} />
+              <Input
+                label="Tags"
+                value={Array.isArray(art.tags) ? art.tags.join(", ") : art.tags}
+                onChange={(e) => handleChange("tags", e.target.value)}
+              />
             </div>
           </section>
 
           <section>
             <h3 className="text-xs font-bold text-rose-500 uppercase mb-3 tracking-wider">🖼️ Images</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {combinedImages.map((img, index) => (
+              {[...(art.images || []), ...newImages].map((img, index) => (
                 <div key={img.id} className="relative group rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                   <img
                     src={img.previewUrl || img.imageUrl || img.image_url}
@@ -269,14 +283,14 @@ export default function ArtworkDetailPage() {
               </label>
             </div>
           </section>
-
-          <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
-            <Button className="bg-pink-500 hover:bg-red-500 text-white" onClick={handleDelete}>🗑️ Delete Artwork</Button>
-            <Button variant="outline" onClick={() => navigate("/admin/artworks/manage")}>❌ Cancel</Button>
-            <Button className="bg-teal-600 hover:bg-teal-700 text-white" onClick={handleSave}>💾 Save Changes</Button>
-          </div>
         </CardContent>
       </Card>
+
+      <div className="flex justify-end gap-3">
+        <Button className="bg-red-600 text-white" onClick={() => setShowConfirmModal(true)}>🗑️ Delete Artwork</Button>
+        <Button className="bg-gray-300 text-black" onClick={() => window.location.reload()}>❌ Cancel</Button>
+        <Button className="bg-green-600 text-white" onClick={handleSave}>💾 Save Artwork</Button>
+      </div>
 
       {zoomImage && <ImageZoomModal imageUrl={zoomImage} onClose={closeZoom} />}
       {cropModal.open && (
@@ -284,6 +298,17 @@ export default function ArtworkDetailPage() {
           imageSrc={cropModal.previewUrl}
           onCancel={() => setCropModal({ open: false, file: null, previewUrl: null })}
           onCropComplete={applyCroppedImage}
+        />
+      )}
+      {showConfirmModal && (
+        <ConfirmModal
+          title="Delete Artwork?"
+          message="Are you sure you want to permanently delete this artwork? This action cannot be undone."
+          onCancel={() => setShowConfirmModal(false)}
+          onConfirm={() => {
+            setShowConfirmModal(false);
+            handleDelete();
+          }}
         />
       )}
     </div>

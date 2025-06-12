@@ -139,8 +139,8 @@ export default function AddArtwork() {
           <div className="flex-1">
             <SurfaceDropdown
               value={formData.surface}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, surface: e.target.value }))
+              onChange={(val) =>
+                setFormData((prev) => ({ ...prev, surface: val }))
               }
             />
           </div>
@@ -163,7 +163,9 @@ export default function AddArtwork() {
           <div className="flex-1">
             <AvailabilityDropdown
               value={formData.availability}
-              onChange={handleChange}
+              onChange={(val) =>
+                setFormData((prev) => ({ ...prev, availability: val }))
+              }
             />
           </div>
         </div>
