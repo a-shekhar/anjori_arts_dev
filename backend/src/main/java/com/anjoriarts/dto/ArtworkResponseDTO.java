@@ -18,6 +18,7 @@ public class ArtworkResponseDTO {
     private SurfaceDTO surface;
     private String size;
     private BigDecimal price;
+    private boolean featured;
     private List<String> tags;
     private String description;
     private AvailabilityDTO availability;

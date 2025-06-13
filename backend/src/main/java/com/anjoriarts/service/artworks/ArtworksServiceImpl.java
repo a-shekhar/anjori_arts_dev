@@ -290,6 +290,7 @@ public class ArtworksServiceImpl implements ArtworksService{
                 .size(entity.getSize())
                 .price(entity.getPrice())
                 .tags(allTags)
+                .featured(entity.isFeatured())
                 .description(entity.getDescription())
                 .availability(AvailabilityDTO.builder().code(entity.getAvailability().getCode())
                         .name(entity.getAvailability().getName()).build())

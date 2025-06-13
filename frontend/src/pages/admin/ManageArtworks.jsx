@@ -13,32 +13,6 @@ export default function ManageArtworksPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Load from sessionStorage on mount
-  useEffect(() => {
-    const cached = sessionStorage.getItem("manage-artworks-cache");
-    if (cached) {
-      const { artworks, totalPages, currentPage, searchParams } = JSON.parse(cached);
-      setArtworks(artworks || []);
-      setTotalPages(totalPages || 0);
-      setCurrentPage(currentPage || 0);
-      setSearchParams(searchParams || { searchBy: "title", searchTerm: "" });
-    }
-  }, []);
-
-  // Save to sessionStorage
-  const saveCache = (updated) => {
-    sessionStorage.setItem(
-      "manage-artworks-cache",
-      JSON.stringify({
-        artworks: updated.artworks,
-        totalPages: updated.totalPages,
-        currentPage,
-        searchParams,
-      })
-    );
-  };
-
-  // Fetch artworks from backend
   const fetchArtworks = async () => {
     const { searchBy, searchTerm } = searchParams;
     if (!searchTerm.trim()) return;
@@ -54,10 +28,15 @@ export default function ManageArtworksPage() {
       if (json.success && Array.isArray(json.data?.content)) {
         setArtworks(json.data.content);
         setTotalPages(json.data.totalPages);
-        saveCache({
-          artworks: json.data.content,
-          totalPages: json.data.totalPages,
-        });
+        sessionStorage.setItem(
+          "manage-artworks-cache",
+          JSON.stringify({
+            artworks: json.data.content,
+            totalPages: json.data.totalPages,
+            currentPage,
+            searchParams,
+          })
+        );
       } else {
         setArtworks([]);
         setTotalPages(0);
@@ -69,23 +48,28 @@ export default function ManageArtworksPage() {
     }
   };
 
-  // Trigger fetch on page or search param changes
+  useEffect(() => {
+    const cached = sessionStorage.getItem("manage-artworks-cache");
+    const comingFromEdit = location.state?.updated;
+
+    if (comingFromEdit || !cached) {
+      fetchArtworks();
+      window.history.replaceState({}, document.title);
+    } else {
+      const { artworks, totalPages, currentPage, searchParams } = JSON.parse(cached);
+      setArtworks(artworks || []);
+      setTotalPages(totalPages || 0);
+      setCurrentPage(currentPage || 0);
+      setSearchParams(searchParams || { searchBy: "title", searchTerm: "" });
+    }
+  }, []);
+
   useEffect(() => {
     if (searchParams.searchTerm.trim()) {
       fetchArtworks();
     }
   }, [currentPage, searchParams]);
 
-  // Refresh on return from detail page
-  useEffect(() => {
-    if (location.state?.updated) {
-      fetchArtworks();
-      // Clear location.state so it doesn't persist on reload
-      window.history.replaceState({}, document.title);
-    }
-  }, [location.state]);
-
-  // Search handler
   const handleSearch = useCallback((searchBy, searchTerm) => {
     const newParams = { searchBy, searchTerm };
     setSearchParams(newParams);
@@ -134,6 +118,11 @@ export default function ManageArtworksPage() {
                   {art.size} • {sortedMediums} on {art.surface?.name || "N/A"}
                 </p>
                 <div className="text-sm font-bold text-teal-600">₹ {art.price}</div>
+                {art.featured && (
+                  <div className="text-xs font-semibold text-yellow-700 bg-yellow-100 px-2 py-1 rounded w-fit">
+                    ⭐ Featured
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-2 mt-2">
                   {Array.isArray(art.tags) && art.tags.length > 0 ? (
                     art.tags.map((tag, i) => (
