@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ArtworkSearchFilterDropdown from "../../components/dropdowns/ArtworkSearchFilterDropdown";
 
 export default function ManageArtworksPage() {
@@ -9,9 +9,11 @@ export default function ManageArtworksPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [searchParams, setSearchParams] = useState({ searchBy: "title", searchTerm: "" });
-  const navigate = useNavigate();
 
-  // Load from sessionStorage
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Load from sessionStorage on mount
   useEffect(() => {
     const cached = sessionStorage.getItem("manage-artworks-cache");
     if (cached) {
@@ -23,6 +25,7 @@ export default function ManageArtworksPage() {
     }
   }, []);
 
+  // Save to sessionStorage
   const saveCache = (updated) => {
     sessionStorage.setItem(
       "manage-artworks-cache",
@@ -35,6 +38,7 @@ export default function ManageArtworksPage() {
     );
   };
 
+  // Fetch artworks from backend
   const fetchArtworks = async () => {
     const { searchBy, searchTerm } = searchParams;
     if (!searchTerm.trim()) return;
@@ -65,12 +69,23 @@ export default function ManageArtworksPage() {
     }
   };
 
+  // Trigger fetch on page or search param changes
   useEffect(() => {
     if (searchParams.searchTerm.trim()) {
       fetchArtworks();
     }
   }, [currentPage, searchParams]);
 
+  // Refresh on return from detail page
+  useEffect(() => {
+    if (location.state?.updated) {
+      fetchArtworks();
+      // Clear location.state so it doesn't persist on reload
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  // Search handler
   const handleSearch = useCallback((searchBy, searchTerm) => {
     const newParams = { searchBy, searchTerm };
     setSearchParams(newParams);
@@ -83,7 +98,7 @@ export default function ManageArtworksPage() {
       JSON.stringify({
         ...parsed,
         searchParams: newParams,
-        currentPage: 0
+        currentPage: 0,
       })
     );
   }, []);

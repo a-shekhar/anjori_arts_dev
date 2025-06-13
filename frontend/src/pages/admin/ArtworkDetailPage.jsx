@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { v4 as uuid } from "uuid";
 import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
+import { Textarea } from "../../components/ui/textarea";
 import { Button } from "../../components/ui/button";
 import { toast } from "react-toastify";
 import SurfaceDropdown from "../../components/dropdowns/SurfaceDropdown";
@@ -12,6 +13,7 @@ import ImageZoomModal from "../../components/ImageZoomModal";
 import CropModal from "../../components/CropModal";
 import ConfirmModal from "../../components/modals/ConfirmModal";
 import ProgressBar from "../../components/Loader/ProgressBar";
+import { ArrowLeft } from "lucide-react";
 
 export default function ArtworkDetailPage() {
   const navigate = useNavigate();
@@ -22,16 +24,18 @@ export default function ArtworkDetailPage() {
     const data = passedArtwork || {};
     return {
       ...data,
+      featured: data.featured || false,
       surface: typeof data.surface === "object" ? data.surface.code : data.surface || "",
       availability: typeof data.availability === "object" ? data.availability.code : data.availability || "",
       mediums: Array.isArray(data.mediums)
         ? data.mediums.map((m) => (typeof m === "object" ? m.code : m))
         : [],
-      tags: Array.isArray(data.tags)
-        ? data.tags.map((t) => t.trim())
-        : typeof data.tags === "string"
-        ? data.tags.split(",").map((t) => t.trim())
-        : [],
+      tags:
+        typeof data.tags === "string"
+          ? data.tags
+          : Array.isArray(data.tags)
+          ? data.tags.join(", ")
+          : "",
     };
   });
 
@@ -110,10 +114,12 @@ export default function ArtworkDetailPage() {
         availability: art.availability,
         description: art.description,
         artistNote: art.artistNote,
+        featured: art.featured,
         mediums: art.mediums,
-        tags: Array.isArray(art.tags)
-          ? art.tags.map((t) => t.trim()).filter(Boolean).join(",")
-          : "",
+        tags:
+          typeof art.tags === "string"
+            ? art.tags.split(",").map((t) => t.trim()).filter(Boolean).join(",")
+            : "",
         images: existingImages,
       };
 
@@ -137,6 +143,11 @@ export default function ArtworkDetailPage() {
         toast.error(result.message || "❌ Save failed. Changes reverted.");
       } else {
         toast.success(result.message || "✅ Artwork saved!");
+
+        // Navigate back to Manage page with updated state
+        navigate("/admin/artworks/manage", {
+          state: { updated: true },
+        });
       }
 
       setUploadProgress(100);
@@ -180,6 +191,16 @@ export default function ArtworkDetailPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6 relative">
+      <div className="flex justify-end">
+        <button
+          onClick={() => navigate("/admin/artworks/manage")}
+          className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Go Back
+        </button>
+      </div>
+
       <ProgressBar uploadProgress={uploadProgress} setUploadProgress={setUploadProgress} />
 
       <Card className="rounded-xl shadow border border-pink-100">
@@ -200,21 +221,41 @@ export default function ArtworkDetailPage() {
               <Input label="Price (₹)" type="number" value={art.price} onChange={(e) => handleChange("price", e.target.value)} />
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-700">Medium(s)</label>
-                <MediumDropdown value={art.mediums || []} onChange={(val) => handleChange("mediums", val)} />
+                <MediumDropdown value={art.mediums} onChange={(val) => handleChange("mediums", val)} />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-700">Surface</label>
-                <SurfaceDropdown value={art.surface || ""} onChange={(val) => handleChange("surface", val)} />
+                <SurfaceDropdown value={art.surface} onChange={(val) => handleChange("surface", val)} />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-700">Availability</label>
-                <AvailabilityDropdown value={art.availability || ""} onChange={(val) => handleChange("availability", val)} />
+                <AvailabilityDropdown value={art.availability} onChange={(val) => handleChange("availability", val)} />
               </div>
               <Input
                 label="Tags"
-                value={Array.isArray(art.tags) ? art.tags.join(", ") : art.tags}
+                value={art.tags}
                 onChange={(e) => handleChange("tags", e.target.value)}
               />
+            </div>
+            <div className="flex items-center gap-2 mt-3">
+              <input
+                type="checkbox"
+                id="featured"
+                checked={art.featured}
+                onChange={(e) => handleChange("featured", e.target.checked)}
+                className="w-4 h-4"
+              />
+              <label htmlFor="featured" className="text-sm font-medium text-gray-700">
+                🌟 Featured Artwork
+              </label>
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-xs font-bold text-rose-500 uppercase mb-2 tracking-wider">📝 Creative</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Textarea label="Description" value={art.description} onChange={(e) => handleChange("description", e.target.value)} />
+              <Textarea label="Artist Note" value={art.artistNote} onChange={(e) => handleChange("artistNote", e.target.value)} />
             </div>
           </section>
 
@@ -224,7 +265,7 @@ export default function ArtworkDetailPage() {
               {[...(art.images || []), ...newImages].map((img, index) => (
                 <div key={img.id} className="relative group rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                   <img
-                    src={img.previewUrl || img.imageUrl || img.image_url}
+                    src={(img.previewUrl || img.imageUrl || img.image_url) + (img.previewUrl ? "" : `?t=${Date.now()}`)}
                     alt={`img-${index}`}
                     className="w-full h-40 object-cover cursor-zoom-in transition-transform duration-200 group-hover:scale-[1.02]"
                     onClick={() => handleZoom(img.previewUrl || img.imageUrl || img.image_url)}

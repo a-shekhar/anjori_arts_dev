@@ -123,6 +123,7 @@ public class ArtworksServiceImpl implements ArtworksService{
 
             if (!artwork.getTitle().equalsIgnoreCase(dto.getTitle().trim())) {
                 artwork.setSlug(this.generateSlug(dto.getTitle()).trim());
+                dto.setSlug(artwork.getSlug());
             }
 
             artwork.setTitle(dto.getTitle().trim());

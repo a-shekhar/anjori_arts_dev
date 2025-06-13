@@ -25,4 +25,5 @@ public class ArtworkUpdateRequestDTO {
     private String artistNote;
     private List<String> mediums;
     private List<ArtworkImagesDTO> images;
+    private String slug;
 }
