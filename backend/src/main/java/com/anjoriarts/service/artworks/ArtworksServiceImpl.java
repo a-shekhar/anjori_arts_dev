@@ -217,6 +217,8 @@ public class ArtworksServiceImpl implements ArtworksService{
         Page<ArtworkEntity> page = null;
         if(request.getSearchBy().equalsIgnoreCase("Title")) {
             page = artworkRepository.findByTitleContainingIgnoreCase(request.getSearchTerm(), pageable);
+        }else if(request.getSearchBy().equalsIgnoreCase("Id")){
+            page = artworkRepository.findById(Long.valueOf(request.getSearchTerm()), pageable);
         }
         // Convert each entity to DTO using map
         return page != null ? page.map(this::convertToResponseDto) : null;

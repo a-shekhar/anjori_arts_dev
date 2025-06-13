@@ -1,31 +1,40 @@
-// ✅ ArtworkSearchFilterDropdown.jsx (for backend pagination)
 import { useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Search as SearchIcon } from "lucide-react";
+import { useLoading } from "../context/LoadingContext";
 
 export default function ArtworkSearchFilterDropdown({ onSearch }) {
   const [searchBy, setSearchBy] = useState("title");
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { setUploadProgress } = useLoading();
 
   const handleSearch = () => {
-    if (searchTerm.trim().length === 0) return;
-    setLoading(true);
-    onSearch(searchBy, searchTerm.trim());
-    setTimeout(() => setLoading(false), 300); // optional visual debounce
+    const trimmed = searchTerm.trim();
+    if (trimmed.length === 0) return;
+
+    if (searchBy === "id" && !/^\d+$/.test(trimmed)) {
+      alert("Please enter a valid numeric ID.");
+      return;
+    }
+
+    setUploadProgress(70);
+    onSearch(searchBy, trimmed);
+    setTimeout(() => {
+      setUploadProgress(100);
+      setTimeout(() => setUploadProgress(0), 400);
+    }, 300);
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
+    if (e.key === "Enter") handleSearch();
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-stretch sm:items-end">
+      {/* Dropdown */}
       <select
-        className="border rounded-lg px-3 py-2 text-sm bg-white w-full sm:w-auto"
+        className="border rounded px-3 text-sm bg-white w-full sm:w-auto h-10"
         value={searchBy}
         onChange={(e) => setSearchBy(e.target.value)}
       >
@@ -33,23 +42,34 @@ export default function ArtworkSearchFilterDropdown({ onSearch }) {
         <option value="title">Title</option>
       </select>
 
-      <div className="relative w-full">
-        <Input
+      {/* Input with icon */}
+      <div className="w-full h-10 flex items-center border rounded px-3 bg-white">
+        <SearchIcon className="text-gray-400 mr-2" size={18} />
+        <input
+          type="text"
           placeholder={`Search by ${searchBy}...`}
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            if (searchBy === "id") {
+              const val = e.target.value;
+              if (val === "" || /^\d+$/.test(val)) setSearchTerm(val);
+            } else {
+              setSearchTerm(e.target.value);
+            }
+          }}
           onKeyDown={handleKeyDown}
-          className="pl-10"
+          className="flex-1 text-base outline-none placeholder-gray-400"
         />
-        <SearchIcon className="absolute left-3 top-2.5 text-gray-400" size={18} />
       </div>
 
+
+      {/* Search button */}
       <Button
         onClick={handleSearch}
-        disabled={loading || searchTerm.trim() === ""}
-        className="w-full sm:w-auto"
+        disabled={searchTerm.trim() === ""}
+        className="w-full sm:w-auto h-10 text-base font-semibold"
       >
-        {loading ? "Searching..." : "Search"}
+        Search
       </Button>
     </div>
   );

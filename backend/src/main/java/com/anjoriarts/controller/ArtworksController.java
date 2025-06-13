@@ -140,6 +140,10 @@ public class ArtworksController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<ArtworkResponseDTO> resultPage = artworksService.searchArtworks(request, pageable);
 
+        if(resultPage ==  null || resultPage.isEmpty()){
+            return ResponseEntity.ok().body(CommonResponse.success("No matching artwork found", null));
+        }
+
         ArtworkPageResponse response = new ArtworkPageResponse(
                 resultPage.getContent(),
                 resultPage.getTotalPages(),

@@ -20,4 +20,6 @@ public interface ArtworkRepository extends JpaRepository<ArtworkEntity, Long> {
     Page<ArtworkEntity> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
     void deleteById(Long artworkId);
+
+    Page<ArtworkEntity> findById(Long artworkId, Pageable pageable);
 }
