@@ -3,6 +3,7 @@ package com.anjoriarts.entity;
 import com.anjoriarts.common.Consonants;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigInteger;
 import java.time.ZoneId;
@@ -20,8 +21,16 @@ import java.util.List;
 public class CustomOrderEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "order-id-generator")
+    @GenericGenerator(
+            name = "order-id-generator",
+            strategy = "com.anjoriarts.entity.OrderIdGenerator",
+            parameters = {
+                    @org.hibernate.annotations.Parameter(name = "seq_name", value = "custom_orders")
+            }
+    )
+    @Column(name = "id", nullable = false, updatable = false)
+    private String id;
 
     // Nullable for guest users
     @ManyToOne(fetch = FetchType.LAZY)

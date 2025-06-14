@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class CustomOrderResponseDTO {
-    private Long customOrderId;
+    private String customOrderId;
     private String firstName;
     private String lastName;
     private String email;

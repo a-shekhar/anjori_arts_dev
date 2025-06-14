@@ -13,7 +13,7 @@ CREATE TABLE orders.order_status(
 
 
 CREATE TABLE orders.custom_orders (
-  id BIGSERIAL PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   user_id BIGSERIAL REFERENCES auth.users(user_id) ON DELETE SET NULL,
   first_name VARCHAR(30),
   last_name VARCHAR(30),
@@ -37,19 +37,28 @@ CREATE TABLE orders.custom_orders (
 
 CREATE TABLE orders.custom_order_images (
   id BIGSERIAL PRIMARY KEY,
-  custom_order_id BIGSERIAL NOT NULL REFERENCES orders.custom_orders(id) ON DELETE CASCADE,
+  custom_order_id TEXT NOT NULL REFERENCES orders.custom_orders(id) ON DELETE CASCADE,
   image_url TEXT NOT NULL,
   display_order INTEGER DEFAULT 0
 );
 
 
 CREATE TABLE orders.custom_order_medium (
-  custom_order_id BIGSERIAL NOT NULL REFERENCES orders.custom_orders(id) ON DELETE CASCADE,
+  custom_order_id TEXT NOT NULL REFERENCES orders.custom_orders(id) ON DELETE CASCADE,
   medium_code VARCHAR NOT NULL REFERENCES arts.medium(code),
   PRIMARY KEY (custom_order_id, medium_code)
 );
 
+CREATE TABLE orders.order_sequence (
+    seq_name VARCHAR(20) PRIMARY KEY,  -- E.g. 'custom_orders', 'orders', 'artworks'
+    prefix   VARCHAR(10) NOT NULL,      -- E.g. 'CUS', 'ORD', 'ART'
+    next_val BIGINT NOT NULL            -- Incrementing value
+);
 
 -- insert values
 INSERT INTO arts.art_type (code, name) VALUES ('MAN', 'Mandala');
 INSERT INTO orders.order_status (code, name) VALUES ('AWA', 'Awaiting Artist Confirmation');
+INSERT INTO orders.order_sequence (seq_name, prefix, next_val)
+VALUES
+('custom_orders', 'CUS', 1),
+('orders', 'OD', 1);
