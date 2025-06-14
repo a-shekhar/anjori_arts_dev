@@ -33,7 +33,7 @@ import ManageArtworksPage from "./pages/admin/ManageArtworks";
 import ArtworkDetailPage from "./pages/admin/ArtworkDetailPage";
 import ManageCustomOrdersPage from "./pages/admin/ManageCustomOrders";
 import ManageOrdersPage from "./pages/admin/ManageOrders";
-
+import Dashboard from "./pages/admin/Dashboard"
 
 
 function App() {
@@ -70,6 +70,7 @@ function App() {
             <Route path="/admin/artworks/:id" element={<ArtworkDetailPage />} />
             <Route path="custom-orders" element={<ManageCustomOrdersPage />} />
              <Route path="orders" element={<ManageOrdersPage />} />
+             <Route path="dashboard" element={<Dashboard />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
