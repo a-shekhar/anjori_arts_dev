@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../components/context/AuthContext";
 import { useLoading } from "../components/context/LoadingContext";
@@ -24,7 +23,7 @@ export default function CustomOrderPage() {
     phoneNo: String(user?.phoneNo || ""),
     artType: "",
     surface: "",
-    mediums: [], // ✅ renamed from medium to mediums
+    mediums: [],
     budget: "",
     preferredSize: "",
     noOfCopies: "",
@@ -64,13 +63,18 @@ export default function CustomOrderPage() {
     setTouched((prev) => ({ ...prev, referenceImages: true }));
   };
 
-  const handleChange = (e) => {
-    const { name, value, files, type, checked } = e.target || {};
-    let updatedValue = type === "checkbox" ? checked : value;
+  const handleChange = (eOrObj) => {
+    const isEvent = !!eOrObj?.target;
+    const name = isEvent ? eOrObj.target.name : eOrObj.name;
+    const type = isEvent ? eOrObj.target.type : null;
+    const checked = isEvent ? eOrObj.target.checked : null;
+    const value = isEvent ? eOrObj.target.value : eOrObj.value;
+    const files = isEvent ? eOrObj.target.files : null;
 
+    let updatedValue = type === "checkbox" ? checked : value;
     if (Array.isArray(value)) updatedValue = value;
 
-    if (name === "suggestOptions" && checked) {
+    if (name === "suggestOptions" && updatedValue) {
       setFormData((prev) => ({
         ...prev,
         suggestOptions: true,
@@ -107,6 +111,7 @@ export default function CustomOrderPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const newErrors = {};
     for (const field in formData) {
       const error = validateField(field, formData[field]);
@@ -114,6 +119,7 @@ export default function CustomOrderPage() {
     }
     setErrors(newErrors);
     setTouched(Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
+
     if (Object.keys(newErrors).length > 0) {
       toast.error("Some details are missing or invalid. Please fix them before submitting.");
       return;
@@ -169,7 +175,6 @@ export default function CustomOrderPage() {
         if (!value.trim()) return "";
         const phoneRegex = /^[0-9]{10}$/;
         return !phoneRegex.test(value) ? "Phone must be 10 digits" : "";
-      case "artType":
       case "budget":
         return value === "" ? "This field is required" : "";
       case "noOfCopies":
@@ -178,6 +183,8 @@ export default function CustomOrderPage() {
         return value.trim() === "" ? "Please specify the preferred size" : "";
       case "mediums":
         return ""; // optional
+      case "artType":
+        return ""; // made optional
       default:
         return "";
     }
@@ -295,10 +302,12 @@ export default function CustomOrderPage() {
               <div>
                 <MediumDropdown
                   value={formData.mediums}
-                  onChange={(val) => handleChange({ name: "mediums", value: val })}
+                  onChange={(selectedCodes) =>
+                    handleChange({ name: "mediums", value: selectedCodes })
+                  }
                 />
-                {touched.medium && errors.medium && (
-                  <p className="text-sm text-red-600">{errors.medium}</p>
+                {touched.mediums && errors.mediums && (
+                  <p className="text-sm text-red-600">{errors.mediums}</p>
                 )}
               </div>
             </>
@@ -411,8 +420,8 @@ export default function CustomOrderPage() {
             </p>
           )}
         </form>
+
       </div>
     </div>
   );
 }
-

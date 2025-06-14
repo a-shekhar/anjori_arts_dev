@@ -62,7 +62,7 @@ public class CustomOrderEntity {
 
     @ManyToMany
     @JoinTable(
-            name = "custom_order_medium",
+            name = "custom_order_medium", schema = "orders",
             joinColumns = @JoinColumn(name = "custom_order_id"),
             inverseJoinColumns = @JoinColumn(name = "medium_code")
     )
