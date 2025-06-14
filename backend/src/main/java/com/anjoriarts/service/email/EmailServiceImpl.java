@@ -3,6 +3,7 @@ package com.anjoriarts.service.email;
 import com.anjoriarts.common.Consonants;
 import com.anjoriarts.dto.CustomOrderResponseDTO;
 import com.anjoriarts.dto.OrderResponseDTO;
+import com.anjoriarts.util.CommonUtil;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ public class EmailServiceImpl implements EmailService{
     private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
 
     private final JavaMailSender mailSender;
+
 
     public EmailServiceImpl(JavaMailSender mailSender){
         this.mailSender = mailSender;
@@ -160,7 +162,7 @@ public class EmailServiceImpl implements EmailService{
 """.formatted(
                 order.getId(),                 // Order ID
                 order.getFirstName(),              // Customer name
-                order.getCreatedAt().toString(),   // Date
+                CommonUtil.formatToLocalDate(order.getCreatedAt().toString()),   // Date
                 order.getArtworkTitle()            // Title
         );
 
@@ -239,7 +241,7 @@ public class EmailServiceImpl implements EmailService{
                 order.getPhoneNo(),             // Phone number
                 order.getArtworkTitle(),        // Title
                 order.getStatus(),              // Status
-                order.getCreatedAt().toString() // Date
+                CommonUtil.formatToLocalDate(order.getCreatedAt().toString()) // Date
         );
 
     }
@@ -441,7 +443,7 @@ public class EmailServiceImpl implements EmailService{
                 order.getBudget(),
                 order.getPreferredSize(),
                 order.getNoOfCopies(),
-                order.isSuggestOptions() ? "Artist will suggest" : order.getSurface() + " + " + order.getMedium(),
+                order.isSuggestOptions() ? "Artist will suggest" : order.getSurface() + " + " + order.getMediums(),
                 order.getAdditionalNotes() == null || order.getAdditionalNotes().isBlank() ? "None" : order.getAdditionalNotes()
         );
         return htmlContent;
@@ -526,7 +528,7 @@ public class EmailServiceImpl implements EmailService{
                 order.getNoOfCopies(),                         // Copies
                 order.isSuggestOptions()
                         ? "Artist to suggest"
-                        : order.getSurface() + " + " + order.getMedium(), // Surface + Medium
+                        : order.getSurface() + " + " + order.getMediums(), // Surface + Medium
                 order.getAdditionalNotes() == null || order.getAdditionalNotes().isBlank()
                         ? "None"
                         : order.getAdditionalNotes(),              // Notes

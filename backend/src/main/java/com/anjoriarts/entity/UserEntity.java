@@ -1,13 +1,13 @@
 package com.anjoriarts.entity;
 
+import com.anjoriarts.common.Consonants;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.math.BigInteger;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", schema = "auth")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,42 +20,42 @@ public class UserEntity {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "first_name", nullable = false, length = 30)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "last_name", length = 30)
+    @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "username", length = 20, unique = true)
+    @Column(name = "username", unique = true)
     private String username;
 
-    @Column(name = "email", length = 50, unique = true)
+    @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "country_code", length = 5)
+    @Column(name = "country_code")
     private String countryCode =  "+91";
 
-    @Column(name = "phone_no", length = 10, unique = true)
-    private BigInteger phoneNo;
+    @Column(name = "phone_no", unique = true)
+    private String phoneNo;
 
-    @Column(name = "role", length = 15)
+    @Column(name = "role")
     private String role = "ROLE_USER";
 
-    @Column(name = "password", length = 100)
+    @Column(name = "password")
     private String password;
 
-    @Column(name = "profile_image_url", columnDefinition = "TEXT")
+    @Column(name = "profile_image_url")
     private String profileImageUrl;
 
     @Column(name = "created_at", updatable = false)
-    private ZonedDateTime createdAt = ZonedDateTime.now();
+    private ZonedDateTime createdAt = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
 
     @Column(name = "updated_at")
-    private ZonedDateTime updatedAt = ZonedDateTime.now();
+    private ZonedDateTime updatedAt = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
 
     // Optional: update updatedAt on save
     @PreUpdate
     public void onUpdate() {
-        updatedAt = ZonedDateTime.now();
+        updatedAt = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
     }
 }

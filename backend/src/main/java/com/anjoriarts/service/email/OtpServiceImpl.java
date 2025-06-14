@@ -35,7 +35,7 @@ public class OtpServiceImpl implements OtpService{
         ZonedDateTime expiresAt = ZonedDateTime.now().plusMinutes(Consonants.EXPIRATION_TIME_IN_MINUTES);
         String generatedOtp = String.valueOf(new Random().nextInt(100000, 999999));
         if(!otpStore.containsKey(email)){
-            otpStore.put(email, new OTPEntry(String.valueOf(generatedOtp), timeNow, expiresAt));
+            otpStore.put(email, new OTPEntry(generatedOtp, timeNow, expiresAt));
         }else {
             OTPEntry otpDetails =  otpStore.get(email);
             ZonedDateTime resendTime = otpDetails.storedAt.plusMinutes(Consonants.RESEND_TIME_IN_MINUTES);
@@ -43,7 +43,7 @@ public class OtpServiceImpl implements OtpService{
                 long secondsDifference = Duration.between(timeNow, resendTime).getSeconds();
                 return "Please try again after " + secondsDifference;
             }else{
-                otpStore.put(email, new OTPEntry(String.valueOf(generatedOtp), timeNow, expiresAt));
+                otpStore.put(email, new OTPEntry(generatedOtp, timeNow, expiresAt));
             }
         }
 
@@ -65,9 +65,9 @@ public class OtpServiceImpl implements OtpService{
 
     // class for storing expiration time
     private static class OTPEntry{
-        private String otp;
-        private ZonedDateTime storedAt;
-        private ZonedDateTime expiresAt;
+        private final String otp;
+        private final ZonedDateTime storedAt;
+        private final ZonedDateTime expiresAt;
         public OTPEntry(String otp, ZonedDateTime storedAt,  ZonedDateTime expiresAt){
             this.otp = otp;
             this.storedAt = storedAt;

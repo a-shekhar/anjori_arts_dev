@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -32,7 +33,7 @@ public class CustomOrderController {
         try {
             if(dto.isSuggestOptions()){
                 dto.setSurface(null);
-                dto.setMedium(null);
+                dto.setMediums(new ArrayList<>());
             }
 
           CustomOrderResponseDTO savedCustomOrder= this.customOrderService.saveCustomOrder(dto, images);
@@ -41,8 +42,8 @@ public class CustomOrderController {
                 return ResponseEntity.ok().body(CommonResponse.failure("Custom Order creation failed. Please try again..", savedCustomOrder));
             }
             // add emails to both artist and users
-           this.emailService.sendCustomOrderArtistConfirmation(savedCustomOrder);
-           this.emailService.sendCustomOrderUserConfirmation(savedCustomOrder);
+           //this.emailService.sendCustomOrderArtistConfirmation(savedCustomOrder);
+           //this.emailService.sendCustomOrderUserConfirmation(savedCustomOrder);
             return ResponseEntity.ok().body(CommonResponse.success("Custom order created.", savedCustomOrder));
         } catch (Exception e) {
             logger.error(e.getMessage());

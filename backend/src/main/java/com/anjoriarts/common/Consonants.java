@@ -25,7 +25,7 @@ public class Consonants {
     public static final String REDIS_UNIQUE_VISITORS_KEY = "anjori-%s:unique-visitors";
 
     // order
-    public static final String ORDER_INITIAL_STATE = "Pending";
+    public static final String ORDER_INITIAL_STATE = "AWA";
 
     // general term
     public static final String FORGET_PASSWORD_TERM = "Forgot Password";

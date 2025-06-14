@@ -1,8 +1,10 @@
 package com.anjoriarts.util;
 
+import com.anjoriarts.dto.ArtTypeOptionDTO;
 import com.anjoriarts.dto.AvailabilityOptionDTO;
 import com.anjoriarts.dto.MediumOptionDTO;
 import com.anjoriarts.dto.SurfaceOptionDTO;
+import com.anjoriarts.repository.ArtTypeRepository;
 import com.anjoriarts.repository.AvailabilityRepository;
 import com.anjoriarts.repository.MediumRepository;
 import com.anjoriarts.repository.SurfaceRepository;
@@ -19,15 +21,19 @@ public class Cache {
     private final SurfaceRepository surfaceRepo;
     private final MediumRepository mediumRepo;
     private final AvailabilityRepository availabilityRepo;
+    private final ArtTypeRepository artTypeRepo;
 
     private List<SurfaceOptionDTO> surfaceOptions;
     private List<MediumOptionDTO> mediumOptions;
     private List<AvailabilityOptionDTO> availabilityOptions;
+    private List<ArtTypeOptionDTO> artTypeOptions;
 
-    public Cache(SurfaceRepository surfaceRepo, MediumRepository mediumRepo, AvailabilityRepository availabilityRepo) {
+    public Cache(SurfaceRepository surfaceRepo, MediumRepository mediumRepo,
+                 AvailabilityRepository availabilityRepo, ArtTypeRepository artTypeRepo ) {
         this.surfaceRepo = surfaceRepo;
         this.mediumRepo = mediumRepo;
         this.availabilityRepo = availabilityRepo;
+        this.artTypeRepo = artTypeRepo;
     }
 
     @PostConstruct
@@ -48,6 +54,13 @@ public class Cache {
     public void loadAvailabilityOptions() {
         this.availabilityOptions = availabilityRepo.findAll().stream()
                 .map(s -> new AvailabilityOptionDTO(s.getCode(), s.getName()))
+                .toList();
+    }
+
+    @PostConstruct
+    public void loadArtTypeOptions() {
+        this.artTypeOptions = artTypeRepo.findAll().stream()
+                .map(s -> new ArtTypeOptionDTO(s.getCode(), s.getName()))
                 .toList();
     }
 }

@@ -8,6 +8,7 @@ import com.anjoriarts.repository.AvailabilityRepository;
 import com.anjoriarts.repository.MediumRepository;
 import com.anjoriarts.repository.SurfaceRepository;
 import com.anjoriarts.service.CloudinaryServiceImpl;
+import com.anjoriarts.service.CommonService;
 import com.anjoriarts.util.CommonUtil;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -33,19 +34,19 @@ public class ArtworksServiceImpl implements ArtworksService{
 
     private final ArtworkRepository artworkRepository;
     private final SurfaceRepository surfaceRepo;
-    private final MediumRepository mediumRepo;
+    private final CommonService commonService;
     private final AvailabilityRepository availabilityRepo;
     private final CloudinaryServiceImpl cloudinaryService;
 
 
     public ArtworksServiceImpl(ArtworkRepository artworkRepository,
                                SurfaceRepository surfaceRepo,
-                               MediumRepository mediumRepo,
+                               CommonService commonService,
                                AvailabilityRepository availabilityRepo,
                                CloudinaryServiceImpl cloudinaryService){
         this.artworkRepository = artworkRepository;
         this.surfaceRepo = surfaceRepo;
-        this.mediumRepo = mediumRepo;
+        this.commonService = commonService;
         this.availabilityRepo = availabilityRepo;
         this.cloudinaryService = cloudinaryService;
     }
@@ -67,7 +68,7 @@ public class ArtworksServiceImpl implements ArtworksService{
                     .price(dto.getPrice())
                     .tags(dto.getTags())
                     .surface(this.getSurface(dto.getSurface()))
-                    .medium(this.getMediumEntities(dto.getMediums()))
+                    .medium(commonService.getMediumEntities(dto.getMediums()))
                     .availability(this.getAvailability(dto.getAvailability()))
                     .slug(slug)
                     .featured(dto.isFeatured())
@@ -130,7 +131,7 @@ public class ArtworksServiceImpl implements ArtworksService{
             artwork.setSize(dto.getSize());
             artwork.setPrice(dto.getPrice());
             artwork.setTags(dto.getTags());
-            artwork.setMedium(this.getMediumEntities(dto.getMediums()));
+            artwork.setMedium(commonService.getMediumEntities(dto.getMediums()));
             artwork.setSurface(this.getSurface(dto.getSurface()));
             artwork.setAvailability(this.getAvailability(dto.getAvailability()));
             artwork.setFeatured(dto.isFeatured());
@@ -297,24 +298,11 @@ public class ArtworksServiceImpl implements ArtworksService{
                 .availability(AvailabilityDTO.builder().code(entity.getAvailability().getCode())
                         .name(entity.getAvailability().getName()).build())
                 .artistNote(entity.getArtistNote())
-                .createdAt(CommonUtil.formatToLocal(entity.getCreatedAt().toString()))
+                .createdAt(CommonUtil.formatToMonYear(entity.getCreatedAt().toString()))
                 .images(imagesDTO)
                 .build();
     }
 
-
-    private List<MediumEntity> getMediumEntities (List<String> mediums) {
-        List<MediumEntity> mediumEntities = new ArrayList<>();
-        for (String medium : mediums) {
-            Optional<MediumEntity> mediumOpt = this.mediumRepo.findByCode(medium);
-            MediumEntity mediumEnt = null;
-            if (mediumOpt.isPresent()) {
-                mediumEnt = mediumOpt.get();
-            }
-            mediumEntities.add(mediumEnt);
-        }
-      return mediumEntities;
-    }
 
 
     private SurfaceEntity getSurface(String surfaceCode){

@@ -240,14 +240,17 @@ export default function ArtworkDetailPage() {
         <Input label="Title" value={art.title} onChange={(e) => handleChange("title", e.target.value)} />
         <Input label="Size" value={art.size} onChange={(e) => handleChange("size", e.target.value)} />
         <Input label="Price (₹)" type="number" value={art.price} onChange={(e) => handleChange("price", e.target.value)} />
+
+        <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-gray-700">Surface</label>
+                  <SurfaceDropdown value={art.surface} onChange={(val) => handleChange("surface", val)} />
+                      </div>
+
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-gray-700">Medium(s)</label>
           <MediumDropdown value={art.mediums} onChange={(val) => handleChange("mediums", val)} />
         </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">Surface</label>
-          <SurfaceDropdown value={art.surface} onChange={(val) => handleChange("surface", val)} />
-        </div>
+
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-gray-700">Availability</label>
           <AvailabilityDropdown value={art.availability} onChange={(val) => handleChange("availability", val)} />

@@ -1,8 +1,6 @@
 package com.anjoriarts.dto;
 
 import lombok.*;
-
-import java.math.BigInteger;
 import java.util.List;
 
 @Data
@@ -16,10 +14,10 @@ public class CustomOrderResponseDTO {
     private String lastName;
     private String email;
     private String countryCode;
-    private BigInteger phoneNo;
+    private String phoneNo;
     private String artType;
     private String surface;
-    private String medium;
+    private List<MediumDTO> mediums;
     private String budget;
     private String preferredSize;
     private String noOfCopies;

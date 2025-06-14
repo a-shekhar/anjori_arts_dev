@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "custom_orders")
+@Table(name = "custom_orders", schema = "orders")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,7 +25,7 @@ public class CustomOrderEntity {
 
     // Nullable for guest users
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = true) // ✅ Optional
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = true)
     private UserEntity user;
 
     @Column(name = "first_name")
@@ -41,16 +41,23 @@ public class CustomOrderEntity {
     private String countryCode = "+91";
 
     @Column(name = "phone_no")
-    private BigInteger phoneNo;
+    private String phoneNo;
 
-    @Column(name = "art_type")
-    private String artType;
+    @ManyToOne
+    @JoinColumn(name = "art_type_code", referencedColumnName = "code")
+    private ArtTypeEntity artType;
 
-    @Column(name = "surface")
-    private String surface;
+    @ManyToOne
+    @JoinColumn(name = "surface_code", referencedColumnName = "code")
+    private SurfaceEntity surface;
 
-    @Column(name = "medium")
-    private String medium;
+    @ManyToMany
+    @JoinTable(
+            name = "custom_order_medium",
+            joinColumns = @JoinColumn(name = "custom_order_id"),
+            inverseJoinColumns = @JoinColumn(name = "medium_code")
+    )
+    private List<MediumEntity> medium = new ArrayList<>();
 
     @Column(name = "budget")
     private String budget;
@@ -73,14 +80,16 @@ public class CustomOrderEntity {
     @Column(name = "agreed_price")
     private Double agreedPrice;
 
-    @Column(name = "status")
-    private String status;
+    @ManyToOne
+    @JoinColumn(name = "status_code", referencedColumnName = "code")
+    private OrderStatusEntity status;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));
 
     @OneToMany(mappedBy = "customOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CustomOrderImagesEntity> images = new ArrayList<>();
 
-
+    @Column(name = "updated_at")
+    private ZonedDateTime updatedAt;
 }

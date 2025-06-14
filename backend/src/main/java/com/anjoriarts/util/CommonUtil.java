@@ -10,7 +10,8 @@ import java.util.stream.Collectors;
 
 public class CommonUtil {
 
-    public static String formatToLocal(String utcTimestamp) {
+    // convert to MM-YYYY
+    public static String formatToMonYear(String utcTimestamp) {
         ZonedDateTime utcDateTime = ZonedDateTime.parse(utcTimestamp);
 
         ZonedDateTime localDateTime = utcDateTime.withZoneSameInstant(ZoneId.of(Consonants.ZONE_ID));
@@ -28,6 +29,17 @@ public class CommonUtil {
                 .filter(s -> !s.isEmpty())
                 .sorted()
                 .collect(Collectors.joining(", "));
+    }
+
+    // convert to MM YYYY
+    public static String formatToLocalDate(String utcTimestamp) {
+        ZonedDateTime utcDateTime = ZonedDateTime.parse(utcTimestamp);
+
+        ZonedDateTime localDateTime = utcDateTime.withZoneSameInstant(ZoneId.of(Consonants.ZONE_ID));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm");
+
+        return localDateTime.format(formatter);
     }
 
 }

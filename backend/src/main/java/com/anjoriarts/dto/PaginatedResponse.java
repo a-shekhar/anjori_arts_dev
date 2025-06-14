@@ -9,13 +9,13 @@ import java.util.List;
 
 
 public class PaginatedResponse<T> {
-    private List<T> content;
-    private int totalPages;
-    private long totalElements;
-    private int number;
-    private int size;
-    private boolean first;
-    private boolean last;
+    private final List<T> content;
+    private final int totalPages;
+    private final long totalElements;
+    private final int number;
+    private final int size;
+    private final boolean first;
+    private final boolean last;
 
     public PaginatedResponse(List<T> content, int totalPages, long totalElements,
                              int number, int size, boolean first, boolean last) {

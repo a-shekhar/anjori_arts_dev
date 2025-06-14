@@ -2,7 +2,6 @@ package com.anjoriarts.dto;
 
 import lombok.*;
 
-import java.math.BigInteger;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +14,7 @@ public class SignupDTO {
     private String firstName;
     private String lastName;
     private String email;
-    private BigInteger phoneNo;
+    private String phoneNo;
     private String username;
     private String password;
     private String otp;

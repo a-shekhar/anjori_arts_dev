@@ -1,16 +1,18 @@
-CREATE TABLE arts.users (
-  user_id SERIAL PRIMARY KEY, -- Use BIGSERIAL for auto-incrementing ID
+CREATE SCHEMA auth;
+
+CREATE TABLE auth.users (
+  user_id BIGSERIAL PRIMARY KEY,
   first_name VARCHAR(30) NOT NULL,
   last_name VARCHAR(30),
   username VARCHAR(20) UNIQUE,
-  email VARCHAR(50) UNIQUE,
+  email VARCHAR(100) UNIQUE,
   country_code VARCHAR(5),
-  phone_no bigint UNIQUE,
-  role VARCHAR(15) DEFAULT 'ROLE_USER', -- Fixed default value syntax
+  phone_no VARCHAR(10) UNIQUE,
+  role VARCHAR(15) DEFAULT 'ROLE_USER',
   password VARCHAR(100),
   profile_image_url TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
 );
 
 

@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
-import { useAuth } from "../components/context/AuthContext"; // ✅ get logged-in user
-import { useLoading } from "../components/context/LoadingContext"; // ✅ progress bar context
+import { useAuth } from "../components/context/AuthContext";
+import { useLoading } from "../components/context/LoadingContext";
 import ArtTypeDropdown from "../components/dropdowns/ArtTypeDropdown";
 import BudgetRangeDropdown from "../components/dropdowns/BudgetRangeDropdown";
 import SurfaceDropdown from "../components/dropdowns/SurfaceDropdown";
@@ -8,12 +9,11 @@ import MediumDropdown from "../components/dropdowns/MediumDropdown";
 import NumberOfCopiesDropdown from "../components/dropdowns/NumberOfCopiesDropdown";
 import CountryCodeDropdown from "../components/dropdowns/CountryCodeDropdown";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom"; // ✅ Required for navigation
-
+import { useNavigate } from "react-router-dom";
 
 export default function CustomOrderPage() {
   const { user } = useAuth();
-  const { setUploadProgress } = useLoading(); // ✅ init progress bar
+  const { setUploadProgress } = useLoading();
   const isGuest = !user;
 
   const [formData, setFormData] = useState({
@@ -24,7 +24,7 @@ export default function CustomOrderPage() {
     phoneNo: String(user?.phoneNo || ""),
     artType: "",
     surface: "",
-    medium: "",
+    mediums: [], // ✅ renamed from medium to mediums
     budget: "",
     preferredSize: "",
     noOfCopies: "",
@@ -44,10 +44,9 @@ export default function CustomOrderPage() {
     if (formData.referenceImages && formData.referenceImages.length > 0) {
       const previews = formData.referenceImages.map((file) => ({
         file,
-        url: URL.createObjectURL(file)
+        url: URL.createObjectURL(file),
       }));
       setImagePreviews(previews);
-
       return () => previews.forEach((p) => URL.revokeObjectURL(p.url));
     } else {
       setImagePreviews([]);
@@ -58,23 +57,25 @@ export default function CustomOrderPage() {
     const updatedFiles = Array.from(formData.referenceImages).filter(
       (_, index) => index !== indexToRemove
     );
-
     setFormData((prev) => ({
       ...prev,
-      referenceImages: updatedFiles
+      referenceImages: updatedFiles,
     }));
     setTouched((prev) => ({ ...prev, referenceImages: true }));
   };
 
   const handleChange = (e) => {
-    const { name, value, files, type, checked } = e.target;
+    const { name, value, files, type, checked } = e.target || {};
+    let updatedValue = type === "checkbox" ? checked : value;
+
+    if (Array.isArray(value)) updatedValue = value;
 
     if (name === "suggestOptions" && checked) {
       setFormData((prev) => ({
         ...prev,
         suggestOptions: true,
         surface: "",
-        medium: ""
+        mediums: [],
       }));
       setTouched((prev) => ({ ...prev, suggestOptions: true }));
       return;
@@ -92,23 +93,20 @@ export default function CustomOrderPage() {
               existing.lastModified === newFile.lastModified
           )
       );
-
       setFormData((prev) => ({
         ...prev,
-        referenceImages: [...existingFiles, ...uniqueFiles]
+        referenceImages: [...existingFiles, ...uniqueFiles],
       }));
       setTouched((prev) => ({ ...prev, referenceImages: true }));
       return;
     }
 
-    const updatedValue = type === "checkbox" ? checked : value;
     setFormData((prev) => ({ ...prev, [name]: updatedValue }));
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const newErrors = {};
     for (const field in formData) {
       const error = validateField(field, formData[field]);
@@ -116,57 +114,44 @@ export default function CustomOrderPage() {
     }
     setErrors(newErrors);
     setTouched(Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
-
     if (Object.keys(newErrors).length > 0) {
       toast.error("Some details are missing or invalid. Please fix them before submitting.");
       return;
     }
 
     setStatus({ loading: true });
-    setUploadProgress(10); // ✅ start progress
-    const loadingToastId = toast.loading("Submitting your custom order...");
-
+    setUploadProgress(10);
     try {
       const { referenceImages, ...orderDetails } = formData;
       const formPayload = new FormData();
       formPayload.append("order", new Blob([JSON.stringify(orderDetails)], { type: "application/json" }));
-
       if (referenceImages && referenceImages.length > 0) {
         for (const file of referenceImages) {
           formPayload.append("images", file);
         }
       }
-
-      setUploadProgress(30); // ✅ after preparing form
-
+      setUploadProgress(30);
       const res = await fetch("/api/custom-order", {
         method: "POST",
         body: formPayload,
       });
-
-      setUploadProgress(70); // ✅ after response
+      setUploadProgress(70);
       const result = await res.json();
       const orderId = result.data?.customOrderId;
-      console.log("hhggg", orderId)
       setUploadProgress(90);
-
       setStatus({ loading: false });
-      toast.dismiss(loadingToastId);
-
       if (res.ok && result.success && orderId) {
-          navigate('/order-confirmed', { state: { orderId } });
+        navigate('/order-confirmed', { state: { orderId } });
       } else {
-          toast.error(result.message || 'Request could not proceed.');
+        toast.error(result.message || 'Request could not proceed.');
       }
-
-      //toast.success(result.message || "Your custom order has been submitted!");
     } catch (err) {
       setStatus({ loading: false });
       toast.dismiss();
       toast.error(err.message || "Something went wrong while submitting your order.");
     } finally {
-      setUploadProgress(100); // ✅ complete
-      setTimeout(() => setUploadProgress(0), 500); // ✅ reset
+      setUploadProgress(100);
+      setTimeout(() => setUploadProgress(0), 500);
     }
   };
 
@@ -191,6 +176,8 @@ export default function CustomOrderPage() {
         return !value || parseInt(value) < 1 ? "Please select at least 1 copy" : "";
       case "preferredSize":
         return value.trim() === "" ? "Please specify the preferred size" : "";
+      case "mediums":
+        return ""; // optional
       default:
         return "";
     }
@@ -297,13 +284,19 @@ export default function CustomOrderPage() {
           {!formData.suggestOptions && (
             <>
               <div>
-                <SurfaceDropdown value={formData.surface} onChange={handleChange} />
+                <SurfaceDropdown
+                  value={formData.surface}
+                  onChange={(val) => handleChange({ target: { name: "surface", value: val } })}
+                />
                 {touched.surface && errors.surface && (
                   <p className="text-sm text-red-600">{errors.surface}</p>
                 )}
               </div>
               <div>
-                <MediumDropdown value={formData.medium} onChange={handleChange} />
+                <MediumDropdown
+                  value={formData.mediums}
+                  onChange={(val) => handleChange({ name: "mediums", value: val })}
+                />
                 {touched.medium && errors.medium && (
                   <p className="text-sm text-red-600">{errors.medium}</p>
                 )}
@@ -422,3 +415,4 @@ export default function CustomOrderPage() {
     </div>
   );
 }
+

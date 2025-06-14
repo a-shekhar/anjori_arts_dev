@@ -3,12 +3,15 @@ package com.anjoriarts.service.orders;
 import com.anjoriarts.common.Consonants;
 import com.anjoriarts.dto.CustomOrderRequestDTO;
 import com.anjoriarts.dto.CustomOrderResponseDTO;
-import com.anjoriarts.entity.CustomOrderEntity;
-import com.anjoriarts.entity.CustomOrderImagesEntity;
-import com.anjoriarts.entity.UserEntity;
+import com.anjoriarts.dto.MediumDTO;
+import com.anjoriarts.entity.*;
+import com.anjoriarts.repository.ArtTypeRepository;
+import com.anjoriarts.repository.OrderStatusRepository;
+import com.anjoriarts.repository.SurfaceRepository;
 import com.anjoriarts.repository.UserRepository;
 import com.anjoriarts.service.CloudinaryService;
 import com.anjoriarts.service.CloudinaryServiceImpl;
+import com.anjoriarts.service.CommonServiceImpl;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -28,17 +30,29 @@ public class CustomOrderServiceImpl implements CustomOrderService{
 
     Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-    private final CustomOrderRepository customOrderRepository;
+    private final CustomOrderRepository customOrderRepo;
+    private final ArtTypeRepository artTypeRepo;
+    private final SurfaceRepository surfaceRepo;
+    private final OrderStatusRepository orderStatusRepo;
     private final CloudinaryService cloudinaryService;
     private final UserRepository userRepository;
+    private final CommonServiceImpl commonService;
 
 
-    public CustomOrderServiceImpl(CustomOrderRepository customOrderRepository,
+
+    public CustomOrderServiceImpl(CustomOrderRepository customOrderRepo,
+                                  ArtTypeRepository artTypeRepo,
+                                  SurfaceRepository surfaceRepo,
+                                  OrderStatusRepository orderStatusRepo,
                                   CloudinaryService cloudinaryService,
-                                  UserRepository userRepository){
-        this.customOrderRepository = customOrderRepository;
+                                  UserRepository userRepository, CommonServiceImpl commonService){
+        this.customOrderRepo = customOrderRepo;
+        this.artTypeRepo = artTypeRepo;
+        this.surfaceRepo = surfaceRepo;
+        this.orderStatusRepo = orderStatusRepo;
         this.cloudinaryService = cloudinaryService;
         this.userRepository = userRepository;
+        this.commonService = commonService;
     }
 
     @Value("${spring.application.env}")
@@ -60,6 +74,25 @@ public class CustomOrderServiceImpl implements CustomOrderService{
                 user = optUser.get();
             }
 
+            Optional<ArtTypeEntity> artTypeOpt = artTypeRepo.findByCode(dto.getArtType());
+            ArtTypeEntity artType = null;
+            if(artTypeOpt.isPresent()){
+                artType = artTypeOpt.get();
+            }
+
+            Optional<SurfaceEntity> surfaceOpt = surfaceRepo.findByCode(dto.getSurface());
+            SurfaceEntity surface = null;
+            if(surfaceOpt.isPresent()){
+                surface = surfaceOpt.get();
+            }
+
+            Optional<OrderStatusEntity> orderStatusOpt = orderStatusRepo.findByCode(Consonants.ORDER_INITIAL_STATE);
+            OrderStatusEntity orderStatus = null;
+            if(orderStatusOpt.isEmpty()){
+                throw new RuntimeException("No valid order status found..");
+            }
+            orderStatus = orderStatusOpt.get();
+
             CustomOrderEntity customOrder =
                     CustomOrderEntity.builder()
                             .user(user)
@@ -68,18 +101,18 @@ public class CustomOrderServiceImpl implements CustomOrderService{
                             .email(dto.getEmail())
                             .countryCode(dto.getCountryCode())
                             .phoneNo(dto.getPhoneNo())
-                            .artType(dto.getArtType())
-                            .surface(dto.getSurface())
-                            .medium(dto.getMedium())
+                            .artType(artType)
+                            .surface(surface)
+                            .medium(commonService.getMediumEntities(dto.getMediums()))
                             .budget(dto.getBudget())
                             .preferredSize(dto.getPreferredSize())
                             .noOfCopies(dto.getNoOfCopies())
                             .additionalNotes(dto.getAdditionalNotes())
-                            .status(Consonants.ORDER_INITIAL_STATE)
+                            .status(orderStatus)
                             .createdAt(ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID)))
                             .build();
 
-            CustomOrderEntity savedCustomOrder = this.customOrderRepository.save(customOrder);
+            CustomOrderEntity savedCustomOrder = this.customOrderRepo.save(customOrder);
             logger.info("Saved custom order with id {}", savedCustomOrder.getId());
 
             // upload images to cloudinary
@@ -100,7 +133,7 @@ public class CustomOrderServiceImpl implements CustomOrderService{
                 }
 
                 savedCustomOrder.setImages(imagesEntity);
-                customOrderRepository.save(savedCustomOrder);
+                customOrderRepo.save(savedCustomOrder);
             }
 
             logger.info("Saved custom order images with id {}", savedCustomOrder.getId());
@@ -113,22 +146,34 @@ public class CustomOrderServiceImpl implements CustomOrderService{
     }
 
     private CustomOrderResponseDTO convertToCustomOrderResponseDTO(CustomOrderEntity entity) {
-        return CustomOrderResponseDTO.builder()
-                        .customOrderId(entity.getId())
-                        .firstName(entity.getFirstName())
-                        .lastName(entity.getLastName())
-                        .email(entity.getEmail())
-                        .countryCode(entity.getCountryCode())
-                        .phoneNo(entity.getPhoneNo())
-                        .artType(entity.getArtType())
-                        .suggestOptions(entity.isSuggestOptions())
-                        .surface(entity.getSurface())
-                        .medium(entity.getMedium())
-                        .budget(entity.getBudget())
-                        .preferredSize(entity.getPreferredSize())
-                        .noOfCopies(entity.getNoOfCopies())
-                        .additionalNotes(entity.getAdditionalNotes())
-                        .imageCount(entity.getImages() != null ? entity.getImages().size() : 0)
-                        .build();
+        try {
+            MediumDTO mediumDTO;
+            List<MediumDTO> mediumDTOs = new ArrayList<>();
+            for (MediumEntity medium : entity.getMedium()) {
+                mediumDTO = MediumDTO.builder().code(medium.getCode())
+                        .name(medium.getName()).build();
+                mediumDTOs.add(mediumDTO);
+            }
+
+            return CustomOrderResponseDTO.builder()
+                    .customOrderId(entity.getId())
+                    .firstName(entity.getFirstName())
+                    .lastName(entity.getLastName())
+                    .email(entity.getEmail())
+                    .countryCode(entity.getCountryCode())
+                    .phoneNo(entity.getPhoneNo())
+                    .artType(entity.getArtType().getName())
+                    .suggestOptions(entity.isSuggestOptions())
+                    .surface(entity.getSurface().getName())
+                    .mediums(mediumDTOs)
+                    .budget(entity.getBudget())
+                    .preferredSize(entity.getPreferredSize())
+                    .noOfCopies(entity.getNoOfCopies())
+                    .additionalNotes(entity.getAdditionalNotes())
+                    .imageCount(entity.getImages() != null ? entity.getImages().size() : 0)
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

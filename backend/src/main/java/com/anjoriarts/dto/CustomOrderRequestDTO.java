@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.math.BigInteger;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -16,10 +16,10 @@ public class CustomOrderRequestDTO {
     private String lastName;
     private String email;
     private String countryCode;
-    private BigInteger phoneNo;
+    private String phoneNo;
     private String artType;
     private String surface;
-    private String medium;
+    private List<String> mediums;
     private String budget;
     private String preferredSize;
     private String noOfCopies;

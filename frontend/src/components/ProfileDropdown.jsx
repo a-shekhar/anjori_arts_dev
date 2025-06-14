@@ -1,11 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { LogOut, User, Lock, ChevronDown } from 'lucide-react';
 import ImageZoomModal from "../components/ImageZoomModal";
 
 export default function ProfileDropdown({ user, onLogout }) {
   const [open, setOpen] = useState(false);
-  const toggleDropdown = () => setOpen(!open);
+  const dropdownRef = useRef(null);
+
+  const toggleDropdown = () => setOpen((prev) => !prev);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   if (!user) {
     return (
@@ -20,13 +33,13 @@ export default function ProfileDropdown({ user, onLogout }) {
   }
 
   return (
-    <div className="relative inline-block text-left">
+    <div className="relative inline-block text-left" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
         className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-100 transition border border-gray-200"
       >
         <ImageZoomModal
-          src={user.profileImageUrl || '/images/default-profile.png'} // fallback if no profile image
+          src={user.profileImageUrl || '/images/default-profile.png'}
           alt="Profile"
           className="w-9 h-9 rounded-full object-cover border cursor-pointer"
         />
@@ -35,8 +48,8 @@ export default function ProfileDropdown({ user, onLogout }) {
       </button>
 
       {open && (
-         <div className="absolute right-0 mt-2 w-44 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-20
-                          transform transition-all duration-200 origin-top-right scale-95 opacity-0 animate-fade-in">
+        <div className="absolute right-0 mt-2 w-44 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-20
+                        transform transition-all duration-200 origin-top-right scale-95 opacity-0 animate-fade-in">
           <div className="py-2 text-sm">
             <Link
               to="/profile"

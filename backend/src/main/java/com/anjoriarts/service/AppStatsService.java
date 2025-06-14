@@ -3,18 +3,18 @@ package com.anjoriarts.service;
 
 public interface AppStatsService {
 
-    public void trackUniqueVisitor(String ip);
+    void trackUniqueVisitor(String ip);
 
-    public long getUniqueVisitorCount();
+    long getUniqueVisitorCount();
 
-    public void trackActiveUser();
+    void trackActiveUser();
 
-    public long getActiveUsersCount();
+    long getActiveUsersCount();
 
-    public String getLatestNews();
+    String getLatestNews();
 
-    public void trackVisitorCount();
+    void trackVisitorCount();
 
-    public long getVisitorsCount();
+    long getVisitorsCount();
 
 }

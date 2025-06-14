@@ -1,6 +1,7 @@
 package com.anjoriarts.controller;
 
 import com.anjoriarts.common.CommonResponse;
+import com.anjoriarts.dto.ArtTypeOptionDTO;
 import com.anjoriarts.dto.AvailabilityOptionDTO;
 import com.anjoriarts.dto.MediumOptionDTO;
 import com.anjoriarts.dto.SurfaceOptionDTO;
@@ -50,6 +51,16 @@ public class CacheController {
             return ResponseEntity.ok().body(CommonResponse.success("Availability options fetched", availability));
         } catch (Exception e) {
             return ResponseEntity.ok().body(CommonResponse.failure("Availability options fetch failed", null));
+        }
+    }
+
+    @GetMapping("/art-types")
+    public ResponseEntity<?> getAllArtTypes() {
+        try {
+            List<ArtTypeOptionDTO> artTypes = cache.getArtTypeOptions();
+            return ResponseEntity.ok().body(CommonResponse.success("Art Type options fetched", artTypes));
+        } catch (Exception e) {
+            return ResponseEntity.ok().body(CommonResponse.failure("Art Type options fetch failed", null));
         }
     }
 }
