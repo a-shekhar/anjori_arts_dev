@@ -5,12 +5,10 @@ CREATE TABLE arts.art_type(
     name VARCHAR(20)
 );
 
-
-CREATE TABLE orders.order_status(
+CREATE TABLE orders.custom_order_status(
     code VARCHAR(10) PRIMARY KEY,
     name VARCHAR(30)
 );
-
 
 CREATE TABLE orders.custom_orders (
   id TEXT PRIMARY KEY,
@@ -57,8 +55,8 @@ CREATE TABLE orders.order_sequence (
 
 -- insert values
 INSERT INTO arts.art_type (code, name) VALUES ('MAN', 'Mandala');
-INSERT INTO orders.order_status (code, name) VALUES ('AWA', 'Awaiting Artist Confirmation');
 INSERT INTO orders.order_sequence (seq_name, prefix, next_val)
 VALUES
 ('custom_orders', 'CUS', 1),
 ('orders', 'OD', 1);
+INSERT INTO orders.custom_order_status (code, name) VALUES ('AWA', 'Awaiting Artist Confirmation');

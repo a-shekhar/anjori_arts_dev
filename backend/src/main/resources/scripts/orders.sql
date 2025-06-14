@@ -1,3 +1,10 @@
+CREATE TABLE orders.order_status(
+    code VARCHAR(10) PRIMARY KEY,
+    name VARCHAR(30)
+);
+
+INSERT INTO orders.order_status (code, name) VALUES ('AWA', 'Awaiting Artist Confirmation');
+
 CREATE TABLE arts.orders (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT REFERENCES arts.users(user_id), -- nullable foreign key

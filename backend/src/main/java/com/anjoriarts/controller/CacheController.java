@@ -1,10 +1,7 @@
 package com.anjoriarts.controller;
 
 import com.anjoriarts.common.CommonResponse;
-import com.anjoriarts.dto.ArtTypeOptionDTO;
-import com.anjoriarts.dto.AvailabilityOptionDTO;
-import com.anjoriarts.dto.MediumOptionDTO;
-import com.anjoriarts.dto.SurfaceOptionDTO;
+import com.anjoriarts.dto.*;
 import com.anjoriarts.util.Cache;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,6 +58,16 @@ public class CacheController {
             return ResponseEntity.ok().body(CommonResponse.success("Art Type options fetched", artTypes));
         } catch (Exception e) {
             return ResponseEntity.ok().body(CommonResponse.failure("Art Type options fetch failed", null));
+        }
+    }
+
+    @GetMapping("/custom-order-status")
+    public ResponseEntity<?> getCustomOrderStatuses() {
+        try {
+            List<CustomOrderStatusOptionDTO> status = cache.getCustomOrderStatusOptions();
+            return ResponseEntity.ok().body(CommonResponse.success("Custom Order Status options fetched", status));
+        } catch (Exception e) {
+            return ResponseEntity.ok().body(CommonResponse.failure("Custom Order Status options fetch failed", null));
         }
     }
 }

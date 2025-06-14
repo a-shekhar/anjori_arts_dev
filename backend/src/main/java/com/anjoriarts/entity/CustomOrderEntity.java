@@ -4,8 +4,6 @@ import com.anjoriarts.common.Consonants;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
-
-import java.math.BigInteger;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -91,7 +89,7 @@ public class CustomOrderEntity {
 
     @ManyToOne
     @JoinColumn(name = "status_code", referencedColumnName = "code")
-    private OrderStatusEntity status;
+    private CustomOrderStatusEntity status;
 
     @Column(name = "created_at", updatable = false)
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneId.of(Consonants.ZONE_ID));

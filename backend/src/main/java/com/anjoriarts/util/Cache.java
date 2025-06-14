@@ -1,13 +1,7 @@
 package com.anjoriarts.util;
 
-import com.anjoriarts.dto.ArtTypeOptionDTO;
-import com.anjoriarts.dto.AvailabilityOptionDTO;
-import com.anjoriarts.dto.MediumOptionDTO;
-import com.anjoriarts.dto.SurfaceOptionDTO;
-import com.anjoriarts.repository.ArtTypeRepository;
-import com.anjoriarts.repository.AvailabilityRepository;
-import com.anjoriarts.repository.MediumRepository;
-import com.anjoriarts.repository.SurfaceRepository;
+import com.anjoriarts.dto.*;
+import com.anjoriarts.repository.*;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
@@ -22,18 +16,22 @@ public class Cache {
     private final MediumRepository mediumRepo;
     private final AvailabilityRepository availabilityRepo;
     private final ArtTypeRepository artTypeRepo;
+    private final CustomOrderStatusRepository customOrderStatusRepo;
 
     private List<SurfaceOptionDTO> surfaceOptions;
     private List<MediumOptionDTO> mediumOptions;
     private List<AvailabilityOptionDTO> availabilityOptions;
     private List<ArtTypeOptionDTO> artTypeOptions;
+    private List<CustomOrderStatusOptionDTO> customOrderStatusOptions;
 
     public Cache(SurfaceRepository surfaceRepo, MediumRepository mediumRepo,
-                 AvailabilityRepository availabilityRepo, ArtTypeRepository artTypeRepo ) {
+                 AvailabilityRepository availabilityRepo, ArtTypeRepository artTypeRepo,
+                 CustomOrderStatusRepository customOrderStatusRepo) {
         this.surfaceRepo = surfaceRepo;
         this.mediumRepo = mediumRepo;
         this.availabilityRepo = availabilityRepo;
         this.artTypeRepo = artTypeRepo;
+        this.customOrderStatusRepo = customOrderStatusRepo;
     }
 
     @PostConstruct
@@ -61,6 +59,13 @@ public class Cache {
     public void loadArtTypeOptions() {
         this.artTypeOptions = artTypeRepo.findAll().stream()
                 .map(s -> new ArtTypeOptionDTO(s.getCode(), s.getName()))
+                .toList();
+    }
+
+    @PostConstruct
+    public void loadCustomOrderStatusOptions() {
+        this.customOrderStatusOptions = customOrderStatusRepo.findAll().stream()
+                .map(s -> new CustomOrderStatusOptionDTO(s.getCode(), s.getName()))
                 .toList();
     }
 }

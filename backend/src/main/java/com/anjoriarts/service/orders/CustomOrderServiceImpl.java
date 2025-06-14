@@ -5,12 +5,8 @@ import com.anjoriarts.dto.CustomOrderRequestDTO;
 import com.anjoriarts.dto.CustomOrderResponseDTO;
 import com.anjoriarts.dto.MediumDTO;
 import com.anjoriarts.entity.*;
-import com.anjoriarts.repository.ArtTypeRepository;
-import com.anjoriarts.repository.OrderStatusRepository;
-import com.anjoriarts.repository.SurfaceRepository;
-import com.anjoriarts.repository.UserRepository;
+import com.anjoriarts.repository.*;
 import com.anjoriarts.service.CloudinaryService;
-import com.anjoriarts.service.CloudinaryServiceImpl;
 import com.anjoriarts.service.CommonServiceImpl;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -33,7 +29,7 @@ public class CustomOrderServiceImpl implements CustomOrderService{
     private final CustomOrderRepository customOrderRepo;
     private final ArtTypeRepository artTypeRepo;
     private final SurfaceRepository surfaceRepo;
-    private final OrderStatusRepository orderStatusRepo;
+    private final CustomOrderStatusRepository customOrderStatusRepo;
     private final CloudinaryService cloudinaryService;
     private final UserRepository userRepository;
     private final CommonServiceImpl commonService;
@@ -43,13 +39,13 @@ public class CustomOrderServiceImpl implements CustomOrderService{
     public CustomOrderServiceImpl(CustomOrderRepository customOrderRepo,
                                   ArtTypeRepository artTypeRepo,
                                   SurfaceRepository surfaceRepo,
-                                  OrderStatusRepository orderStatusRepo,
+                                  CustomOrderStatusRepository customOrderStatusRepo,
                                   CloudinaryService cloudinaryService,
                                   UserRepository userRepository, CommonServiceImpl commonService){
         this.customOrderRepo = customOrderRepo;
         this.artTypeRepo = artTypeRepo;
         this.surfaceRepo = surfaceRepo;
-        this.orderStatusRepo = orderStatusRepo;
+        this.customOrderStatusRepo = customOrderStatusRepo;
         this.cloudinaryService = cloudinaryService;
         this.userRepository = userRepository;
         this.commonService = commonService;
@@ -86,8 +82,8 @@ public class CustomOrderServiceImpl implements CustomOrderService{
                 surface = surfaceOpt.get();
             }
 
-            Optional<OrderStatusEntity> orderStatusOpt = orderStatusRepo.findByCode(Consonants.ORDER_INITIAL_STATE);
-            OrderStatusEntity orderStatus = null;
+            Optional<CustomOrderStatusEntity> orderStatusOpt = customOrderStatusRepo.findByCode(Consonants.ORDER_INITIAL_STATE);
+            CustomOrderStatusEntity orderStatus = null;
             if(orderStatusOpt.isEmpty()){
                 throw new RuntimeException("No valid order status found..");
             }

@@ -34,6 +34,7 @@ import ArtworkDetailPage from "./pages/admin/ArtworkDetailPage";
 import ManageCustomOrdersPage from "./pages/admin/ManageCustomOrders";
 import ManageOrdersPage from "./pages/admin/ManageOrders";
 import Dashboard from "./pages/admin/Dashboard"
+import CustomOrderDetailPage from "./pages/admin/CustomOrderDetail";
 
 
 function App() {
@@ -60,15 +61,14 @@ function App() {
           <Route path="/order-summary" element={<OrderSummaryPage />} />
           <Route path="/order-confirmed" element={<OrderConfirmedPageWrapper />} />
 
-
-
           {/* Admin Routes */}
           <Route path="/admin" element={<Admin />}>
             <Route index element={<AdminHome />} />
             <Route path="artworks/add" element={<AddArtwork />} />
             <Route path="artworks/manage" element={<ManageArtworksPage />} />
-            <Route path="/admin/artworks/:id" element={<ArtworkDetailPage />} />
+            <Route path="artworks/:id" element={<ArtworkDetailPage />} />
             <Route path="custom-orders" element={<ManageCustomOrdersPage />} />
+            <Route path="custom-orders/:id" element={<CustomOrderDetailPage />} />
              <Route path="orders" element={<ManageOrdersPage />} />
              <Route path="dashboard" element={<Dashboard />} />
           </Route>
